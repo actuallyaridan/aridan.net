@@ -422,7 +422,9 @@ i>h3 {
     padding: 12px;
     border-radius: 12px;
     background-color: var(--card-background-color);
-    /* Fallback for var(--darker-accent-color) */
+    /* Fallback for var(--darker-accent-color) */;
+    width: -webkit-min-content;
+    width: min-content;
 }
 
 #lyricsCard {
