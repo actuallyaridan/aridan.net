@@ -1,5 +1,5 @@
 ---
-title: "Display your current acitivty on your webiste using Lanyard"
+title: "Display your current acitivty on your website using Lanyard"
 date: "01/05/2025"
 link: "/articles/lanyard-setup"
 ---
@@ -14,7 +14,7 @@ Lanyard is simple. It doesn't reinvent the wheel. The way it works is by simply 
 
 Your data is not used to profile you, and you can verify that yourself by having a look at their GitHub, as all of Lanyard's source code is availble for free for anyone on the internet. That's the best thing about open soruce stuff. It's transparent and if the current developers abandon it, anyone can just carry on from where they left off!
 
-Want to add Lanyard to your webiste? It's super easy, you just need a few things to get started.
+Want to add Lanyard to your website? It's super easy, you just need a few things to get started.
 Just as a word of causion, whilst this article gets you basic information, you should always have a look on their GitHub in order to get the latest instrcutions and get the most out of Lanyard!
 
 ## Getting started with Lanyard
