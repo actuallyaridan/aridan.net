@@ -19,8 +19,9 @@
     --modal-background-color: rgb(240, 240, 240);
     --icon-background-color: rgba(200, 200, 200, 0.30);
     --card-background-color: var(--icon-background-color);
-
     --border-color: #cccccc;
+    color-scheme: light;
+
 }
 
 /* Dark theme class */
@@ -44,9 +45,8 @@
     --modal-background-color: rgb(26, 26, 26);
     --icon-background-color: rgba(60, 60, 60, 0.30);
     --card-background-color: var(--icon-background-color);
-    
-
     --border-color: #333333;
+    color-scheme: dark;
 }
 
 

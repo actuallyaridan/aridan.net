@@ -169,7 +169,7 @@ function updateActivityImages(activities) {
         elements.activityLogoLarge,
         activity.assets.large_image,
         activity.application_id,
-        activity.details
+        activity.assets.large_text
       );
     }
   });
@@ -204,7 +204,7 @@ function updateAppleMusicInfo(activity) {
       elements.amActivityLogoLarge,
       activity.assets.large_image,
       activity.application_id,
-      activity.details
+      activity.assets.large_text
     );
   }
 
@@ -281,7 +281,7 @@ function updateImage(element, image, appId, details = "") {
     return;
   }
   element.src = getImageUrl(image, appId);
-  element.alt = `Image for ${details || image}`;
+  element.alt = details || image;
   element.title = details || image;
   element.style.display = "block";
 }
