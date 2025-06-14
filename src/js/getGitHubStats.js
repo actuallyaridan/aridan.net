@@ -35,7 +35,6 @@ async function updateGitHubRepoStats(repos) {
     }
 }
 
-// Example usage:
 updateGitHubRepoStats([
     "actuallyaridan/NeoFreeBird",
     "dimdenGD/OldTwitter",

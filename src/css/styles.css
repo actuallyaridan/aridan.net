@@ -970,18 +970,20 @@ span.token{
 }
 
 .warn {
-    display: none;
     background-color: var(--danger-zone-background-color);
     color: var(--text-color);
     padding: 10px;
     border-radius: 8px;
     margin: 10px 0;
     font-size: 1em;
-    animation: fadeIn .3s;
     align-items: center;
     justify-content: center;    
     gap: 4px;  
     flex-direction: row;
+}
+
+#rateLimitGitHub{
+    display: none;
 }
 
 .warn>i {
