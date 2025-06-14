@@ -7,6 +7,17 @@ async function updateGitHubRepoStats(repos) {
 
         try {
             const response = await fetch(url);
+
+            if (response.status === 403) {
+                // Handle rate limiting by showing the warning element
+                const rateLimitEl = document.getElementById("rateLimitGitHub");
+                if (rateLimitEl) {
+                    rateLimitEl.style.display = "flex";
+                }
+                console.warn(`Rate limited by GitHub API when fetching ${repo}`);
+                break; // Exit loop if rate limited
+            }
+
             if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
             const data = await response.json();
 
