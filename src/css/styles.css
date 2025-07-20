@@ -991,6 +991,10 @@ span.token{
     margin-right: 0px;
 }
 
+.hideMenuNoAnimation {
+    display: flex !important;
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {

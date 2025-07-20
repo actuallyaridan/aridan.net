@@ -157,7 +157,7 @@ select {
 
 /* The Modal (background) */
 .modal {
-    display: flex;
+    display: none;
     position: fixed;
     z-index: 99;
     left: 0;

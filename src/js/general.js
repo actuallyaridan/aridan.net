@@ -35,4 +35,5 @@ function toggleMenu() {
 
 function toggleSettings() {
     document.getElementById("settingsDialog").classList.toggle("showMenuNoAnimation");
+    document.getElementById("settingsModalMenu").classList.toggle("showMenuNoAnimation");
 }
