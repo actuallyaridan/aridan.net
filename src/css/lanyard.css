@@ -558,3 +558,14 @@ div.iconContainer {
     width: 0%;
     transition: width 0.2s linear;
 }
+
+
+#apple-link{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    margin-top: 6px;
+    margin-bottom: 3px;
+    text-align: center;
+}
