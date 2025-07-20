@@ -348,6 +348,7 @@ div#loading>div {
 }
 
 #activityTime,
+#ActivityTime,
 #amActivityTime {
     display: inline;
     color: #000;
@@ -490,6 +491,7 @@ i>h3 {
 }
 
 div#timeremaning,
+div#Timeremaning,
 div#amTimeremaning {
     display: flex;
     flex-direction: row;
@@ -500,6 +502,7 @@ div#amTimeremaning {
 }
 
 div#timeremaning>p,
+div#Timeremaning>p,
 div#amTimeremaning>p {
     padding: 0.2rem;
     color: var(--paragraph-color);

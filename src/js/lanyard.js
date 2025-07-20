@@ -1,5 +1,6 @@
 const userID = "701403809129168978";
 let lastArtSrc = "";
+let lastTrackKey = ""; // cache to detect song change
 let lastStatus;
 let discordDataLatest;
 let webSocket;
@@ -64,6 +65,7 @@ function connectWebSocket() {
     } else if (data.op === 0) {
       toggleLoading(true);
       discordDataLatest = data.d;
+      updateLanyardData(); // trigger UI update on new payload
     }
   };
 
@@ -200,7 +202,7 @@ function updateActivityDetails(activities) {
 function updateAppleMusicInfo(activity) {
   toggleDisplay(elements.amLanyardDiscord, true);
 
-  /* ── artwork ── */
+  //  artwork 
   if (activity.assets) {
     updateImage(
       elements.amActivityLogoLarge,
@@ -210,22 +212,32 @@ function updateAppleMusicInfo(activity) {
     );
   }
 
-  /* ── text ── */
+  // text  
   updateElementText(elements.amActivityName,    activity.name);
   updateElementText(elements.amActivityState,   formatActivityState(activity.state));
   updateElementText(elements.amActivityDetails, activity.details);
 
-  /* ── time + progress ── */
+  // time + progress 
   updateActivityTime(activity.timestamps, "am");
   updateProgressBar(activity.timestamps);
 
-  /* ▼ resolve the track → URL and wire the badge ▼ */
-refreshAppleMusicLink(
-  activity.details,                 // title
-  activity.state,                   // artist
-  activity.assets?.large_text,      // album  (can be undefined)
-  activity.assets?.large_image      // artwork URL so the ID‑lookup works
-);
+  // resolve the track → URL and wire the badge
+  const trackKey = [
+    activity.details,
+    activity.state,
+    activity.assets?.large_text,
+    activity.assets?.large_image
+  ].join("|");
+
+  if (trackKey !== lastTrackKey) {
+    lastTrackKey = trackKey;
+    refreshAppleMusicLink(
+      activity.details,                 // title
+      activity.state,                   // artist
+      activity.assets?.large_text,      // album
+      activity.assets?.large_image      // artwork URL
+    );
+  }
 }
 
 function updateProgressBar(timestamps) {
@@ -251,7 +263,6 @@ function updateProgressBar(timestamps) {
     const percentage = (elapsed / duration) * 100;
     progressBar.style.width = `${percentage}%`;
   }
-
 
   // Keep screen readers informed of current progress (0-100)
   const ariaValue = parseFloat(progressBar.style.width) || 0;
@@ -289,16 +300,14 @@ function formatTime({ hours, minutes, seconds }) {
     : `${pad(minutes)}:${pad(seconds)}`;
 }
 
-// ────────────────────────────────────────────────────────────────
 // High‑resolution Apple Music artwork with signed‑CDN fallback
-// ────────────────────────────────────────────────────────────────
 const HIGH_RES = 512;
 
-/**
- * Returns the *preferred* (highest‑quality) image URL.
- *  • Apple Music → direct Apple artwork scaled to HIGH_RES.
- *  • Anything else → Discord CDN at HIGH_RES.
- */
+
+// Returns the *preferred* (highest‑quality) image URL.
+//  Apple Music → direct Apple artwork scaled to HIGH_RES.
+//  Anything else → Discord CDN at HIGH_RES.
+ 
 function getImageUrl(image, appId, size = HIGH_RES) {
   if (image.includes("external")) {
     // strip Discord signature → https://is1-ssl.mzstatic.com/…
@@ -310,12 +319,12 @@ function getImageUrl(image, appId, size = HIGH_RES) {
   return `https://cdn.discordapp.com/app-assets/${appId}/${image}.png?size=${size}`;
 }
 
-/**
- * Same signature as before, but now:
- * 1. tries the high‑res URL,
- * 2. falls back to Discord’s signed proxy if that 404s,
- * 3. logs the fallback so you can spot problem albums quickly.
- */
+
+// Same signature as before, but now:
+// 1. tries the high‑res URL,
+// 2. falls back to Discord’s signed proxy if that 404s,
+// 3. logs the fallback so you can spot problem albums quickly.
+
 function updateImage(element, image, appId, details = "") {
   if (!image) {
     element.style.display = "none";
@@ -327,10 +336,10 @@ function updateImage(element, image, appId, details = "") {
     ? `https://media.discordapp.net/external/${image.split("mp:external/")[1]}?width=${HIGH_RES}&height=${HIGH_RES}&quality=lossless`
     : hiRes;
 
-  /* ── bail out early if we’re already showing this artwork ── */
+  // bail out early if we’re already showing this artwork
   if (hiRes === lastArtSrc || fallback === lastArtSrc) return;
 
-  /* ── log success once ── */
+  /*  log success once  */
   element.onload = function () {
     if (this.src === hiRes) {
       console.info("[Lanyard] Using high‑res art");
@@ -341,7 +350,7 @@ function updateImage(element, image, appId, details = "") {
     this.onload = null;         // clean up
   };
 
-  /* ── fall back if hi‑res fails ── */
+  //  fall back if hi‑res fails 
   element.onerror = function () {
     if (this.src !== fallback) {
       console.warn("[Lanyard] Falling back to signed Discord art:");
@@ -350,7 +359,7 @@ function updateImage(element, image, appId, details = "") {
     }
   };
 
-  element.src   = hiRes;        // start loading
+  element.src   = hiRes;        
   element.alt   = details || image;
   element.title = details || image;
   element.style.display = "block";
@@ -365,7 +374,6 @@ function toggleTimeDisplay(remainingElem, elapsedElem, isRemaining) {
   if (remainingElem) remainingElem.classList.toggle("hide", !isRemaining);
   if (elapsedElem) elapsedElem.classList.toggle("hide", isRemaining);
 }
-
 
 function capitalizeFirstLetter(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -386,17 +394,14 @@ function formatActivityState(state) {
 
 function handleError(error) {
   console.error("Error:", error);
-  elements.errorMessage.textContent = `An error occurred: ${error.message || error
-    }`;
+  elements.errorMessage.textContent = `An error occurred: ${error.message || error}`;
   toggleDisplay(elements.spinner, false);
   toggleDisplay(elements.contentDiv, false);
   toggleDisplay(elements.errorMessage, true);
 }
 
-
 // Adds ARIA roles/attributes so assistive technologies announce live updates.
 // This runs once, right before the WebSocket connection is established.
-
 function initAccessibility() {
   // Status wrappers announce presence changes
   document.querySelectorAll(".statusWrapper").forEach((el) => {
@@ -406,15 +411,9 @@ function initAccessibility() {
 
   // Activity large icons
   if (elements.activityLogoLarge)
-    elements.activityLogoLarge.setAttribute(
-      "alt",
-      "Discord activity icon"
-    );
+    elements.activityLogoLarge.setAttribute("alt", "Discord activity icon");
   if (elements.amActivityLogoLarge)
-    elements.amActivityLogoLarge.setAttribute(
-      "alt",
-      "Album art"
-    );
+    elements.amActivityLogoLarge.setAttribute("alt", "Album art");
 
   // Progress bar for Apple Music track
   const prog = document.getElementById("progressBar");
@@ -426,36 +425,58 @@ function initAccessibility() {
   }
 }
 
-if (document.querySelector(".discordWrapper")) {  initAccessibility();
-
+if (document.querySelector(".discordWrapper")) {
+  initAccessibility();
   connectWebSocket();
-  setInterval(updateLanyardData, 1000);
+
+  /* lightweight timer: keep the progress bar smooth without re‑fetching */
+/* lightweight timer: keep the progress bar smooth without re‑fetching */
+setInterval(() => {
+  const musicActivity =
+    discordDataLatest?.activities?.find(
+      (a) =>
+        a.name === "Apple Music" ||
+        a.application_id === "773825528921849856"
+    );
+
+  //  Apple Music only 
+  if (musicActivity) {
+    updateProgressBar(musicActivity.timestamps);   
+    updateActivityTime(musicActivity.timestamps, "am"); 
+  }
+
+  //  every other timed activity now gets a 1 s tick too
+  const otherTimed = discordDataLatest?.activities?.find(
+    (a) => a !== musicActivity && a.timestamps
+  );
+  if (otherTimed) updateActivityTime(otherTimed.timestamps); 
+
+}, 1000);
+
 }
 
-/* cache the last successful href so we don’t hammer the API */
+// cache the last successful href so we don’t hammer the API
 let lastAppleHref = "";
 
-/* helper — derive the visitor’s storefront once */
+// helper — derive the visitor’s storefront once
 function getStorefront() {
   return (navigator.languages?.[0] || navigator.language || "us")
     .slice(-2)          // "sv‑SE" → "se"
-    .toLowerCase();     // Apple wants lowercase
+    .toLowerCase();     
 }
 
-/**
- * Resolve (title, artist, album, artworkURL) → Apple Music link
- * 1. Precise track/album link via Apple’s APIs.
- * 2. Otherwise a storefront‑aware search URL (deep‑link friendly on iOS).
- */
+
+// Resolve (title, artist, album, artworkURL) → Apple Music link
+// 1. Precise track/album link via Apple’s APIs.
+// 2. Otherwise a storefront‑aware search URL (deep‑link friendly on iOS).
+
 async function refreshAppleMusicLink(title, artist, album, artworkURL) {
   const badge = document.getElementById("apple-link");
   if (!badge) return;
 
-  /* storefront once per call */
-  const storefront = getStorefront();        // "se", "us", …
-  const country    = storefront.toUpperCase(); // API needs "SE", "US", …
+  const storefront = getStorefront();        
+  const country    = storefront.toUpperCase(); 
 
-  /* quick normaliser */
   const norm = (s) =>
     s
       .toLowerCase()
@@ -473,7 +494,7 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
 
   let href = "";
 
-  /* ── 1. ID‑lookup (artwork URL contains a numeric Apple ID) ───────── */
+  //   1. ID‑lookup (artwork URL contains a numeric Apple ID)
   const idMatch = artworkURL?.match(/\/(\d{8,})\.jpg/); // 8+ digits before .jpg
   if (idMatch) {
     try {
@@ -497,7 +518,7 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
     }
   }
 
-  /* ── 2. Text‑search fallback (title → candidate tracks) ───────────── */
+  //  2. Text‑search fallback (title → candidate tracks)
   if (!href) {
     const api = `https://itunes.apple.com/search?term=${encodeURIComponent(
       title
@@ -515,7 +536,7 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
         }
       }
 
-      /* album‑search backup (if we still haven’t matched) */
+      // album‑search backup (if we still haven’t matched)
       if (!href && album) {
         const api2 = `https://itunes.apple.com/search?term=${encodeURIComponent(
           album
@@ -546,7 +567,7 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
     }
   }
 
-  /* ── 3. FINAL fallback: storefront‑aware /search deep link ─────────── */
+  //  3. fallback: storefront‑aware /search deep link
   if (!href) {
     const query = [title, artist, album]
       .filter(Boolean)
@@ -568,7 +589,7 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
     href = `${base}?term=${query}`;
   }
 
-  /* ── 4. Safety net: ensure storefront in finished URLs ─────────────── */
+  //   4. Safety net: ensure storefront in finished URLs
   if (href.startsWith("https://music.apple.com/")) {
     href = href.replace(
       /music\.apple\.com\/[a-z]{2}\//,
@@ -576,7 +597,7 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
     );
   }
 
-  /* ── 5. Wire the badge if the link changed ─────────────────────────── */
+  //  5. Wire the badge if the link changed
   if (href && href !== lastAppleHref) {
     badge.href = href;
     lastAppleHref = href;
