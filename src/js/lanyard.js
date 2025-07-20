@@ -242,6 +242,11 @@ function updateProgressBar(timestamps) {
     const percentage = (elapsed / duration) * 100;
     progressBar.style.width = `${percentage}%`;
   }
+
+
+  // Keep screen readers informed of current progress (0-100)
+  const ariaValue = parseFloat(progressBar.style.width) || 0;
+  progressBar.setAttribute("aria-valuenow", ariaValue.toFixed(0));
 }
 
 function updateActivityTime(timestamps, prefix = "") {
@@ -328,7 +333,41 @@ function handleError(error) {
   toggleDisplay(elements.errorMessage, true);
 }
 
-if (document.querySelector(".discordWrapper")) {
+
+// Adds ARIA roles/attributes so assistive technologies announce live updates.
+// This runs once, right before the WebSocket connection is established.
+
+function initAccessibility() {
+  // Status wrappers announce presence changes
+  document.querySelectorAll(".statusWrapper").forEach((el) => {
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+  });
+
+  // Activity large icons
+  if (elements.activityLogoLarge)
+    elements.activityLogoLarge.setAttribute(
+      "alt",
+      "Discord activity icon"
+    );
+  if (elements.amActivityLogoLarge)
+    elements.amActivityLogoLarge.setAttribute(
+      "alt",
+      "Album art"
+    );
+
+  // Progress bar for Apple Music track
+  const prog = document.getElementById("progressBar");
+  if (prog) {
+    prog.setAttribute("role", "progressbar");
+    prog.setAttribute("aria-valuemin", "0");
+    prog.setAttribute("aria-valuemax", "100");
+    prog.setAttribute("aria-valuenow", "0");
+  }
+}
+
+if (document.querySelector(".discordWrapper")) {  initAccessibility();
+
   connectWebSocket();
   setInterval(updateLanyardData, 1000);
 }
