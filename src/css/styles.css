@@ -115,6 +115,7 @@
 
 @font-face {
     font-family: Jost;
+    font-display: swap;
     src: url(/src/fonts/Jost.ttf);
 }
 
