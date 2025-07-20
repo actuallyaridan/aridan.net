@@ -38,9 +38,32 @@ function toggleLoading(isLoading) {
   });
 }
 
+
+function fetchJsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cb = "jsonp_" + Math.random().toString(36).slice(2);
+    window[cb] = (data) => {
+      delete window[cb];
+      script.remove();
+      resolve(data);
+    };
+
+    const script = document.createElement("script");
+    script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+    script.onerror = () => {
+      delete window[cb];
+      script.remove();
+      reject(new Error("JSONP request failed for " + url));
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
+
 function connectWebSocket() {
   console.log(
-    "[Lanyard] Preparing connection to Lanyard WebSocket at wss://api.lanyard.rest/socket..."
+    "[Lanyard] Preparing connection to Lanyard WebSocket at wss://api.lanyard.rest/socket."
   );
   webSocket = new WebSocket("wss://api.lanyard.rest/socket");
 
@@ -202,7 +225,7 @@ function updateActivityDetails(activities) {
 function updateAppleMusicInfo(activity) {
   toggleDisplay(elements.amLanyardDiscord, true);
 
-  //  artwork 
+  // artwork  
   if (activity.assets) {
     updateImage(
       elements.amActivityLogoLarge,
@@ -217,11 +240,11 @@ function updateAppleMusicInfo(activity) {
   updateElementText(elements.amActivityState,   formatActivityState(activity.state));
   updateElementText(elements.amActivityDetails, activity.details);
 
-  // time + progress 
+  // time + progress  
   updateActivityTime(activity.timestamps, "am");
   updateProgressBar(activity.timestamps);
 
-  // resolve the track → URL and wire the badge
+  // resolve the track → URL and wire the badge  
   const trackKey = [
     activity.details,
     activity.state,
@@ -300,12 +323,13 @@ function formatTime({ hours, minutes, seconds }) {
     : `${pad(minutes)}:${pad(seconds)}`;
 }
 
+// 
 // High‑resolution Apple Music artwork with signed‑CDN fallback
+// 
 const HIGH_RES = 512;
 
-
 // Returns the *preferred* (highest‑quality) image URL.
-//  Apple Music → direct Apple artwork scaled to HIGH_RES.
+//  Apple Music → direct Apple artwork scaled to HIGH_RES.
 //  Anything else → Discord CDN at HIGH_RES.
  
 function getImageUrl(image, appId, size = HIGH_RES) {
@@ -318,7 +342,6 @@ function getImageUrl(image, appId, size = HIGH_RES) {
   // default Discord artwork
   return `https://cdn.discordapp.com/app-assets/${appId}/${image}.png?size=${size}`;
 }
-
 
 // Same signature as before, but now:
 // 1. tries the high‑res URL,
@@ -336,21 +359,16 @@ function updateImage(element, image, appId, details = "") {
     ? `https://media.discordapp.net/external/${image.split("mp:external/")[1]}?width=${HIGH_RES}&height=${HIGH_RES}&quality=lossless`
     : hiRes;
 
-  // bail out early if we’re already showing this artwork
+  // bail out early if we’re already showing this artwork  
   if (hiRes === lastArtSrc || fallback === lastArtSrc) return;
 
-  /*  log success once  */
+  // log success once  
   element.onload = function () {
-    if (this.src === hiRes) {
-      console.info("[Lanyard] Using high‑res art");
-    } else {
-      console.info("[Lanyard] Using fallback art");
-    }
     lastArtSrc = this.src;      // remember what we ended up with
     this.onload = null;         // clean up
   };
 
-  //  fall back if hi‑res fails 
+  // fall back if hi‑res fails  
   element.onerror = function () {
     if (this.src !== fallback) {
       console.warn("[Lanyard] Falling back to signed Discord art:");
@@ -359,7 +377,7 @@ function updateImage(element, image, appId, details = "") {
     }
   };
 
-  element.src   = hiRes;        
+  element.src   = hiRes;        // start loading
   element.alt   = details || image;
   element.title = details || image;
   element.style.display = "block";
@@ -429,8 +447,7 @@ if (document.querySelector(".discordWrapper")) {
   initAccessibility();
   connectWebSocket();
 
-  /* lightweight timer: keep the progress bar smooth without re‑fetching */
-/* lightweight timer: keep the progress bar smooth without re‑fetching */
+// lightweight timer: keep the progress bar smooth without re‑fetching 
 setInterval(() => {
   const musicActivity =
     discordDataLatest?.activities?.find(
@@ -439,44 +456,44 @@ setInterval(() => {
         a.application_id === "773825528921849856"
     );
 
-  //  Apple Music only 
+  // Apple Music only  
   if (musicActivity) {
     updateProgressBar(musicActivity.timestamps);   
     updateActivityTime(musicActivity.timestamps, "am"); 
   }
 
-  //  every other timed activity now gets a 1 s tick too
+  // every other timed activity now gets a 1 s tick too  
   const otherTimed = discordDataLatest?.activities?.find(
     (a) => a !== musicActivity && a.timestamps
   );
   if (otherTimed) updateActivityTime(otherTimed.timestamps); 
 
 }, 1000);
-
 }
 
-// cache the last successful href so we don’t hammer the API
+// cache the last successful href so we don’t hammer the API 
 let lastAppleHref = "";
 
-// helper — derive the visitor’s storefront once
+// helper — derive the visitor’s storefront once 
 function getStorefront() {
   return (navigator.languages?.[0] || navigator.language || "us")
     .slice(-2)          // "sv‑SE" → "se"
-    .toLowerCase();     
+    .toLowerCase();     // Apple wants lowercase
 }
 
-
-// Resolve (title, artist, album, artworkURL) → Apple Music link
+// Resolve (title, artist, album, artworkURL) → Apple Music link
 // 1. Precise track/album link via Apple’s APIs.
 // 2. Otherwise a storefront‑aware search URL (deep‑link friendly on iOS).
-
+ 
 async function refreshAppleMusicLink(title, artist, album, artworkURL) {
   const badge = document.getElementById("apple-link");
   if (!badge) return;
 
-  const storefront = getStorefront();        
-  const country    = storefront.toUpperCase(); 
+  // storefront once per call 
+  const storefront = getStorefront();        // "se", "us", …
+  const country    = storefront.toUpperCase(); // API needs "SE", "US", …
 
+  // quick normaliser 
   const norm = (s) =>
     s
       .toLowerCase()
@@ -494,14 +511,13 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
 
   let href = "";
 
-  //   1. ID‑lookup (artwork URL contains a numeric Apple ID)
+  // 1. ID‑lookup (artwork URL contains a numeric Apple ID)  
   const idMatch = artworkURL?.match(/\/(\d{8,})\.jpg/); // 8+ digits before .jpg
   if (idMatch) {
     try {
-      const res   = await fetch(
+      const { results } = await fetchJsonp(
         `https://itunes.apple.com/lookup?id=${idMatch[1]}&country=${country}&entity=song`
       );
-      const { results } = await res.json();
 
       for (const r of results) {
         if (r.wrapperType !== "track") continue;
@@ -518,14 +534,13 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
     }
   }
 
-  //  2. Text‑search fallback (title → candidate tracks)
+  // 2. Text‑search fallback (title → candidate tracks)  
   if (!href) {
     const api = `https://itunes.apple.com/search?term=${encodeURIComponent(
       title
     )}&entity=song&attribute=songTerm&limit=25&country=${country}`;
     try {
-      const res   = await fetch(api);
-      const { results } = await res.json();
+      const { results } = await fetchJsonp(api);
 
       for (const r of results) {
         if (norm(r.trackName) !== titleN) continue;
@@ -536,22 +551,20 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
         }
       }
 
-      // album‑search backup (if we still haven’t matched)
+      // album‑search backup (if we still haven’t matched) 
       if (!href && album) {
         const api2 = `https://itunes.apple.com/search?term=${encodeURIComponent(
           album
         )}&entity=album&attribute=albumTerm&limit=5&country=${country}`;
-        const res2     = await fetch(api2);
-        const { results: albums } = await res2.json();
+        const { results: albums } = await fetchJsonp(api2);
 
         for (const alb of albums) {
           const artistN = norm(alb.artistName);
           if (!artistsN.every((a) => artistN.includes(a))) continue;
 
-          const res3  = await fetch(
+          const { results: tracks } = await fetchJsonp(
             `https://itunes.apple.com/lookup?id=${alb.collectionId}&entity=song&country=${country}`
           );
-          const { results: tracks } = await res3.json();
           const track = tracks.find(
             (t) =>
               t.wrapperType === "track" && norm(t.trackName) === titleN
@@ -567,7 +580,7 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
     }
   }
 
-  //  3. fallback: storefront‑aware /search deep link
+  // 3. FINAL fallback: storefront‑aware /search deep link  
   if (!href) {
     const query = [title, artist, album]
       .filter(Boolean)
@@ -589,7 +602,7 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
     href = `${base}?term=${query}`;
   }
 
-  //   4. Safety net: ensure storefront in finished URLs
+  // 4. Safety net: ensure storefront in finished URLs  
   if (href.startsWith("https://music.apple.com/")) {
     href = href.replace(
       /music\.apple\.com\/[a-z]{2}\//,
@@ -597,7 +610,7 @@ async function refreshAppleMusicLink(title, artist, album, artworkURL) {
     );
   }
 
-  //  5. Wire the badge if the link changed
+  // 5. Wire the badge if the link changed  
   if (href && href !== lastAppleHref) {
     badge.href = href;
     lastAppleHref = href;
