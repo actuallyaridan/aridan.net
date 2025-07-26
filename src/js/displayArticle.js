@@ -106,7 +106,7 @@ function parseFrontMatter(frontMatter) {
       // build HTML
       const articleHTML = `
         <article class="full-article">
-          <div id="info">
+          <div class="info">
             <p class="icon"><i class="fa-solid fa-newspaper icon-background"></i></p>
             <div>
               <h1 class="name">${metadata.title}</h1>
@@ -130,7 +130,7 @@ function parseFrontMatter(frontMatter) {
     } catch (error) {
       console.error('Error loading article:', error);
       articleContainer.innerHTML = `
-        <div id="info">
+        <div class="info">
           <p class="icon"><i class="fa-solid fa-xmark icon-background"></i></p>
           <div>
             <h1 class="name">Can't display article</h1>

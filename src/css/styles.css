@@ -255,12 +255,12 @@ li.active>a, li.active>button.noUI {
 }
 
 /* App Info */
-#info {
+.info {
     text-align: center;
     margin-top: 42px;
 }
 
-#info>div {
+.info>div {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -993,6 +993,97 @@ span.token{
 
 .hideMenuNoAnimation {
     display: flex !important;
+}
+
+.contactMe {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px;
+    margin: 12px;
+    width: 100%;
+    color: var(--text-color);
+}
+.contactMe>div {
+    flex: 1;
+    max-width: 50%;
+    border-radius: 12px;
+}
+
+.contactMe>div>a {
+    color: var(--secondary-title-color);
+    background-color: var(--button-background-color);
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    gap: 40px;
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.contactMe>div>a:hover {
+    background-color: var(--button-hover-background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+
+.contactMe>div>a>i {
+    margin-right: 0px;
+    color: inherit;
+    align-self: flex-end;
+}
+
+
+.contactMe>div>a.twitter {
+    background-color: #1DA1F2;
+    color: white;
+}
+
+.contactMe>div>a.twitter:hover{
+    background-color: #1DA1F2da;
+    color: white;
+}
+
+.contactMe>div>a.github{
+    background-color: #6e5494;
+    color: white;
+}
+
+.contactMe>div>a.github:hover{
+    background-color: #6e5494da;
+    color: white;
+}
+
+.contactMe>div>a.email {
+    background-color: #c71610;
+    color: white;
+}
+
+.contactMe>div>a.email:hover {
+    background-color: #c71610da;
+    color: white;
+}
+
+.contactMe>div>a.imessage {
+    background-color: #53d769;
+    color: black;
+}
+
+.contactMe>div>a.imessage:hover {
+    background-color: #53d769da;
+    color: black;
 }
 
 /* Animations */
