@@ -80,7 +80,7 @@
 
     </header>
 
-    <main class="container" >
+    <main class="container">
         <div class="info withBanner" fetchpriority="high">
             <img src="/assets/uploads/images/image.webp" alt="A selfie where I'm in a bus in a grey t-shit."
                 class="icon" fetchpriority="high">
@@ -89,8 +89,13 @@
                 <p class="description white">a swedish <span id="techEnthu">tech
                         enthusiast</span><span id="frontEndWebDev">front end web developer</span><span
                         id="backEndWebDev">back-end web developer</span><span id="itTech">IT-technician</span></p>
-                <p id="statusWrapperConnecting" class="dcloading statusWrapper"><i
-                        class="fa-solid fa-hourglass-half"></i>Connecting</p>
+                <div id="statusWrapperConnecting" class="dcloading statusWrapper">
+                <div class="lds-ring smallLoader lanyardConnecting">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>Connecting</div>
                 <p id="statusWrapperOnline" class="online hide statusWrapper"><i class="fa-solid fa-signal"></i>Online
                 </p>
                 <p id="statusWrapperOffline" class="offline hide statusWrapper"><i
@@ -106,14 +111,6 @@
             <section class="discordWrapper" id="currentdiscord">
                 <div id="lanyardDiscord">
                     <div id="loading">
-                        <div>
-                            <div id="loadingSpinner" class="lds-ring">
-                                <div></div>
-                                <div></div>
-                                <div></div>
-                                <div></div>
-                            </div>
-                        </div>
                     </div>
                     <div id="errorMessage">
                         <p class="errorMessage">❌</p>
@@ -151,11 +148,11 @@
                                         <p id="amElapsed" class="hide subTitle"> elapsed</p>
                                     </div>-->
                                 </div>
-                                                <a id="apple-link" target="_blank" rel="noopener" title="Listen on Apple Music">
-                                        <img src="/assets/media/icons/listenOnAppleMusic.svg"
+                                <a id="apple-link" target="_blank" rel="noopener" title="Listen on Apple Music">
+                                    <img src="/assets/media/icons/listenOnAppleMusic.svg"
                                         alt="A black button with the Apple Music logo and text that says 'Listen on Apple Music'."
                                         class="h-8 mt-2 pointer-events-auto" />
-                                    </a>
+                                </a>
                             </div>
                             <div id="discordActivity">
                                 <span class="titleActivity"> <i class="fa-regular fa-window-maximize">

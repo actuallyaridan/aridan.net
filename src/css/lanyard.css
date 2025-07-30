@@ -288,6 +288,12 @@ div#loading>div {
     display: inline-block !important;
 }
 
+.lanyardConnecting {
+    display: inline-block !important;
+    color: white;
+    margin-right: .5em;
+}
+
 .lds-ring.smallLoader div {
     box-sizing: border-box;
     display: block;
@@ -300,6 +306,20 @@ div#loading>div {
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     border-color: var(--accent-color, rgba(128, 128, 128, 0.8)) transparent transparent transparent;
 }
+
+.lds-ring.lanyardConnecting div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 0.8em;
+    height: 0.8em;
+    margin: 0.25em;
+    border: 0.1em solid transparent;
+    border-radius: 50%;
+    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: white transparent transparent transparent;
+}
+
 
 .lds-ring.smallLoader div:nth-child(1) {
     animation-delay: -0.45s;
