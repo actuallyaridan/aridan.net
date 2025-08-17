@@ -113,8 +113,3 @@ document.addEventListener('readystatechange', function() {
     }
 });
 
-function toggleSettings() {
-    const dialog = document.getElementById('settingsDialog');
-    if (!dialog) return;
-    dialog.open ? dialog.close() : dialog.showModal();
-}

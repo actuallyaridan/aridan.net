@@ -249,7 +249,7 @@ input[type="radio"] {
 .colorOptions>label>span {
     display: inline-block;
     padding: 0.3em 0.3em;
-    margin: auto -5 auto 8;
+    margin: auto -5px auto 8px;
     border-radius: 50%;
 }
 
