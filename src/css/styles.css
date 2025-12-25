@@ -1086,6 +1086,57 @@ span.token{
     color: black;
 }
 
+.grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column; 
+}
+
+.grid-links {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    flex: 1;
+}
+
+
+.full-button{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    flex: 1;
+}
+
+
+.grid-links>a, .full-button>a {
+    background-color: var(--button-background-color);
+    color: var(--secondary-title-color);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: 500;
+    flex-grow: 2;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.grid-links>a:hover, .full-button>a:hover {
+    background-color: var(--button-hover-background-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.full-button>a{
+    width: 100%;
+    text-align: center;
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {

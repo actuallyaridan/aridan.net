@@ -3,8 +3,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <script src="/src/js/settings.js" async></script>
+    <meta charset="UTF-8">    
+<script src="/src/js/settings.js" async></script>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="aridan.net">
     <meta name="keywords"
@@ -12,7 +12,7 @@
     <meta name="author" content="actualluaridan">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact - aridan.net</title>
+    <title>Experience - aridan.net</title>
 
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/src/css/styles.css">
@@ -36,10 +36,10 @@
         <div>
             <ul class="notAList">
                 <li><a href="/">aridan.net</a></li>
-                <li><a href="/experience/">Experience</a></li>
+                <li class="active"><a href="/experience/">Experience</a></li>
                 <li><a href="/projects/">Projects</a></li>
                 <li><a href="/articles/">Articles</a></li>
-                <li class="active"><a href="/contact/">Contact</a></li>
+                <li><a href="/contact/">Contact</a></li>
             </ul>
                       <ul class="notAList">
                 <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
@@ -57,16 +57,15 @@
                 <li><a href="/">aridan.net</a></li>
             </ul>
             <ul class="notAList">
-                <li><button title="Menu" class="noUI" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button>
-                </li>
+                <li><button class="noUI" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button></li>
             </ul>
         </div>
         <menu class="mobileMenu" id="mobileMenuID">
             <ul class="notAList">
-                <li><a href="/experience/">Experience</a></li>
+                <li class="active"><a href="/experience/">Experience</a></li>
                 <li><a href="/projects/">Projects</a></li>
                 <li><a href="/articles/">Articles</a></li>
-                <li class="active"><a href="/contact/">Contact</a></li>
+                <li><a href="/contact/">Contact</a></li>
             </ul>
                       <ul class="notAList">
                 <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
@@ -81,30 +80,17 @@
 
     <main class="container">
         <div class="info">
-            <p class="icon"><i class="fa-solid fa-address-book icon-background"></i></p>
+            <p class="icon"><i class="fa-solid fa-briefcase icon-background"></i></p>
             <div>
-                <h1 class="name">Contact
-                </h1>
-                <p class="description titleColor">Let's connect! You can find me on social media or send me an
-email. I'm always open to chatting and networking!</p>
+                <h1 class="name">Career</h1>
+                <p class="description titleColor">I've had various jobs at a few companies. I've worked in tech repair,
+                    IT support for a municipality, and general support for an IoT company, and I'm only getting started!
+                </p>
+                <a class="button" href="mailto:adnan@aridan.net"><i class="fa-solid fa-envelope"></i>Get in touch</a>
             </div>
         </div>
         <hr>
-
-        <div class="grid-container">  
-            <div class="grid-links">
-                <a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"></i>Twitter</a>
-                <a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"></i>GitHub</a>
-            </div>
-            <div class ="full-button">
-                <a href="mailto:adnan@aridan.net"><i class="fa-solid fa-envelope"></i>Email</a>
-            </div>
-        </div>
-
-    </main>
-    <footer>
-    </footer>
-    <div id="settingsDialog">
+        <div id="settingsDialog">
         <div id="settingsModalMenu" class="modal">
             <div class="modal-content">
                 <h2>Settings</h2>
@@ -216,6 +202,11 @@ email. I'm always open to chatting and networking!</p>
             </div>
         </div>
     </div>
+        <hr>
+    </main>
+
+    <footer>
+    </footer>
 </body>
 
 </html>
