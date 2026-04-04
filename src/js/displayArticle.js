@@ -89,7 +89,7 @@ function parseFrontMatter(frontMatter) {
   
     try {
       // show spinner
-      loadingSpinner.style.display = 'block';
+      loadingSpinner.style.display = 'flex';
   
       // get ?article=foo
       const params      = new URLSearchParams(window.location.search);
@@ -111,7 +111,7 @@ function parseFrontMatter(frontMatter) {
             <div>
               <h1 class="name">${metadata.title}</h1>
               <p class="description titleColor">${metadata.date}</p>
-              <a href="/articles/" title="Back to articles" class="button backButton">
+              <a href="/articles/" title="Back to Articles" class="button backButton">
                 <i class="fa-solid fa-arrow-left"></i>
               </a>
             </div>
@@ -133,9 +133,9 @@ function parseFrontMatter(frontMatter) {
         <div class="info">
           <p class="icon"><i class="fa-solid fa-xmark icon-background"></i></p>
           <div>
-            <h1 class="name">Can't display article</h1>
+            <h1 class="name">Unable to display article</h1>
             <p class="description titleColor">${error.message}</p>
-            <a href="/articles/" class="button">Back to Articles</a>
+            <a href="/articles/" class="button"><i class="fa-solid fa-arrow-left"></i>Back to Articles</a>
           </div>
         </div>
       `;

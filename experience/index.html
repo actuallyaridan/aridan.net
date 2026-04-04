@@ -88,7 +88,7 @@
                 <p class="description titleColor">I've had various jobs at a few companies. I've worked in tech repair,
                     IT support for a municipality, and general support for an IoT company, and I'm only getting started!
                 </p>
-                <a class="button" href="mailto:adnan@aridan.net"><i class="fa-solid fa-envelope"></i>Get in touch</a>
+                <a class="button primary" href="mailto:adnan@aridan.net"><i class="fa-solid fa-envelope"></i>Get in touch</a>
             </div>
         </div>
         <hr>
@@ -112,6 +112,7 @@
                 </div>
             </div>
         </div>
+                        <hr class="onMobile">
         <div class="section">
             <div>
                 <h2 class="section-title">IT technician</h2>
@@ -135,6 +136,7 @@
                 </div>
             </div>
         </div>
+                        <hr class="onMobile">
         <div class="section">
             <div>
                 <h2 class="section-title">Technician and Web developer</h2>
@@ -187,18 +189,17 @@
                 </div>
             </div>
         </div>
-        <hr>
     </main>
 
     <footer>
     </footer>
-        <div id="settingsDialog">
+    <div id="settingsDialog">
         <div id="settingsModalMenu" class="modal">
             <div class="modal-content">
                 <h2>Settings</h2>
                 <div class="modalSettings">
                     <div>
-                        <h3><i class="fa-solid fa-globe"></i>Language</h3>
+                        <h3><i class="fa-solid fa-language"></i>Language</h3>
                         <div>
                             <select name="language" id="language" class="button">
                                 <option value="en" selected>English</option>
@@ -207,7 +208,7 @@
                         </div>
                     </div>
                     <div>
-                        <h3><i class="fa-solid fa-paint-roller"></i>Theme</h3>
+                        <h3><i class="fa-solid fa-brush"></i>Theme</h3>
                         <div class="themeOptions options">
                             <input type="radio" id="auto" name="theme-color" value="auto" class="theme-option" checked>
                             <label for="auto" class="auto button theme-label"><i class="fa-solid fa-laptop"></i>Follow
@@ -223,7 +224,19 @@
                         </div>
                     </div>
                     <div>
-                        <h3><i class="fa-solid fa-palette"></i>Color</h3>
+                        <h3><i class="fa-solid fa-border-top-left"></i>Style</h3>
+                        <div class="themeOptions options">
+                            <input type="radio" id="liquid-glass" name="style" value="liquid-glass" class="theme-option" checked>
+                            <label for="liquid-glass" class="auto button theme-label"><i class="fa-solid fa-droplet"></i>Liquid Glass</label>
+
+                            <input type="radio" id="flat" name="style" value="flat" class="theme-option">
+                            <label for="flat" class="light button theme-label"><i
+                                    class="fa-solid fa-layer-group"></i>Flat</label>
+                        </div>
+                        <!---<div id="liquidGlassDisabled"><span class="warn"><p>You need to disable Reduce transparency in order to use Liquid Glass.</p></span></div>--->
+                    </div>
+                    <div>
+                        <h3><i class="fa-solid fa-fill-drip"></i>Color</h3>
                         <div class="colorOptions options">
                             <input type="radio" id="red" name="accent-color" value="red">
                             <label for="red" class="button">Red<span class="red"></span></label>
@@ -240,12 +253,10 @@
                             <input type="radio" id="monochrome" name="accent-color" value="monochrome">
                             <label for="monochrome" class="monochrome button">Monochrome</label>
 
-                            <input type="radio" id="custom" name="accent-color" value="custom">
-                            <label for="custom" class="button">Custom</label>
                         </div>
                     </div>
                     <div>
-                        <h3><i class="fa-solid fa-wrench"></i>General</h3>
+                        <h3><i class="fa-solid fa-sliders"></i>General</h3>
                         <div>
                             <div class="checkbox-wrapper-51">
                                 <label for="autoUpdateActivity" class="title">Automatically update activities</label>
@@ -266,9 +277,9 @@
                         <h3><i class="fa-solid fa-universal-access"></i>Accessibility</h3>
                         <div>
                             <div class="checkbox-wrapper-51">
-                                <label for="autoUpdateActivity" class="title">Reduce motion</label>
-                                <input type="checkbox" id="autoUpdateActivity" name="autoUpdateActivity" />
-                                <label for="autoUpdateActivity" class="toggle">
+                                <label for="reduceMotion" class="title">Reduce motion</label>
+                                <input type="checkbox" id="reduceMotion" name="reduceMotion" />
+                                <label for="reduceMotion" class="toggle">
                                     <span>
                                         <svg width="10px" height="10px" viewBox="0 0 10 10">
                                             <path
@@ -281,9 +292,9 @@
                         </div>
                         <div>
                             <div class="checkbox-wrapper-51">
-                                <label for="autoUpdateActivity" class="title">Reduce transparency</label>
-                                <input type="checkbox" id="autoUpdateActivity" name="autoUpdateActivity" />
-                                <label for="autoUpdateActivity" class="toggle">
+                                <label for="reduceTransparency" class="title">Reduce transparency</label>
+                                <input type="checkbox" id="reduceTransparency" name="reduceTransparency" />
+                                <label for="reduceTransparency" class="toggle">
                                     <span>
                                         <svg width="10px" height="10px" viewBox="0 0 10 10">
                                             <path
@@ -296,10 +307,10 @@
                         </div>
                     </div>
                 </div>
-                <p class="modalDescription">version 2.6.1</p>
+                <p class="modalDescription">version 3.13</p>
                 <div class="modalButtons">
-                    <button type="button" class="button" onClick="toggleSettings()">Done</button>
-                    <button type="button" class="button dangerZone">Reset</button>
+                    <button type="button" class="button primary" onClick="toggleSettings()">Done</button>
+                    <button type="button" class="button dangerZone destructive">Reset</button>
                 </div>
             </div>
         </div>

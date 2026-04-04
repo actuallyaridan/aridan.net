@@ -6,6 +6,10 @@
     src: url(/src/fonts/SevenSegment.otf) format("opentype");
 }
 
+.invisible-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .statusWrapper {
     list-style-type: none;
     color: white;
@@ -118,38 +122,51 @@ img.albumArt {
 
 .offline,
 .dnd {
-    background-color: #f94c5780;
-    border: #f94c57 2px solid;
-    box-shadow: rgba(249, 76, 87, 0.50) 0px 0px 20px;
+    background-color: rgba(249, 76, 87, 0.15);
+    border: 1px solid rgba(249, 76, 87, 0.4);
+    box-shadow: rgba(249, 76, 87, 0.3) 0px 0px 20px,
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     transition: background-color 0.2s;
 }
 
 .dcloading {
-    background-color: #90909080;
-    border: #90909080 2px solid;
-    box-shadow: rgba(140, 140, 140, 0.50) 0px 0px 20px;
+    background-color: rgba(144, 144, 144, 0.15);
+    border: 1px solid rgba(144, 144, 144, 0.3);
+    box-shadow: rgba(140, 140, 140, 0.3) 0px 0px 20px,
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     transition: background-color 0.2s;
     text-align: center;
 }
 
 .online {
-    background-color: #53d76980;
-    border: #53d76980 2px solid;
-    box-shadow: rgba(83, 215, 105, 0.50) 0px 0px 20px;
+    background-color: rgba(83, 215, 105, 0.15);
+    border: 1px solid rgba(83, 215, 105, 0.4);
+    box-shadow: rgba(83, 215, 105, 0.3) 0px 0px 20px,
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     transition: background-color 0.2s;
 }
 
 .idle {
-    background-color: #f2841d80;
-    border: #f2841d80 2px solid;
+    background-color: rgba(242, 132, 29, 0.15);
+    border: 1px solid rgba(242, 132, 29, 0.4);
+    box-shadow: rgba(242, 132, 29, 0.3) 0px 0px 20px,
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     transition: background-color 0.2s;
 }
 
 div#discord {
     display: flex;
     flex-direction: row;
-    justify-content: start;
-    align-items: center;
+    justify-content: center;
+    align-items: stretch;
     flex-wrap: nowrap;
     max-width: 80vw;
     overflow-x: scroll;
@@ -199,15 +216,18 @@ div#discord {
     word-wrap: break-word;
     min-width: 250px;
     max-width: 350px;
+    justify-content: space-between;
 }
 
 #activityLogoLarge,
 #activityLogoLarge {
     border-radius: 5px;
+    margin: 12px;
 }
 
 #amActivityLogoLarge {
   border-radius: 50%;
+  margin: 12px;
   animation: spin 3s linear infinite;
   will-change: transform;
   backface-visibility: hidden;
@@ -333,8 +353,6 @@ div#loading>div {
     animation-delay: -0.15s;
 }
 
-
-
 #activityName,
 #activityState,
 #activityDetails,
@@ -342,9 +360,9 @@ div#loading>div {
 #amActivityDetails,
 #amActivityState {
     color: var(--paragraph-color);
-    margin-top: 12px;
+    margin-top: 6px;
     margin-right: 6px;
-    word-break: break-all;
+    word-break: break-word;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
@@ -448,6 +466,11 @@ i>h3 {
     width: min-content;
 }
 
+.style-liquid-glass #discordActivity, .style-liquid-glass #amLanyardDiscord {
+    background-color: var(--liquid-glass-button-background);
+border: 1px solid var(--liquid-glass-button-border);
+}
+
 #lyricsCard {
     flex-direction: column;
     justify-content: center;
@@ -472,7 +495,7 @@ i>h3 {
 .progress-bar-container {
     position: relative;
     width: 100%;
-    height: 3px;
+    height: 5px;
     background-color: var(--card-background-color);
     margin-top: 0.5em;
     margin-bottom: 0.5em;
@@ -500,6 +523,9 @@ i>h3 {
 #amDiscordActivityInfo {
     width: 100%;
     transition: width 0.2s;
+        width: 100%;
+    transition: width 0.2s;
+    flex: 1;
 }
 
 .titleColor {
@@ -519,6 +545,7 @@ div#amTimeremaning {
     align-items: center;
     justify-content: center;
     padding: 10px;
+    flex-grow: 1;
 }
 
 div#timeremaning>p,
@@ -591,4 +618,5 @@ div.iconContainer {
     margin-top: 6px;
     margin-bottom: 3px;
     text-align: center;
+    flex-grow: 1;
 }

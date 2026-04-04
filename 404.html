@@ -96,7 +96,7 @@
                 <h2>Settings</h2>
                 <div class="modalSettings">
                     <div>
-                        <h3><i class="fa-solid fa-globe"></i>Language</h3>
+                        <h3><i class="fa-solid fa-language"></i>Language</h3>
                         <div>
                             <select name="language" id="language" class="button">
                                 <option value="en" selected>English</option>
@@ -118,7 +118,7 @@
                         </div>
                     </div>
                     <div>
-                        <h3><i class="fa-solid fa-palette"></i>Color</h3>
+                        <h3><i class="fa-solid fa-fill-drip"></i>Color</h3>
                         <div class="colorOptions options">
                             <input type="radio" id="red" name="accent-color" value="red">
                             <label for="red" class="button">Red<span class="red"></span></label>
@@ -135,12 +135,10 @@
                             <input type="radio" id="monochrome" name="accent-color" value="monochrome">
                             <label for="monochrome" class="monochrome button">Monochrome</label>
 
-                            <input type="radio" id="custom" name="accent-color" value="custom">
-                            <label for="custom" class="button">Custom</label>
                         </div>
                     </div>
                     <div>
-                        <h3><i class="fa-solid fa-wrench"></i>General</h3>
+                        <h3><i class="fa-solid fa-sliders"></i>General</h3>
                         <div>
                             <div class="checkbox-wrapper-51">
                                 <label for="autoUpdateActivity" class="title">Automatically update activities</label>
@@ -185,10 +183,10 @@
                         </div>  
                     </div>
                 </div>
-                <p class="modalDescription">version 2.6.1</p>
+                <p class="modalDescription">version 3.13</p>
                 <div class="modalButtons">
-                    <button type="button" class="button" onClick="toggleSettings()">Done</button>
-                    <button type="button" class="button dangerZone">Reset</button>
+                    <button type="button" class="button primary" onClick="toggleSettings()">Done</button>
+                    <button type="button" class="button dangerZone destructive">Reset</button>
                 </div>
             </div>
     </dialog>

@@ -22,6 +22,10 @@
     --border-color: #cccccc;
     color-scheme: light;
 
+    --liquid-glass-button-border: rgba(0, 0, 0, 0.1);
+    --liquid-glass-button-background: rgba(0, 0, 0, 0.05);
+    --liquid-glass-button-slected: rgba(0, 0, 0, 0.08);
+
 }
 
 /* Dark theme class */
@@ -47,6 +51,11 @@
     --card-background-color: var(--icon-background-color);
     --border-color: #333333;
     color-scheme: dark;
+
+    --liquid-glass-button-border: rgba(255, 255, 255, 0.15);
+    --liquid-glass-button-background: rgba(255, 255, 255, 0.05);
+    --liquid-glass-button-slected:     rgba(63, 63, 63, 0.50);
+
 }
 
 
@@ -71,6 +80,10 @@
         --card-background-color: var(--icon-background-color);
         
         --border-color: #333333;
+
+            --liquid-glass-button-border: rgba(255, 255, 255, 0.15);
+    --liquid-glass-button-background: rgba(255, 255, 255, 0.05);
+        --liquid-glass-button-slected:     rgba(63, 63, 63, 0.50);
     }
 }
 
@@ -91,12 +104,11 @@
 }
 
 .color-green {
-    --accent-color: #4cd964;
+    --accent-color: #359d46;
     --accent-color-to-active: #4cd9649c;
     --accent-color-hover: #3dae50;
     --icon-color: #3dae50;
 }
-
 
 
 .color-purple {
@@ -139,6 +151,12 @@ body {
     overflow-y: scroll;
 }
 
+.fullPage{
+    height: 90vh;
+    margin: auto;
+}
+
+
 
 header {
     position: sticky;
@@ -164,6 +182,13 @@ header {
     vertical-align: -0.1em;
 }
 
+hr.onMobile {
+    display: block;
+    width: 80%;
+    margin: 20px auto;
+    border: 1px solid transparent;
+}
+
 .icon>.emoji {
     font-size: inherit;
     width: inherit;
@@ -184,22 +209,6 @@ font-size: 4em;
 
 #mobile-header {
     display: none;
-}
-
-header>div {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 80vw;
-    height: 4em;
-    background-color: var(--header-background-color);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    margin: auto;
-    margin-top: 12px;
-    padding: 12px;
-    border-radius: 10px;
 }
 
 ul {
@@ -231,21 +240,100 @@ ul.notAList, ul.specs {
 }
 
 
-li>a, li>button.noUI {
-    text-decoration: none;
-    color: var(--header-text-color);
-    border-bottom: 2px solid transparent;
-    transition: all 0.3s;
+
+header>div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 80vw;
+    height: 4em;
+    background-color: var(--header-background-color);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    margin: auto;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 10px;
 }
 
-li>a:hover, li>button.noUI:hover {
+.style-liquid-glass header>div {
+    height: 3.2em;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+        0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 6px;
+    border-radius: 42px;
+}
+
+
+
+li>a, li>button.noUI {
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+    color: var(--header-text-color);
+}
+
+.style-flat li>a, .style-flat li>button.noUI {
+   
+}
+
+.style-liquid-glass li>a, .style-liquid-glass li>button.noUI {
+    padding: 8px;
+}
+
+.style-flat li>a:hover, .style-flat li>button.noUI:hover {
     color: var(--header-text-color-hover);
     border-bottom: 2px solid var(--accent-color-to-active);
 }
 
-li.active>a, li.active>button.noUI {
+.style-flat li.active>a, .style-flat li.active>button.noUI {
     border-bottom: 2px solid var(--accent-color);
     color: var(--text-color);
+}
+
+.style-liquid-glass li.active>a, .style-liquid-glass li.active>button.noUI {
+    color: var(--accent-color);
+}
+
+.style-liquid-glass #desktop-header .notAList {
+    position: relative;
+    z-index: 1;
+}
+
+.style-liquid-glass ul.notAList{
+    padding-left: 0px;
+    white-space: nowrap;
+}
+
+.style-flat #nav-pill {
+    display: none;
+}
+
+.style-liquid-glass #nav-pill {
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 60%;
+    border-radius: 42px;
+    pointer-events: none;
+    transition: left 0.25s ease, width 0.25s ease, opacity 0.2s ease;
+    opacity: 0;
+    background: var(--liquid-glass-button-slected);
+    border: 1px solid var(--liquid-glass-button-border);
+    padding: 0 8px;
+}
+
+.style-liquid-glass #nav-pill.hovering {
+    background: var(--liquid-glass-button-background);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    height: 72%;
 }
 
 /* Container */
@@ -407,7 +495,7 @@ a.inline {
 
 /* Footer */
 footer {
-    width: 100%;
+    width: 80vw;
     height: fit-content;
     min-height: 10vh;
     display: flex;
@@ -499,6 +587,7 @@ hr {
     border-radius: 10px;
     z-index: 1000;
     animation: fadeOut .2s;
+
 }
 
 .mobileMenu>ul{
@@ -506,6 +595,37 @@ hr {
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
+}
+
+.style-liquid-glass #mobile-header>div>ul.notAList {
+    transform: translateX(-2px);
+}
+
+
+.style-liquid-glass .mobileMenu>ul>li, header#mobile-header>div>ul.notAList>li {
+    border-radius: min(43.25rem, 4.65rem + 36.5vw);
+        -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
+}
+
+
+.style-liquid-glass .mobileMenu>ul>li>a, .mobileMenu>ul>li>button.noUI, header#mobile-header>div>ul.notAList>li>a {
+    border: 1px solid transparent;
+    background-color: transparent;
+    border-radius: min(43.25rem, 4.65rem + 36.5vw);
+        -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
+}
+
+
+
+.style-liquid-glass .mobileMenu>ul>li.active>a, .mobileMenu>ul>li.active>button.noUI, header#mobile-header>div>ul.notAList>li.active>a {
+    border: 1px solid var(--liquid-glass-button-border);
+    background-color: var(--liquid-glass-button-slected);
+    border-radius: min(43.25rem, 4.65rem + 36.5vw);
+        -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
+     
 }
 
 .showMenu {
@@ -527,7 +647,8 @@ ul.specs {
     display: none;
 }
 
-.button {
+
+.style-flat .button {
     background-color: var(--button-background-color);
     color: var(--secondary-title-color);
     border: none;
@@ -540,7 +661,29 @@ ul.specs {
     text-decoration: none;
 }
 
-.button:hover {
+.style-liquid-glass .button {
+    padding: 10px 20px;
+    border-radius: min(43.25rem, 4.65rem + 36.5vw);
+    font-family: Jost, sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transition: opacity 0.2s ease, transform 0.1s ease;
+        background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--paragraph-color);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+        0 4px 16px rgba(0, 0, 0, 0.2);
+    
+}
+
+.button:hover{
     background-color: var(--button-hover-background-color);
 }
 
@@ -555,8 +698,8 @@ span>i {
     width: initial !important;
 }
 
-.linkCompany>i {
-    margin-right: 0px;
+.linkCompany>a>i {
+    margin-right: 0px !important;
 }
 
 button>.fa-solid {
@@ -575,7 +718,7 @@ button>.fa-solid {
     margin: auto;
 }
 
-.icon-background {
+.style-flat .icon-background {
     background-color: var(--icon-background-color);
     padding: 10px;
     border-radius: 25%;
@@ -590,7 +733,40 @@ button>.fa-solid {
     font-size: 4em;
 }
 
-.options {
+.style-liquid-glass .icon-background {
+    background-color: var(--liquid-glass-button-background);
+    padding: 10px;
+    border-radius: 25%;
+    margin: auto;
+    height: 128px;
+    width: 128px;
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    justify-content: center;
+    font-size: 4em;
+color: var(--liquid-glass-button-background);
+border: 1px solid var(--liquid-glass-button-border);
+    text-shadow: 
+        0 0 0px var(--icon-color),
+        0 0 0px var(--icon-color),
+        0 2px 4px var(--icon-color);
+
+
+}
+
+
+.style-liquid-glass .button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease-in-out;
+}
+
+.style-liquid-glass .button {
+    transition: transform 0.1s ease-in-out;
+}
+
+
+.style-flat .options {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -612,6 +788,34 @@ select.button {
     justify-content: space-between;
     gap: 10px;
 }
+
+.style-liquid-glass .options {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: left;
+    gap: 10px;
+}
+
+.style-liquid-glass label.button, select.button {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.style-liquid-glass .linkCompany {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2em;
+    background-color: var(--liquid-glass-button-background);
+    border: 1px solid var(--liquid-glass-button-border);
+    padding: 10px 20px;
+    border-radius: 42px;
+}
+
+
 
 .linkCompany>a {
     color: var(--secondary-title-color);
@@ -719,6 +923,38 @@ li>a>i, li>button.noUI>i {
     padding: 12px;
     border-radius: 12px;
     background-color: var(--card-background-color);
+}
+
+.style-liquid-glass .articlePreview {
+
+    background-color: rgba(255, 255, 255, 0.05);
+background-color: var(--liquid-glass-button-background);
+border: 1px solid var(--liquid-glass-button-border);
+}
+
+.gridButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex-grow: 1;
+}
+
+.gridButtons>a{
+    flex-grow: 1;
+    text-align: center;
+}
+
+#gridButtonsWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: fit-content;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex: 1;
+    text-align: center;
 }
 
 .articlePreview>.preview {
@@ -982,6 +1218,16 @@ span.token{
     gap: 4px;  
     flex-direction: row;
 }
+    .style-liquid-glass .warn {
+        background: rgba(249, 76, 87, 0.15);
+    border: 1px solid rgba(249, 76, 87, 0.35);
+    color: #f94c57;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 4px 16px rgba(249, 76, 87, 0.1);
+}
 
 #rateLimitGitHub{
     display: none;
@@ -1137,6 +1383,49 @@ span.token{
     text-align: center;
 }
 
+.style-liquid-glass .primary {
+    background: var(--accent-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.style-liquid-glass .primary:hover {
+   
+}
+
+.style-liquid-glass .secondary {
+    background: rgba(var(--accent-color-rgb), 0.15);
+    border: none;
+    color: var(--accent-color);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.style-liquid-glass .secondary:hover {
+    background: rgba(var(--accent-color-rgb), 0.22);
+}
+
+.style-liquid-glass .destructive {
+    background: rgba(249, 76, 87, 0.15);
+    border: 1px solid rgba(249, 76, 87, 0.35);
+    color: #f94c57;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 4px 16px rgba(249, 76, 87, 0.1);
+}
+
+.style-liquid-glass .destructive:hover {
+    background: rgba(249, 76, 87, 0.22);
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {
@@ -1160,7 +1449,7 @@ span.token{
 
 
 /* Media Queries */
-@media screen and (max-width: 734px) {
+@media screen and (max-width: 966px) {
     header>div {
         width: 90vw;
     }
@@ -1198,6 +1487,12 @@ span.token{
     #mobile-header {
         display: flex;
     }
+hr.onMobile {
+    display: block;
+    width: 80%;
+    margin: 20px auto;
+    border: 1px solid var(--border-color);
+}
 
     .photo-container {
         left: 0px;
@@ -1210,4 +1505,3 @@ span.token{
         max-width: inherit;
     }
 }
-
