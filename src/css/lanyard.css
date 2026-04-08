@@ -228,7 +228,7 @@ div#discord {
 #amActivityLogoLarge {
   border-radius: 50%;
   margin: 12px;
-  animation: spin 3s linear infinite;
+  animation: spin 2.5s linear infinite;
   will-change: transform;
   backface-visibility: hidden;
   transform: translateZ(0);
