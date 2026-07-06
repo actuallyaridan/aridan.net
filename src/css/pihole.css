@@ -1,0 +1,101 @@
+/* Pi-hole stats — full grid (on /pihole/) and a compact homepage widget.
+   Uses the site's existing theme variables so it follows light/dark + style. */
+
+/* ---- full stat grid (dedicated page) ---- */
+.ph-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+}
+
+.ph-card {
+  background-color: var(--card-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+
+.ph-card .ph-num {
+  display: block;
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--title-color);
+  line-height: 1.1;
+}
+
+.ph-card .ph-label {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--paragraph-color);
+}
+
+.ph-card i {
+  color: var(--secondary-title-color);
+  margin-bottom: 0.4rem;
+}
+
+.ph-meta {
+  color: var(--footer-text-color);
+  font-size: 0.85rem;
+}
+
+.ph-error {
+  display: none;
+  color: var(--danger-zone-hover-background-color);
+}
+
+/* ---- compact homepage widget ---- */
+.ph-widget {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.ph-stat {
+  flex: 1 1 140px;
+  background-color: var(--card-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.ph-stat:hover {
+  background-color: var(--button-hover-background-color);
+}
+
+.ph-stat-num {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--title-color);
+  line-height: 1.1;
+}
+
+.ph-stat-label {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  color: var(--paragraph-color);
+}
+
+/* ---- loading placeholder pulse ---- */
+.ph-loading {
+  color: var(--secondary-title-color);
+  animation: ph-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ph-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.8; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-loading { animation: none; }
+}
