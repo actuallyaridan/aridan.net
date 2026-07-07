@@ -17,6 +17,7 @@
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/src/css/styles.css">
     <link rel="stylesheet" href="/src/css/settings.css">
+    <link rel="stylesheet" href="/src/css/lanyard.css">
     <link rel="stylesheet" href="/src/css/pihole.css">
 
     <script src="/src/js/general.js"></script>
@@ -83,10 +84,10 @@
 
     <main class="container">
         <div class="info">
-            <p class="icon"><i class="fa-solid fa-shield-halved icon-background"></i></p>
+            <p class="icon"><i class="fa-brands fa-raspberry-pi icon-background"></i></p>
             <div>
                 <h1 class="name">Pi-hole</h1>
-                <p class="description titleColor">Live stats from <strong>look-what-you-made-me-do</strong>, the
+                <p class="description titleColor">Live stats from look-what-you-made-me-do, the
                     Raspberry&nbsp;Pi&nbsp;5 that runs DNS-level ad&nbsp;and tracker blocking for my whole home network.
                     These numbers update in real time.</p>
             </div>
@@ -98,42 +99,88 @@
                 <div class="ph-grid">
                     <div class="ph-card">
                         <i class="fa-solid fa-globe fa-lg"></i>
-                        <span class="ph-num ph-loading" id="ph-total">—</span>
+                        <span class="ph-num ph-loading" id="ph-total">-</span>
                         <span class="ph-label">DNS queries (24h)</span>
                     </div>
                     <div class="ph-card">
-                        <i class="fa-solid fa-hand fa-lg"></i>
-                        <span class="ph-num ph-loading" id="ph-blocked">—</span>
+                        <i class="fa-solid fa-ban fa-lg"></i>
+                        <span class="ph-num ph-loading" id="ph-blocked">-</span>
                         <span class="ph-label">queries blocked</span>
                     </div>
                     <div class="ph-card">
                         <i class="fa-solid fa-chart-pie fa-lg"></i>
-                        <span class="ph-num ph-loading" id="ph-percent">—</span>
+                        <span class="ph-num ph-loading" id="ph-percent">-</span>
                         <span class="ph-label">of traffic blocked</span>
                     </div>
                     <div class="ph-card">
                         <i class="fa-solid fa-list-ul fa-lg"></i>
-                        <span class="ph-num ph-loading" id="ph-domains">—</span>
+                        <span class="ph-num ph-loading" id="ph-domains">-</span>
                         <span class="ph-label">domains on blocklists</span>
                     </div>
                     <div class="ph-card">
                         <i class="fa-solid fa-network-wired fa-lg"></i>
-                        <span class="ph-num ph-loading" id="ph-clients">—</span>
+                        <span class="ph-num ph-loading" id="ph-clients">-</span>
                         <span class="ph-label">active clients</span>
                     </div>
                 </div>
-                <p class="ph-meta">Updated <span id="ph-updated">…</span> · pushed from the Pi every 5&nbsp;minutes.</p>
+                <p class="ph-meta">Updated <span id="ph-updated">never</span> - updates automatically every 5&nbsp;minutes.</p>
             </div>
         </div>
         <hr class="onMobile">
         <div class="section">
             <div>
                 <h2 class="section-title">How it works</h2>
-                <p class="section-content">The Pi-hole runs on a Raspberry&nbsp;Pi&nbsp;5 on my home network and answers
-                    every device's DNS lookups, quietly returning nothing for known ad, tracker, and malware domains. It
-                    validates DNSSEC end-to-end and forwards everything else to Quad9. It never leaves my network — a
-                    small script on the Pi pushes only these aggregate numbers out to this page, so nothing about what I
-                    actually browse is ever exposed.</p>
+                <p class="section-content">The Pi-hole runs on a Raspberry&nbsp;Pi&nbsp;5 that sits on my home network
+                    and acts as the DNS server for every device in the house - phones, laptops, TVs, consoles,
+                    everything. When something looks up a domain, the Pi checks it against a blocklist of nearly
+                    two&nbsp;million known ad, tracker, and malware domains. If it's on the list, the Pi
+                    answers with nothing and the connection quietly goes nowhere; if it's a normal site, the lookup is
+                    passed through as usual. Because it works at the DNS level, it blocks ads and tracking in every
+                    app, not just in a browser with an extension.</p>
+                <p class="section-content">Everything that isn't blocked is forwarded to Quad9, and the
+                    Pi validates DNSSEC end-to-end - so it cryptographically checks that the answers it
+                    gets back are genuine and haven't been tampered with on the way.</p>
+            </div>
+        </div>
+        <hr class="onMobile">
+        <div class="section">
+            <div>
+                <h2 class="section-title">It looks after itself</h2>
+                <p class="section-content">I don't want to babysit it, so it maintains itself on a schedule. Every
+                    week it quietly updates its own software, refreshes its blocklists, and installs operating-system and
+                    security patches - rebooting on its own only when a kernel update actually needs it. If anything ever
+                    fails, it's written to a log instead of failing silently.</p>
+                <ul class="specs">
+                    <li><i class="fa-solid fa-arrows-rotate"></i>Updates its own Pi-hole software every Sunday</li>
+                    <li><i class="fa-solid fa-shield-halved"></i>Refreshes the ~2&nbsp;million-domain blocklists weekly</li>
+                    <li><i class="fa-solid fa-box-open"></i>Installs OS &amp; security updates, auto-rebooting only when required</li>
+                    <li><i class="fa-solid fa-lock"></i>Validates DNSSEC and resolves through Quad9</li>
+                    <li><i class="fa-solid fa-file-lines"></i>Logs every automated run so nothing breaks unnoticed</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="onMobile">
+        <div class="section">
+            <div>
+                <h2 class="section-title">How these numbers reach this page</h2>
+                <p class="section-content">The Pi-hole lives entirely inside my home network and is never exposed to the
+                    internet. Instead of this website reaching in to it, the Pi reaches out: a small
+                    script runs every five minutes, reads its own stats, and sends just these aggregate totals to a tiny
+                    Cloudflare function that stores them. This page then reads them straight back.</p>
+                <p class="section-content">Only the summary numbers you see above ever leave my network - never which
+                    sites were visited, which device asked, or anything about what I actually browse. It's live, but it's
+                    not revealing.</p>
+            </div>
+        </div>
+        <hr class="onMobile">
+        <div class="section">
+            <div>
+                <h2 class="section-title">Why it's called look-what-you-made-me-do</h2>
+                <p class="section-content">Every machine deserves a good name. My Wi-Fi is invisible string
+                    (yes, after the Taylor&nbsp;Swift song), so the Pi-hole guarding it became
+                    look-what-you-made-me-do - and honestly the song fits a little too well. It keeps
+                    "a list of names, and yours is in red, underlined" - that's literally a blocklist - and every
+                    time a tracker comes knocking, it gets the same answer, over and over: nothing at all.</p>
             </div>
         </div>
     </main>

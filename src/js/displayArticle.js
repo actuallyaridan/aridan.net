@@ -1,6 +1,6 @@
 // displayArticle.js
 
-// ———— 1. Front Matter Parser ————
+// ---- 1. Front Matter Parser ----
 function parseFrontMatter(frontMatter) {
     const metadata   = { categories: [] };
     const lines      = frontMatter.split('\n');
@@ -52,7 +52,7 @@ function parseFrontMatter(frontMatter) {
     return metadata;
   }
   
-  // ———— 2. Markdown Parser ————
+  // ---- 2. Markdown Parser ----
   function parseMarkdown(markdown) {
     // normalize newlines
     markdown = markdown.replace(/\r\n/g, '\n').trim();
@@ -82,7 +82,7 @@ function parseFrontMatter(frontMatter) {
   // window.parseMarkdown = parseMarkdown;
   
   
-  // ———— 3. Fetch, Render & Highlight ————
+  // ---- 3. Fetch, Render & Highlight ----
   async function fetchFullArticle() {
     const loadingSpinner   = document.getElementById('loading');
     const articleContainer = document.querySelector('main.container');
@@ -144,6 +144,6 @@ function parseFrontMatter(frontMatter) {
     }
   }
   
-  // ———— 4. Initialize on DOM Ready ————
+  // ---- 4. Initialize on DOM Ready ----
   document.addEventListener('DOMContentLoaded', fetchFullArticle);
   

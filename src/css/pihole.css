@@ -1,4 +1,4 @@
-/* Pi-hole stats — full grid (on /pihole/) and a compact homepage widget.
+/* Pi-hole stats - full grid (on /pihole/) and a compact homepage widget.
    Uses the site's existing theme variables so it follows light/dark + style. */
 
 /* ---- full stat grid (dedicated page) ---- */
@@ -21,9 +21,10 @@
 .ph-card .ph-num {
   display: block;
   font-size: 2.1rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--title-color);
-  line-height: 1.1;
+  line-height: 1.5;
+  padding: 0.25rem;
 }
 
 .ph-card .ph-label {
@@ -35,6 +36,7 @@
 
 .ph-card i {
   color: var(--secondary-title-color);
+    margin: 0;
   margin-bottom: 0.4rem;
 }
 
@@ -73,9 +75,10 @@
 .ph-stat-num {
   display: block;
   font-size: 1.8rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--title-color);
-  line-height: 1.1;
+  line-height: 1.5;
+
 }
 
 .ph-stat-label {

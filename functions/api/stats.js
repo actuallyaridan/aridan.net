@@ -1,4 +1,4 @@
-// Cloudflare Pages Function — /api/stats
+// Cloudflare Pages Function - /api/stats
 //
 // GET  /api/stats  -> public: returns the latest aggregate Pi-hole numbers (from KV)
 // POST /api/stats  -> private: the Pi-hole pushes new numbers here, authorised by a
@@ -8,7 +8,7 @@
 //   - KV namespace binding named  STATS
 //   - Environment secret named    PIHOLE_PUSH_TOKEN
 //
-// Only aggregate numbers are ever stored/served — no per-domain or per-client data.
+// Only aggregate numbers are ever stored/served - no per-domain or per-client data.
 
 const KV_KEY = "latest";
 
