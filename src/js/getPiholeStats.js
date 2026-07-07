@@ -38,17 +38,33 @@ function isPiholeLocalHost() {
 
 const PIHOLE_IS_LOCAL = isPiholeLocalHost();
 
+// Abbreviates large numbers: 1907467 -> "1.9M+", 25517 -> "25.5K+", 5 -> "5".
+// Anything under 1000 is shown in full. Values >= 1000 are floored to one decimal
+// and get a trailing "+" — floored so the "+" is always truthful (the real number
+// is at least what's shown). Decimal separator follows the visitor's locale.
+function abbreviatePiholeNumber(n) {
+  n = Number(n) || 0;
+  if (n < 1000) return n.toLocaleString();
+  const [value, suffix] = n >= 1e6 ? [n / 1e6, "M"] : [n / 1e3, "K"];
+  const floored = Math.floor(value * 10) / 10;
+  return `${floored.toLocaleString(undefined, { maximumFractionDigits: 1 })}${suffix}+`;
+}
+
 function renderPiholeStats(data, { example = false } = {}) {
-  const setText = (id, value) => {
+  // Shows the abbreviated value on screen, with the exact number as a hover tooltip.
+  const setStat = (id, text, fullTitle) => {
     const el = document.getElementById(id);
-    if (el) el.textContent = value;
+    if (!el) return;
+    el.textContent = text;
+    if (fullTitle != null) el.title = fullTitle;
   };
 
-  setText("ph-total", Number(data.total).toLocaleString());
-  setText("ph-blocked", Number(data.blocked).toLocaleString());
-  setText("ph-percent", `${Number(data.percent).toFixed(1)}%`);
-  setText("ph-domains", Number(data.domains_on_lists).toLocaleString());
-  setText("ph-clients", Number(data.clients).toLocaleString());
+  const full = (n) => Number(n).toLocaleString();
+  setStat("ph-total", abbreviatePiholeNumber(data.total), full(data.total));
+  setStat("ph-blocked", abbreviatePiholeNumber(data.blocked), full(data.blocked));
+  setStat("ph-percent", `${Number(data.percent).toFixed(1)}%`);
+  setStat("ph-domains", abbreviatePiholeNumber(data.domains_on_lists), full(data.domains_on_lists));
+  setStat("ph-clients", abbreviatePiholeNumber(data.clients), full(data.clients));
 
   const updatedEl = document.getElementById("ph-updated");
   if (updatedEl) {
