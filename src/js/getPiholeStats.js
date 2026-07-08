@@ -7,9 +7,9 @@
 // Cloudflare Function isn't running so /api/stats can't be reached. Production
 // is never affected - it always uses the live API.
 const EXAMPLE_STATS = {
-  total: 25333,
-  blocked: 2453,
-  percent: 9.68,
+  total: 1756845,
+  blocked: 272765,
+  percent: 15.53,
   domains_on_lists: 1907467,
   clients: 5,
 };
@@ -107,8 +107,8 @@ async function updatePiholeStats() {
 }
 
 updatePiholeStats();
-// Refresh while the tab is open (the Pi pushes every ~5 min; a 60s poll keeps it fresh).
+// Refresh while the tab is open (the Pi pushes every 15 min; a 5-min poll keeps it fresh).
 // Skipped on local dev since the values are static.
 if (!PIHOLE_IS_LOCAL) {
-  setInterval(updatePiholeStats, 60000);
+  setInterval(updatePiholeStats, 300000);
 }
