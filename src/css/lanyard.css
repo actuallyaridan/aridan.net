@@ -620,3 +620,10 @@ div.iconContainer {
     text-align: center;
     flex-grow: 1;
 }
+
+/* Normalize the "Listen on Apple Music" badge so the English and Swedish SVGs
+   render at the same size regardless of their declared intrinsic units. */
+#apple-link img {
+    height: 41px;
+    width: auto;
+}
