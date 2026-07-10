@@ -222,7 +222,10 @@
     }
 
     if (appleMusic) updateAppleMusicInfo(appleMusic);
-    else show(els.amLanyardDiscord, false);
+    else {
+      show(els.amLanyardDiscord, false);
+      window.dispatchEvent(new CustomEvent("lanyard:applemusic", { detail: null }));
+    }
 
     show(byId("discordActivity"), others.length > 0);
     updateActivityImages(others);
@@ -269,6 +272,8 @@
 
     updateActivityTime(a.timestamps, "am");
     updateProgressBar(a.timestamps);
+
+    window.dispatchEvent(new CustomEvent("lanyard:applemusic", { detail: a }));
 
     // build a stable key to reduce API churn
     const trackKey = [a.details, a.state, a.assets?.large_text, a.assets?.large_image].join("|");

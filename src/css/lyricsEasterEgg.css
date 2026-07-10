@@ -1,0 +1,143 @@
+#lyricsEasterEggBtn {
+    margin: 12px auto 0;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+#lyricsEasterEggBtn.hide {
+    display: none;
+}
+
+#lyricsOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-color);
+    overflow-y: scroll;
+}
+
+#lyricsOverlay.hide {
+    display: none;
+}
+
+#lyricsOverlay.lyricsOpening {
+    animation: lyricsFadeIn 0.25s ease;
+}
+
+#lyricsOverlay.lyricsClosing {
+    animation: lyricsFadeOut 0.25s ease forwards;
+}
+
+#lyricsCloseBtn {
+    position: absolute;
+    top: max(20px, env(safe-area-inset-top));
+    right: max(20px, env(safe-area-inset-right));
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--card-background-color);
+    color: var(--text-color);
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#lyricsCloseBtn>i{
+    margin: 0;
+}
+
+#lyricsCloseBtn:hover {
+    background: var(--button-hover-background-color);
+}
+
+#lyricsStage {
+    width: 100%;
+    max-width: 900px;
+    padding: 0 8vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.lyricsRow {
+    font-family: Jost, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    font-size: clamp(1.6em, 6.2vw, 3.1em);
+    line-height: 1.18;
+    color: var(--title-color);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+    animation: lyricsRowPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.lyricsRow .em {
+    color: var(--accent-color, #e0202c);
+}
+
+.lyricsRow .underline {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.12em;
+}
+
+#lyricsCaption {
+    position: absolute;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: var(--paragraph-color);
+    font-family: Jost, sans-serif;
+    font-size: 0.8em;
+    margin: 0;
+}
+
+@keyframes lyricsRowPop {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes lyricsFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes lyricsFadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lyricsRow {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    #lyricsOverlay.lyricsOpening,
+    #lyricsOverlay.lyricsClosing {
+        animation: none;
+    }
+}

@@ -18,10 +18,13 @@
     <link rel="stylesheet" href="/src/css/settings.css">
     <link rel="stylesheet" href="/src/css/lanyard.css">
     <link rel="stylesheet" href="/src/css/pihole.css">
+    <link rel="stylesheet" href="/src/css/lyricsEasterEgg.css?v=3">
     <script src="/src/js/general.js"></script>
 
     <script src="/src/js/lanyard.js" defer></script>
     <script src="/src/js/getPiholeStats.js" defer></script>
+    <script src="/src/js/lyricsEasterEggScript.js?v=3" defer></script>
+    <script src="/src/js/lyricsEasterEgg.js?v=3" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
         crossorigin="anonymous"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/media/favicons/apple-touch-icon.png">
@@ -185,6 +188,9 @@
                                 </div>
                             </div>
                         </div>
+                        <button type="button" id="lyricsEasterEggBtn" class="button hide">
+                            <i class="fa-solid fa-closed-captioning"></i>Look What You Made Me Block
+                        </button>
                     </div>
                 </div>
             </section>
@@ -401,6 +407,14 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="lyricsOverlay" class="hide" role="dialog" aria-modal="true" aria-label="Parody lyrics video">
+        <button type="button" id="lyricsCloseBtn" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div id="lyricsStage"></div>
+        <p id="lyricsCaption">Look What You Made Me Block - a Pi-hole parody<br>Time synced to playback</p>
     </div>
 </body>
 
