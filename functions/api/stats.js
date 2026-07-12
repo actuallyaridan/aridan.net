@@ -79,6 +79,15 @@ export async function onRequestPost({ request, env }) {
     percent: num(body.percent),
     domains_on_lists: num(body.domains_on_lists),
     clients: num(body.clients),
+    temp_c: num(body.temp_c),
+    cpu_percent: num(body.cpu_percent),
+    ram_percent: num(body.ram_percent),
+    ram_used_gb: num(body.ram_used_gb),
+    ram_total_gb: num(body.ram_total_gb),
+    disk_percent: num(body.disk_percent),
+    disk_used_gb: num(body.disk_used_gb),
+    disk_total_gb: num(body.disk_total_gb),
+    uptime_seconds: num(body.uptime_seconds),
     updated: Date.now(),
   };
 

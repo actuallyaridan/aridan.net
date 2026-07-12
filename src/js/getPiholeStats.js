@@ -12,6 +12,15 @@ const EXAMPLE_STATS = {
   percent: 15.53,
   domains_on_lists: 1907467,
   clients: 5,
+  temp_c: 48.3,
+  cpu_percent: 0.6,
+  ram_percent: 6,
+  ram_used_gb: 0.25,
+  ram_total_gb: 4,
+  disk_percent: 17,
+  disk_used_gb: 4.8,
+  disk_total_gb: 28,
+  uptime_seconds: 442800,
 };
 
 // True for any local/dev host: localhost, .local/.lan hostnames, IPv6 loopback,
@@ -50,6 +59,26 @@ function abbreviatePiholeNumber(n) {
   return `${floored.toLocaleString(undefined, { maximumFractionDigits: 1 })}${suffix}+`;
 }
 
+// "4.8 GB used of 28 GB" — a value under 1 GB is shown in MB ("256 MB used of 4 GB").
+function formatSize(gb) {
+  const n = Number(gb) || 0;
+  return n < 1 ? `${Math.round(n * 1024)} MB` : `${n} GB`;
+}
+function usedOfTotal(usedGb, totalGb) {
+  return `${formatSize(usedGb)} used of ${formatSize(totalGb)}`;
+}
+
+// Compact uptime: "5d 3h", "3h 20m", or "12m".
+function formatUptime(seconds) {
+  const s = Math.floor(Number(seconds) || 0);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
 function renderPiholeStats(data, { example = false } = {}) {
   // Shows the abbreviated value on screen, with the exact number as a hover tooltip.
   const setStat = (id, text, fullTitle) => {
@@ -65,6 +94,19 @@ function renderPiholeStats(data, { example = false } = {}) {
   setStat("ph-percent", `${Number(data.percent).toFixed(1)}%`);
   setStat("ph-domains", abbreviatePiholeNumber(data.domains_on_lists), full(data.domains_on_lists));
   setStat("ph-clients", abbreviatePiholeNumber(data.clients), full(data.clients));
+
+  // Hardware (elements only exist on the /pihole page)
+  if (data.temp_c != null) setStat("ph-temp", `${Number(data.temp_c).toFixed(1)}°C`);
+  if (data.cpu_percent != null) setStat("ph-cpu", `${Number(data.cpu_percent).toFixed(1)}%`);
+  if (data.ram_percent != null) {
+    setStat("ph-ram", `${Math.round(Number(data.ram_percent))}%`,
+      data.ram_total_gb != null ? usedOfTotal(data.ram_used_gb, data.ram_total_gb) : undefined);
+  }
+  if (data.disk_percent != null) {
+    setStat("ph-disk", `${Math.round(Number(data.disk_percent))}%`,
+      data.disk_total_gb != null ? usedOfTotal(data.disk_used_gb, data.disk_total_gb) : undefined);
+  }
+  if (data.uptime_seconds != null) setStat("ph-uptime", formatUptime(data.uptime_seconds));
 
   const updatedEl = document.getElementById("ph-updated");
   if (updatedEl) {

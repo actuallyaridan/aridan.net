@@ -131,6 +131,39 @@
         <hr class="onMobile">
         <div class="section">
             <div>
+                <h2 class="section-title">Hardware</h2>
+                <div class="ph-grid">
+                    <div class="ph-card">
+                        <i class="fa-solid fa-temperature-half fa-lg"></i>
+                        <span class="ph-num ph-loading" id="ph-temp">-</span>
+                        <span class="ph-label">temperature</span>
+                    </div>
+                    <div class="ph-card">
+                        <i class="fa-solid fa-microchip fa-lg"></i>
+                        <span class="ph-num ph-loading" id="ph-cpu">-</span>
+                        <span class="ph-label">CPU usage</span>
+                    </div>
+                    <div class="ph-card">
+                        <i class="fa-solid fa-memory fa-lg"></i>
+                        <span class="ph-num ph-loading" id="ph-ram">-</span>
+                        <span class="ph-label">RAM usage</span>
+                    </div>
+                    <div class="ph-card">
+                        <i class="fa-solid fa-hard-drive fa-lg"></i>
+                        <span class="ph-num ph-loading" id="ph-disk">-</span>
+                        <span class="ph-label">storage used</span>
+                    </div>
+                    <div class="ph-card ph-card-wide">
+                        <i class="fa-solid fa-clock fa-lg"></i>
+                        <span class="ph-num ph-loading" id="ph-uptime">-</span>
+                        <span class="ph-label">uptime</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="onMobile">
+        <div class="section">
+            <div>
                 <h2 class="section-title">How it works</h2>
                 <p class="section-content">The Pi-hole runs on a Raspberry&nbsp;Pi&nbsp;5 that sits on my home network
                     and acts as the DNS server for every device in the house - phones, laptops, TVs, consoles,
@@ -167,7 +200,7 @@
                 <h2 class="section-title">How these numbers reach this page</h2>
                 <p class="section-content">The Pi-hole lives entirely inside my home network and is never exposed to the
                     internet. Instead of this website reaching in to it, the Pi reaches out: a small
-                    script runs every five minutes, reads its own stats, and sends just these aggregate totals to a tiny
+                    script runs every fifteen minutes, reads its own stats, and sends just these aggregate totals to a tiny
                     Cloudflare function that stores them. This page then reads them straight back.</p>
                 <p class="section-content">Only the summary numbers you see above ever leave my network - never which
                     sites were visited, which device asked, or anything about what I actually browse. It's live, but it's
