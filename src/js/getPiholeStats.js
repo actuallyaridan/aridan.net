@@ -89,26 +89,26 @@ function renderPiholeStats(data, { example = false } = {}) {
   };
 
   const full = (n) => Number(n).toLocaleString();
-  setStat("ph-total", abbreviatePiholeNumber(data.total), full(data.total));
-  setStat("ph-blocked", abbreviatePiholeNumber(data.blocked), full(data.blocked));
-  setStat("ph-percent", `${Number(data.percent).toFixed(1)}%`);
-  setStat("ph-domains", abbreviatePiholeNumber(data.domains_on_lists), full(data.domains_on_lists));
-  setStat("ph-clients", abbreviatePiholeNumber(data.clients), full(data.clients));
+  setStat("pi-total", abbreviatePiholeNumber(data.total), full(data.total));
+  setStat("pi-blocked", abbreviatePiholeNumber(data.blocked), full(data.blocked));
+  setStat("pi-percent", `${Number(data.percent).toFixed(1)}%`);
+  setStat("pi-domains", abbreviatePiholeNumber(data.domains_on_lists), full(data.domains_on_lists));
+  setStat("pi-clients", abbreviatePiholeNumber(data.clients), full(data.clients));
 
   // Hardware (elements only exist on the /pihole page)
-  if (data.temp_c != null) setStat("ph-temp", `${Number(data.temp_c).toFixed(1)}°C`);
-  if (data.cpu_percent != null) setStat("ph-cpu", `${Number(data.cpu_percent).toFixed(1)}%`);
+  if (data.temp_c != null) setStat("pi-temp", `${Number(data.temp_c).toFixed(1)}°C`);
+  if (data.cpu_percent != null) setStat("pi-cpu", `${Number(data.cpu_percent).toFixed(1)}%`);
   if (data.ram_percent != null) {
-    setStat("ph-ram", `${Math.round(Number(data.ram_percent))}%`,
+    setStat("pi-ram", `${Math.round(Number(data.ram_percent))}%`,
       data.ram_total_gb != null ? usedOfTotal(data.ram_used_gb, data.ram_total_gb) : undefined);
   }
   if (data.disk_percent != null) {
-    setStat("ph-disk", `${Math.round(Number(data.disk_percent))}%`,
+    setStat("pi-disk", `${Math.round(Number(data.disk_percent))}%`,
       data.disk_total_gb != null ? usedOfTotal(data.disk_used_gb, data.disk_total_gb) : undefined);
   }
-  if (data.uptime_seconds != null) setStat("ph-uptime", formatUptime(data.uptime_seconds));
+  if (data.uptime_seconds != null) setStat("pi-uptime", formatUptime(data.uptime_seconds));
 
-  const updatedEl = document.getElementById("ph-updated");
+  const updatedEl = document.getElementById("pi-updated");
   if (updatedEl) {
     if (example) {
       updatedEl.textContent = "example data (local dev)";
@@ -119,7 +119,7 @@ function renderPiholeStats(data, { example = false } = {}) {
   }
 
   // Reveal freshly-loaded values (removes the pulsing placeholder state).
-  document.querySelectorAll(".ph-loading").forEach((el) => el.classList.remove("ph-loading"));
+  document.querySelectorAll(".pi-loading").forEach((el) => el.classList.remove("pi-loading"));
 }
 
 async function updatePiholeStats() {
@@ -143,7 +143,7 @@ async function updatePiholeStats() {
     renderPiholeStats(data);
   } catch (error) {
     console.error("Failed to fetch Pi-hole stats:", error);
-    const errEl = document.getElementById("ph-error");
+    const errEl = document.getElementById("pi-error");
     if (errEl) errEl.style.display = "block";
   }
 }

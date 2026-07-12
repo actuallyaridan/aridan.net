@@ -2,7 +2,7 @@
    Uses the site's existing theme variables so it follows light/dark + style. */
 
 /* ---- full stat grid (dedicated page) ---- */
-.ph-grid {
+.pi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
@@ -10,26 +10,41 @@
   margin: 0.5rem 0 1rem;
 }
 
-.ph-card {
+/* div.section is a flex row that becomes a centered column on mobile, which would
+   otherwise shrink the grid's wrapper to its content width. Keep it full-width. */
+.section > div:has(> .pi-grid) {
+  width: 100%;
+}
+
+.pi-card {
   background-color: var(--card-background-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: 16px;
   padding: 1.25rem 1rem;
   text-align: center;
 }
 
 /* Wide card (uptime) fills two columns on desktop, one on mobile */
-.ph-card-wide {
+.pi-card-wide {
   grid-column: span 2;
 }
 
 @media screen and (max-width: 966px) {
-  .ph-card-wide {
+  .pi-card-wide {
     grid-column: span 1;
   }
 }
 
-.ph-card .ph-num {
+/* Follow the site's Liquid Glass / Flat toggle (class on <html>). The base .pi-card
+   above is the Flat surface; Liquid Glass switches to the same glass surface as the
+   Discord activity / Apple Music cards (#discordActivity, #amLanyardDiscord). */
+.style-liquid-glass .pi-card,
+.style-liquid-glass .pi-stat {
+  background-color: var(--liquid-glass-button-background);
+  border-color: var(--liquid-glass-button-border);
+}
+
+.pi-card .pi-num {
   display: block;
   font-size: 2.1rem;
   font-weight: 500;
@@ -38,52 +53,55 @@
   padding: 0.25rem;
 }
 
-.ph-card .ph-label {
+.pi-card .pi-label {
   display: block;
   margin-top: 0.35rem;
   font-size: 0.9rem;
   color: var(--paragraph-color);
 }
 
-.ph-card i {
+.pi-card i {
   color: var(--secondary-title-color);
     margin: 0;
   margin-bottom: 0.4rem;
 }
 
-.ph-meta {
+.pi-meta {
   color: var(--footer-text-color);
   font-size: 0.85rem;
 }
 
-.ph-error {
+.pi-error {
   display: none;
   color: var(--danger-zone-hover-background-color);
 }
 
 /* ---- compact homepage widget ---- */
-.ph-widget {
+.pi-widget {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
   margin-top: 0.75rem;
 }
 
-.ph-stat {
+.pi-stat {
   flex: 1 1 140px;
   background-color: var(--card-background-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: 14px;
   padding: 0.9rem 1rem;
   text-decoration: none;
-  transition: background-color 0.15s ease;
 }
 
-.ph-stat:hover {
+.pi-stat:hover {
   background-color: var(--button-hover-background-color);
 }
 
-.ph-stat-num {
+.style-liquid-glass .pi-stat:hover {
+  background-color: var(--liquid-glass-button-slected);
+}
+
+.pi-stat-num {
   display: block;
   font-size: 1.8rem;
   font-weight: 500;
@@ -92,7 +110,7 @@
 
 }
 
-.ph-stat-label {
+.pi-stat-label {
   display: block;
   margin-top: 0.2rem;
   font-size: 0.85rem;
@@ -100,16 +118,16 @@
 }
 
 /* ---- loading placeholder pulse ---- */
-.ph-loading {
+.pi-loading {
   color: var(--secondary-title-color);
-  animation: ph-pulse 1.2s ease-in-out infinite;
+  animation: pi-pulse 1.2s ease-in-out infinite;
 }
 
-@keyframes ph-pulse {
+@keyframes pi-pulse {
   0%, 100% { opacity: 0.35; }
   50% { opacity: 0.8; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ph-loading { animation: none; }
+  .pi-loading { animation: none; }
 }

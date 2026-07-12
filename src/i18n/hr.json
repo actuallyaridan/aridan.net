@@ -62,10 +62,7 @@
   "a 1st Generation iPod Touch": "iPod Touch 1. generacije",
   "a 3rd Generation iPod Touch": "iPod Touch 3. generacije",
 
-  "My Pi-hole": "Moj Pi-hole",
-  "I run a Pi-hole on a Raspberry Pi 5 that blocks ads and trackers across my whole home network at the DNS level. Its name is look-what-you-made-me-do. Here's what it's been up to lately - see the full stats.": "Pokrećem Pi-hole na Raspberry Pi 5 koji blokira oglase i pratitelje u cijeloj mojoj kućnoj mreži na DNS razini. Zove se look-what-you-made-me-do. Evo čime se bavio u zadnje vrijeme - pogledaj cijelu statistiku.",
   "queries blocked": "blokiranih upita",
-  "of all DNS traffic": "od ukupnog DNS prometa",
 
   "Career": "Karijera",
   "I've had various jobs at a few companies. I've worked in tech repair, IT support for a municipality, and general support for an IoT company, and I'm only getting started!": "Radio sam razne poslove u nekoliko tvrtki. Bavio sam se popravkom tehnike, IT podrškom za jednu općinu i općom podrškom za IoT tvrtku - a tek sam počeo!",
