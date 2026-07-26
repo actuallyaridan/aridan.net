@@ -21,6 +21,7 @@
 
     <script src="/src/js/general.js"></script>
     <script src="/src/js/getGitHubStats.js"></script>
+    <script src="/src/js/projectFilter.js"></script>
 
     <script src="/src/js/lanyard.js" async></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
@@ -98,7 +99,38 @@
             </span>
         </div>
         <hr>
-        <div class="section">
+        <nav class="projectFilter" aria-label="Project status">
+            <ul class="notAList">
+                <li><button type="button" class="noUI" data-status="ongoing" aria-pressed="true">Ongoing</button></li>
+                <li><button type="button" class="noUI" data-status="paused" aria-pressed="false">Paused</button></li>
+            </ul>
+        </nav>
+        <div class="section" data-status="ongoing">
+            <div>
+                <h2 class="section-title">Windows-alike Software for Linux</h2>
+                <p class="section-content">A suite of Linux programs that recreate the Windows 7 originals down to the
+                    pixel, with my weird eye for detail - the same layouts, sprites, sounds and animations, only backed
+                    by real Linux system data. Three of them so far, and the suite keeps growing.</p>
+                <ul class="specs">
+                    <li><i class="fa-solid fa-code"></i>C++, Qt6, CMake</li>
+                    <li><i class="fa-solid fa-window-restore"></i>Device Manager, Control Panel and Minesweeper</li>
+                    <li><i class="fa-solid fa-star"></i><span id="stars-wsl">371</span> stars,
+                        <span id="forks-wsl">9</span> forks</li>
+                    <li><i class="fa-solid fa-bars-progress"></i>Ongoing</li>
+                </ul>
+            </div>
+            <div class="photo-container">
+                <img class="photo" src="/assets/uploads/images/wsl.webp"
+                    alt="The Windows 7 Device Manager, recreated on Linux, listing the hardware of an Arch Linux machine.">
+                <div class="linkCompany">
+                    <a title="Windows-alike Software for Linux - GitHub"
+                        href="https://github.com/actuallyaridan?tab=repositories&amp;q=linux-"><i
+                            class="fa-brands fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+                <hr class="onMobile">
+        <div class="section" data-status="paused">
             <div>
                 <h2 class="section-title">NeoFreeBird</h2>
                 <p class="section-content">The latest version of the X app for iOS, with reverted branding to Twitter
@@ -122,7 +154,7 @@
             </div>
         </div>
                 <hr class="onMobile">
-        <div class="section">
+        <div class="section" data-status="paused">
             <div>
                 <h2 class="section-title">Chirp</h2>
                 <p class="section-content">A completely self-made Twitter clone in PHP. Users can post (chirp), repost
@@ -144,7 +176,7 @@
             </div>
         </div>
                 <hr class="onMobile">
-        <div class="section">
+        <div class="section" data-status="ongoing">
             <div>
                 <h2 class="section-title">This website</h2>
                 <p class="section-content">The thing you're looking at. A fast and modern website, with dynamic parts
@@ -166,7 +198,7 @@
             </div>
         </div>
                 <hr class="onMobile">
-        <div class="section">
+        <div class="section" data-status="paused">
             <div>
                 <h2 class="section-title">Swedish translation for OldTwitter</h2>
                 <p class="section-content">A new extension for Chrome and Firefox to restore Twitters old web UI. I made

@@ -109,19 +109,7 @@ function applyStyle(styleValue) {
     if (styleValue === 'liquid-glass') {
         // Give the browser a frame to apply the new styles before recalculating
         requestAnimationFrame(() => {
-            const activeItem = document.querySelector('#desktop-header .notAList li.active');
-            const pill = document.getElementById('nav-pill');
-            const nav = document.querySelector('#desktop-header .notAList');
-            if (!activeItem || !pill || !nav) return;
-            
-            const inner = activeItem.querySelector('a, button');
-            if (!inner) return;
-            
-            const navRect = nav.getBoundingClientRect();
-            const innerRect = inner.getBoundingClientRect();
-            pill.style.width = innerRect.width + 'px';
-            pill.style.left = (innerRect.left - navRect.left) + 'px';
-            pill.style.opacity = '1';
+            if (typeof repositionNavPills === 'function') repositionNavPills();
         });
     }
 }

@@ -310,11 +310,11 @@ li>a, li>button.noUI {
     white-space: nowrap;
 }
 
-.style-flat #nav-pill {
+.style-flat .nav-pill {
     display: none;
 }
 
-.style-liquid-glass #nav-pill {
+.style-liquid-glass .nav-pill {
     position: absolute;
     z-index: -1;
     top: 50%;
@@ -329,7 +329,7 @@ li>a, li>button.noUI {
     padding: 0 8px;
 }
 
-.style-liquid-glass #nav-pill.hovering {
+.style-liquid-glass .nav-pill.hovering {
     background: var(--liquid-glass-button-background);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
@@ -469,6 +469,43 @@ div.section {
 
 div.section>div {
     flex: 1;
+}
+
+/* Project status filter (Ongoing / Paused). The items themselves pick up the
+   header nav's styling, and the list is given the header's bar to sit in, so
+   only the container is described here. */
+.projectFilter {
+    display: flex;
+    justify-content: center;
+}
+
+.projectFilter>ul.notAList {
+    background-color: var(--header-background-color);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    padding: 12px 24px;
+    border-radius: 10px;
+}
+
+.style-liquid-glass .projectFilter>ul.notAList {
+    position: relative; /* the pill sits behind the items, above this background */
+    z-index: 1;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+        0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 42px;
+}
+
+/* Sections (and the separator that follows them) that the filter hides. The
+   selectors are this specific to outrank div.section and hr.onMobile. */
+div.section.hide,
+hr.onMobile.hide {
+    display: none;
 }
 
 .photo-container {

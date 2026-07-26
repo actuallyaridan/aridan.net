@@ -37,16 +37,14 @@ function toggleSettings() {
     document.getElementById("settingsDialog").classList.toggle("showMenuNoAnimation");
     document.getElementById("settingsModalMenu").classList.toggle("showMenuNoAnimation");
 }
-document.addEventListener("DOMContentLoaded", () => {
-    const nav = document.querySelector("#desktop-header .notAList");
-    const activeItem = nav.querySelector("li.active");
-    const pill = document.createElement("span");
-    pill.id = "nav-pill";
-    nav.style.position = "relative";
-    nav.insertBefore(pill, nav.firstChild);
+/* The sliding pill (Liquid Glass only): it sits behind the active item of a
+   nav and follows the pointer as you move across the nav. The header gets one
+   on every page, the Projects page gives one to its Ongoing/Paused filter. */
+(function () {
+    const pills = []; // [nav, pill] pairs, so every pill can be repositioned at once
 
-    function movePillTo(el) {
-        const inner = el.querySelector("a, button");
+    function movePillTo(nav, pill, item) {
+        const inner = item && item.querySelector("a, button");
         if (!inner) return;
         const navRect = nav.getBoundingClientRect();
         const innerRect = inner.getBoundingClientRect();
@@ -55,25 +53,51 @@ document.addEventListener("DOMContentLoaded", () => {
         pill.style.opacity = "1";
     }
 
-    if (activeItem) movePillTo(activeItem);
-
-    window.addEventListener("load", () => {
-        if (activeItem) movePillTo(activeItem);
-    });
-
-    nav.querySelectorAll("li").forEach(li => {
-        li.addEventListener("mouseenter", () => {
-            pill.classList.add("hovering");
-            movePillTo(li);
-        });
-    });
-
-    nav.addEventListener("mouseleave", () => {
-        pill.classList.remove("hovering");
-        if (activeItem) movePillTo(activeItem);
+    // Back to where the pill rests: behind the active item, or out of sight
+    // if the nav hasn't got one.
+    function settle(nav, pill) {
+        const activeItem = nav.querySelector("li.active");
+        if (activeItem) movePillTo(nav, pill, activeItem);
         else pill.style.opacity = "0";
+    }
+
+    function attachPill(nav) {
+        const pill = document.createElement("span");
+        pill.className = "nav-pill";
+        nav.style.position = "relative";
+        nav.insertBefore(pill, nav.firstChild);
+        pills.push([nav, pill]);
+
+        nav.querySelectorAll("li").forEach((li) => {
+            li.addEventListener("mouseenter", () => {
+                pill.classList.add("hovering");
+                movePillTo(nav, pill, li);
+            });
+        });
+
+        nav.addEventListener("mouseleave", () => {
+            pill.classList.remove("hovering");
+            settle(nav, pill);
+        });
+
+        settle(nav, pill);
+    }
+
+    // Anything that moves the active item or the layout around it (switching
+    // to Liquid Glass, the project filter tabs) calls this to catch the pills up.
+    window.repositionNavPills = function () {
+        pills.forEach(([nav, pill]) => settle(nav, pill));
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        [
+            document.querySelector("#desktop-header .notAList"), // the page links, not the icons beside them
+            document.querySelector("main .projectFilter ul")
+        ].forEach((nav) => { if (nav) attachPill(nav); });
     });
-});
+
+    window.addEventListener("load", () => window.repositionNavPills());
+})();
 
 /* i18n: language switching 
 
@@ -97,6 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "head > title",
         "#desktop-header .notAList > li > a",
         "#mobile-header .mobileMenu > li > a",
+        "main .projectFilter li > button",
         "main h1.name",
         "main h2.section-title",
         "main .description.titleColor",
