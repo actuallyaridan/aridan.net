@@ -73,6 +73,20 @@ export async function onRequestPost({ request, env }) {
   }
 
   const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  // Short, sanitised strings only (drop control chars, cap length) - never echo
+  // arbitrary text back to visitors.
+  const str = (v, max = 40) =>
+    typeof v === "string"
+      ? Array.from(v)
+          .filter((c) => {
+            const n = c.charCodeAt(0);
+            return n >= 32 && n !== 127;
+          })
+          .join("")
+          .slice(0, max)
+      : "";
+  const oneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
+
   const clean = {
     total: num(body.total),
     blocked: num(body.blocked),
@@ -88,6 +102,16 @@ export async function onRequestPost({ request, env }) {
     disk_used_gb: num(body.disk_used_gb),
     disk_total_gb: num(body.disk_total_gb),
     uptime_seconds: num(body.uptime_seconds),
+    // SD-card health (proxy signals - SD exposes no vendor wear data)
+    sd_status: oneOf(body.sd_status, ["ok", "warning", "critical"], "ok"),
+    sd_fs_mode: oneOf(body.sd_fs_mode, ["rw", "ro"], "rw"),
+    sd_fs_errors: num(body.sd_fs_errors),
+    sd_mmc_errors: num(body.sd_mmc_errors),
+    sd_lifetime_writes_gb: num(body.sd_lifetime_writes_gb),
+    sd_capacity_gb: num(body.sd_capacity_gb),
+    sd_age_days: num(body.sd_age_days),
+    sd_model: str(body.sd_model, 40),
+    sd_manufactured: str(body.sd_manufactured, 10),
     updated: Date.now(),
   };
 

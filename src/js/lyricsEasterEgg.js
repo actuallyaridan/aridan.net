@@ -3,7 +3,7 @@
 // Plays a fake, time-synced "lyrics video" full of DNS/Pi-hole jokes whenever
 // Lanyard reports "Look What You Made Me Do" by Taylor Swift playing on Apple Music.
 // Short phrases pop in one at a time on a plain white stage, then the whole
-// phrase clears and the next one builds up. Not the real lyrics — a parody,
+// phrase clears and the next one builds up. Not the real lyrics, a parody,
 // triggered purely by what's currently playing.
 //
 // The actual words/timings live in lyricsEasterEggScript.js (window.LYRICS_EASTER_EGG_SCRIPT),
@@ -17,7 +17,7 @@
   const HOLD_AFTER_LAST_LINE = 8; // seconds the last line stays up before a fallback loop restarts
   const CLOSE_ANIM_MS = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? 0 : 250;
 
-  // Parses lines like: 2:21 "sweetheart" — blank lines start a new phrase
+  // Parses lines like: 2:21 "sweetheart", blank lines start a new phrase
   // (the stage clears before the next line appears), # lines are comments.
   function parseScript(text) {
     const cues = [];

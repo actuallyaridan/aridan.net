@@ -164,6 +164,55 @@
         <hr class="onMobile">
         <div class="section">
             <div>
+                <h2 class="section-title">Storage health</h2>
+                <div class="pi-grid">
+                    <div class="pi-card pi-card-wide">
+                        <i class="fa-solid fa-sd-card fa-lg"></i>
+                        <span class="pi-num pi-loading" id="pi-sd-model">-</span>
+                        <span class="pi-label">card model</span>
+                    </div>
+                    <div class="pi-card pi-health" id="pi-health">
+                        <i class="fa-solid fa-heart-pulse fa-lg"></i>
+                        <span class="pi-num pi-loading" id="pi-sd-status">-</span>
+                        <span class="pi-label">SD card health</span>
+                    </div>
+                    <div class="pi-card">
+                        <i class="fa-solid fa-hourglass-half fa-lg"></i>
+                        <span class="pi-num pi-loading" id="pi-sd-age">-</span>
+                        <span class="pi-label">card age</span>
+                    </div>
+                    <div class="pi-card">
+                        <i class="fa-solid fa-feather-pointed fa-lg"></i>
+                        <span class="pi-num pi-loading" id="pi-sd-writes">-</span>
+                        <span class="pi-label">lifetime writes</span>
+                    </div>
+                    <div class="pi-card">
+                        <i class="fa-solid fa-database fa-lg"></i>
+                        <span class="pi-num pi-loading" id="pi-sd-size">-</span>
+                        <span class="pi-label">card size</span>
+                    </div>
+                    <div class="pi-card">
+                        <i class="fa-solid fa-up-down fa-lg" id="pi-sd-mode-icon"></i>
+                        <span class="pi-num pi-loading" id="pi-sd-mode">-</span>
+                        <span class="pi-label">mount mode</span>
+                    </div>
+                    <div class="pi-card">
+                        <i class="fa-solid fa-file-circle-exclamation fa-lg"></i>
+                        <span class="pi-num pi-loading" id="pi-sd-fserr">-</span>
+                        <span class="pi-label">filesystem errors</span>
+                    </div>
+                    <div class="pi-card">
+                        <i class="fa-solid fa-plug-circle-exclamation fa-lg"></i>
+                        <span class="pi-num pi-loading" id="pi-sd-ioerr">-</span>
+                        <span class="pi-label">I/O errors</span>
+                    </div>
+                </div>
+                <p class="pi-meta">An SD card can't report wear like an SSD, so this watches the warning signs instead - read-only remounts, filesystem errors, and kernel I/O errors. Green means all clear.</p>
+            </div>
+        </div>
+        <hr class="onMobile">
+        <div class="section">
+            <div>
                 <h2 class="section-title">How it works</h2>
                 <p class="section-content">The Pi-hole runs on a Raspberry&nbsp;Pi&nbsp;5 that sits on my home network
                     and acts as the DNS server for every device in the house - phones, laptops, TVs, consoles,

@@ -21,6 +21,15 @@ const EXAMPLE_STATS = {
   disk_used_gb: 4.8,
   disk_total_gb: 28,
   uptime_seconds: 442800,
+  sd_status: "ok",
+  sd_fs_mode: "rw",
+  sd_fs_errors: 0,
+  sd_mmc_errors: 0,
+  sd_lifetime_writes_gb: 14,
+  sd_capacity_gb: 128,
+  sd_age_days: 92,
+  sd_model: "SanDisk SA128",
+  sd_manufactured: "2026-05",
 };
 
 // True for any local/dev host: localhost, .local/.lan hostnames, IPv6 loopback,
@@ -49,7 +58,7 @@ const PIHOLE_IS_LOCAL = isPiholeLocalHost();
 
 // Abbreviates large numbers: 1907467 -> "1.9M+", 25517 -> "25.5K+", 5 -> "5".
 // Anything under 1000 is shown in full. Values >= 1000 are floored to one decimal
-// and get a trailing "+" — floored so the "+" is always truthful (the real number
+// and get a trailing "+", floored so the "+" is always truthful (the real number
 // is at least what's shown). Decimal separator follows the visitor's locale.
 function abbreviatePiholeNumber(n) {
   n = Number(n) || 0;
@@ -59,7 +68,7 @@ function abbreviatePiholeNumber(n) {
   return `${floored.toLocaleString(undefined, { maximumFractionDigits: 1 })}${suffix}+`;
 }
 
-// "4.8 GB used of 28 GB" — a value under 1 GB is shown in MB ("256 MB used of 4 GB").
+// "4.8 GB used of 28 GB", a value under 1 GB is shown in MB ("256 MB used of 4 GB").
 function formatSize(gb) {
   const n = Number(gb) || 0;
   return n < 1 ? `${Math.round(n * 1024)} MB` : `${n} GB`;
@@ -77,6 +86,20 @@ function formatUptime(seconds) {
   if (d > 0) return `${d}d ${h}h`;
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
+}
+
+// Cumulative writes: "14 GB", or "1.3 TB" once it passes 1024 GB.
+function formatWrites(gb) {
+  const n = Number(gb) || 0;
+  return n >= 1024 ? `${(n / 1024).toFixed(1)} TB` : `${Math.round(n)} GB`;
+}
+
+// Card age from days: "12d", "3 mo", or "1.4 yr".
+function formatAge(days) {
+  const d = Math.max(0, Math.floor(Number(days) || 0));
+  if (d < 60) return `${d}d`;
+  if (d < 730) return `${Math.floor(d / 30.44)} mo`;
+  return `${(d / 365.25).toFixed(1)} yr`;
 }
 
 function renderPiholeStats(data, { example = false } = {}) {
@@ -107,6 +130,40 @@ function renderPiholeStats(data, { example = false } = {}) {
       data.disk_total_gb != null ? usedOfTotal(data.disk_used_gb, data.disk_total_gb) : undefined);
   }
   if (data.uptime_seconds != null) setStat("pi-uptime", formatUptime(data.uptime_seconds));
+
+  // SD-card health (elements only exist on the /pihole page). SD cards report no
+  // vendor wear data, so the status is a traffic light over readable warning signs,
+  // with each underlying signal shown as its own card.
+  if (data.sd_status != null) {
+    const states = {
+      ok: { label: "OK", cls: "status-ok" },
+      warning: { label: "WARN", cls: "status-warn" },
+      critical: { label: "ERR", cls: "status-crit" },
+    };
+    const s = states[String(data.sd_status)] || states.ok;
+
+    const statusEl = document.getElementById("pi-sd-status");
+    if (statusEl) statusEl.textContent = s.label;
+    const card = document.getElementById("pi-health");
+    if (card) {
+      card.classList.remove("status-ok", "status-warn", "status-crit");
+      card.classList.add(s.cls);
+    }
+  }
+  if (data.sd_model != null) setStat("pi-sd-model", data.sd_model || "unknown");
+  if (data.sd_fs_mode != null) {
+    const ro = data.sd_fs_mode === "ro";
+    setStat("pi-sd-mode", ro ? "r/o" : "r/w");
+    const modeIcon = document.getElementById("pi-sd-mode-icon");
+    if (modeIcon) modeIcon.className = ro
+      ? "fa-solid fa-arrow-down-up-lock fa-lg"
+      : "fa-solid fa-up-down fa-lg";
+  }
+  if (data.sd_fs_errors != null) setStat("pi-sd-fserr", `${Number(data.sd_fs_errors) || 0}`);
+  if (data.sd_mmc_errors != null) setStat("pi-sd-ioerr", `${Number(data.sd_mmc_errors) || 0}`);
+  if (data.sd_lifetime_writes_gb != null) setStat("pi-sd-writes", formatWrites(data.sd_lifetime_writes_gb));
+  if (data.sd_capacity_gb != null) setStat("pi-sd-size", `${Math.round(Number(data.sd_capacity_gb))} GB`);
+  if (data.sd_age_days != null) setStat("pi-sd-age", formatAge(data.sd_age_days));
 
   const updatedEl = document.getElementById("pi-updated");
   if (updatedEl) {

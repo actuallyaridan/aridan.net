@@ -76,6 +76,19 @@
   color: var(--danger-zone-hover-background-color);
 }
 
+/* ---- SD-card health cards ---- */
+/* Traffic light: colour only the status word by state (leave the heart icon the
+   default card-icon colour). Fixed hues so they read the same in light and dark. */
+.pi-health.status-ok .pi-num {
+  color: #2ea043;
+}
+.pi-health.status-warn .pi-num {
+  color: #d29922;
+}
+.pi-health.status-crit .pi-num {
+  color: #f85149;
+}
+
 /* ---- compact homepage widget ---- */
 .pi-widget {
   display: flex;
