@@ -21,6 +21,8 @@ const EXAMPLE_STATS = {
   disk_used_gb: 4.8,
   disk_total_gb: 28,
   uptime_seconds: 442800,
+  queries_per_hour: 1465,
+  blocked_per_hour: 262,
   sd_status: "ok",
   sd_fs_mode: "rw",
   sd_fs_errors: 0,
@@ -117,6 +119,13 @@ function renderPiholeStats(data, { example = false } = {}) {
   setStat("pi-percent", `${Number(data.percent).toFixed(1)}%`);
   setStat("pi-domains", abbreviatePiholeNumber(data.domains_on_lists), full(data.domains_on_lists));
   setStat("pi-clients", abbreviatePiholeNumber(data.clients), full(data.clients));
+
+  // Rolling hourly averages, computed server-side (in stats.js) from the delta
+  // between pushes - total/blocked are all-time counters, so a raw division of
+  // them would be wrong.
+  const perHour = (n) => Math.round(Number(n) || 0).toLocaleString();
+  if (data.queries_per_hour != null) setStat("pi-qph", perHour(data.queries_per_hour), "rolling hourly average");
+  if (data.blocked_per_hour != null) setStat("pi-bph", perHour(data.blocked_per_hour), "rolling hourly average");
 
   // Hardware (elements only exist on the /pihole page)
   if (data.temp_c != null) setStat("pi-temp", `${Number(data.temp_c).toFixed(1)}°C`);
