@@ -133,6 +133,10 @@ export async function onRequestPost({ request, env }) {
     const delta = curr - prevTotal;
     if (delta < 0) return Math.round(prevRate) || 0;
     const instant = delta / hours;
+    // Discontinuity guard: an impossibly high rate means the counter's meaning
+    // jumped (e.g. switching the data source, or an FTL/DB reset), not real
+    // traffic - ignore it so one bad sample can't poison the average.
+    if (instant > 100000) return Math.round(prevRate) || 0;
     return Math.round(prevRate > 0 ? 0.4 * instant + 0.6 * prevRate : instant);
   };
   clean.queries_per_hour = hourly(clean.total, prev?.total, prev?.queries_per_hour || 0);
