@@ -102,6 +102,8 @@ export async function onRequestPost({ request, env }) {
     disk_used_gb: num(body.disk_used_gb),
     disk_total_gb: num(body.disk_total_gb),
     uptime_seconds: num(body.uptime_seconds),
+    frequency: num(body.frequency),
+    cached_percent: num(body.cached_percent),
     // SD-card health (proxy signals - SD exposes no vendor wear data)
     sd_status: oneOf(body.sd_status, ["ok", "warning", "critical"], "ok"),
     sd_fs_mode: oneOf(body.sd_fs_mode, ["rw", "ro"], "rw"),
@@ -114,33 +116,6 @@ export async function onRequestPost({ request, env }) {
     sd_manufactured: str(body.sd_manufactured, 10),
     updated: Date.now(),
   };
-
-  // Hourly rates. total/blocked are all-time cumulative counters, so the change
-  // since the previous push (over the actual elapsed time) is a real rate. A light
-  // EMA smooths out quiet/busy 15-min samples into a rolling average.
-  let prev = null;
-  try {
-    const raw = await env.STATS.get(KV_KEY);
-    if (raw) prev = JSON.parse(raw);
-  } catch {
-    prev = null;
-  }
-  const hourly = (curr, prevTotal, prevRate) => {
-    if (prev == null || !Number.isFinite(prevTotal)) return 0;
-    const hours = (clean.updated - prev.updated) / 3600000;
-    // Ignore the first run, long gaps, and counter resets (FTL restart).
-    if (!(hours > 0.02 && hours < 3)) return Math.round(prevRate) || 0;
-    const delta = curr - prevTotal;
-    if (delta < 0) return Math.round(prevRate) || 0;
-    const instant = delta / hours;
-    // Discontinuity guard: an impossibly high rate means the counter's meaning
-    // jumped (e.g. switching the data source, or an FTL/DB reset), not real
-    // traffic - ignore it so one bad sample can't poison the average.
-    if (instant > 100000) return Math.round(prevRate) || 0;
-    return Math.round(prevRate > 0 ? 0.4 * instant + 0.6 * prevRate : instant);
-  };
-  clean.queries_per_hour = hourly(clean.total, prev?.total, prev?.queries_per_hour || 0);
-  clean.blocked_per_hour = hourly(clean.blocked, prev?.blocked, prev?.blocked_per_hour || 0);
 
   await env.STATS.put(KV_KEY, JSON.stringify(clean));
 
