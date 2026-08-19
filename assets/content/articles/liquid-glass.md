@@ -1,7 +1,7 @@
 ---
-title: "Hello, Liquid Glass"
-date: "30/03/2026"
-link: "/articles/liquid-glass"
+title: Hello, Liquid Glass
+date: 2026-03-30
+preview: If you've been following Apple's software updates, you've probably heard of Liquid Glass.
 ---
 
 ## Liquid Glass?

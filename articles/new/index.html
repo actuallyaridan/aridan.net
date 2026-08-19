@@ -12,22 +12,23 @@
     <meta name="keywords"
         content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
     <meta name="author" content="actualluaridan">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Articles - aridan.net</title>
+    <title>New article - aridan.net</title>
 
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/src/css/styles.css">
     <link rel="stylesheet" href="/src/css/settings.css">
     <link rel="stylesheet" href="/src/css/lanyard.css">
     <link rel="stylesheet" href="/src/css/editor.css">
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.css">
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
     <script src="/src/js/general.js"></script>
 
     <script src="/src/js/articleFormat.js" defer></script>
     <script src="/src/js/articleStore.js" defer></script>
-    <script src="/src/js/previewArticles.js" defer></script>
-    <script src="/src/js/articleAdmin.js" defer></script>
-    <script src="/src/js/lanyard.js" defer></script>
+    <script src="/src/js/articleEditor.js" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
         crossorigin="anonymous"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/media/favicons/apple-touch-icon.png">
@@ -38,7 +39,7 @@
 
 </head>
 
-<body>
+<body class="editorPage">
     <header id="desktop-header">
         <div>
             <ul class="notAList">
@@ -91,24 +92,83 @@
 
     <main class="container">
         <div class="info">
-            <p class="icon"><i class="fa-solid fa-newspaper icon-background"></i></p>
+            <p class="icon"><i class="fa-solid fa-pen-nib icon-background"></i></p>
             <div>
-                <h1 class="name">Articles</h1>
-                <p class="description titleColor">Here you can learn about neiche things I've done. Some regarding this website, some about other stuff I do, or just random stuff I want to share with the world!</p>
+                <h1 class="name">New article</h1>
+                <p class="description titleColor">Write a new article and save it straight into aets/content/articles/. Runs entirely in your browser - nothing is uploaded anywhere.</p>
+                <div class="articleAdminBar">
+                    <a href="/articles/" class="button backButton" title="Back to Articles"><i class="fa-solid fa-arrow-left"></i></a>
+                    <button type="submit" form="editorForm" class="button primary" id="saveArticle">
+                        <i class="fa-solid fa-floppy-disk"></i>Save
+                    </button>
+                    <button type="button" class="button" id="downloadArticle">
+                        <i class="fa-solid fa-download"></i>Download .md
+                    </button>
+                </div>
+                <p class="editorStatus" id="editorStatus" role="status" aria-live="polite"></p>
             </div>
+
+            <span class="warn" id="editorFolderBar">
+                <p><span id="editorFolderState">No folder chosen yet.</span></p>
+                <button type="button" class="button" id="editorPickFolder">Choose folder</button>
+            </span>
         </div>
         <hr>
-        <div id="loading" style="display: none;">
-            <div>
-                <div id="loadingSpinner" class="lds-ring">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
+
+        <div class="editorLayout">
+            <form class="section editorForm" id="editorForm" autocomplete="off">
+                <label class="editorField">
+                    <span>Title</span>
+                    <input type="text" id="fieldTitle" class="button" placeholder="Just a title, nothing fancy" required>
+                </label>
+
+                <label class="editorField">
+                    <span>File name</span>
+                    <input type="text" id="fieldSlug" class="button" placeholder="the-identifier-for-this-article" required>
+                    <small id="slugHint">Becomes <code>&lt;name&gt;.md</code> and the article's web address.</small>
+                </label>
+
+                <label class="editorField">
+                    <span>Date</span>
+                    <input type="date" id="fieldDate" class="button" required>
+                </label>
+
+                <label class="editorField">
+                    <span>Preview</span>
+                    <textarea id="fieldPreview" class="button" rows="3"
+                        placeholder="A short description of the article for the listing page."></textarea>
+                </label>
+
+                <div class="editorField">
+                    <span>Categories</span>
+                    <div id="categoryList"></div>
+                    <button type="button" class="button" id="addCategory">
+                        <i class="fa-solid fa-plus"></i>Add category
+                    </button>
                 </div>
-            </div>
-        </div>        
+
+                <div class="editorField">
+                    <span>Body</span>
+                    <div id="fieldBodyEditor"></div>
+                    <textarea id="fieldBody" class="button editorBody hide" rows="18"
+                        placeholder="## A heading&#10;&#10;Write your article in Markdown."></textarea>
+                </div>
+            </form>
+
+        </div>
     </main>
+
+    <div id="loading" style="display: none;">
+        <div>
+            <div id="loadingSpinner" class="lds-ring">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+
     <footer>
     </footer>
 </body>

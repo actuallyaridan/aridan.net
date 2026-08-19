@@ -8,6 +8,8 @@ window.onload = function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     const spans = Array.from(document.querySelectorAll(".description span"));
+    // Some pages (e.g. /pihole/) have a plain description with no spans to rotate.
+    if (spans.length === 0) return;
     let currentIndex = 0;
     let shuffledSpans = [];
 
@@ -206,11 +208,16 @@ function toggleSettings() {
         }
     }
 
+    function reveal() {
+        document.documentElement.classList.remove("i18n-wait");
+    }
+
     function applyLanguage() {
         document.documentElement.setAttribute("lang", currentLang);
         const sel = document.getElementById("language");
         if (sel) sel.value = currentLang;
         swap();
+        reveal(); // show the (now translated) page; no-op if it was never hidden
     }
 
     function setLanguage(lang, persist) {
@@ -220,10 +227,11 @@ function toggleSettings() {
 
         if (lang === "en") { current = null; applyLanguage(); return; }
         if (dicts[lang]) { current = dicts[lang]; applyLanguage(); return; }
-        fetch("/src/i18n/" + lang + ".json", { cache: "no-cache" })
-            .then((r) => r.json())
+        // Reuse the dictionary the inline <head> script already started fetching.
+        const pre = window.__i18nPreload && window.__i18nPreload.lang === lang ? window.__i18nPreload.dict : null;
+        (pre || fetch("/src/i18n/" + lang + ".json", { cache: "no-cache" }).then((r) => r.json()))
             .then((d) => { dicts[lang] = d; current = d; applyLanguage(); })
-            .catch(() => {});
+            .catch(reveal);
     }
 
     function initI18n() {

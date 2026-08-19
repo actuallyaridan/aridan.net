@@ -1,8 +1,4 @@
 [
-    {
-        "title": "Hello, Liquid Glass",
-        "date": "30/03/2026",
-        "preview": "If you've been following Apple's software updates, you've probably heard of Liquid Glass.",
-        "link": "/articles/view/index.html?article=liquid-glass"
-    }
+    "liquid-glass",
+    "pihole"
 ]

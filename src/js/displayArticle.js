@@ -1,149 +1,126 @@
-// displayArticle.js
+(function () {
+    "use strict";
 
-// ---- 1. Front Matter Parser ----
-function parseFrontMatter(frontMatter) {
-    const metadata   = { categories: [] };
-    const lines      = frontMatter.split('\n');
-    let   currentKey = null;
-    let   currentVal = [];
-  
-    for (const line of lines) {
-      if (line.includes(':')) {
-        // flush previous multi‐line value
-        if (currentKey && currentVal.length) {
-          metadata[currentKey] = currentVal.join('\n').trim();
-          currentVal = [];
+    var AF = window.ArticleFormat;
+
+    function setMeta(attr, key, value) {
+        var el = document.head.querySelector("meta[" + attr + '="' + key + '"]');
+        if (!el) {
+            el = document.createElement("meta");
+            el.setAttribute(attr, key);
+            document.head.appendChild(el);
         }
-        const [key, ...rest] = line.split(':');
-        currentKey = key.trim();
-        let value = rest.join(':').trim();
-        // strip quotes
-        value = value.replace(/^['"](.*)['"]$/, '$1');
-        metadata[currentKey] = value;
-      }
-      else if (currentKey && line.trim().startsWith('-')) {
-        // array item
-        metadata[currentKey] = metadata[currentKey] || [];
-        metadata[currentKey].push(line.replace(/^\s*-\s*/, '').trim());
-      }
-      else if (currentKey) {
-        // continuation of multi‐line
-        currentVal.push(line);
-      }
+        el.setAttribute("content", value);
     }
-  
-    // flush last
-    if (currentKey && currentVal.length) {
-      metadata[currentKey] = currentVal.join('\n').trim();
+
+    function applyMetadata(meta) {
+        var title = meta.title || "Article";
+        document.title = title + " - aridan.net";
+        if (meta.preview) {
+            setMeta("name", "description", meta.preview);
+            setMeta("property", "og:description", meta.preview);
+        }
+        setMeta("property", "og:title", title);
+        setMeta("property", "og:type", "article");
+        setMeta("property", "og:url", location.href);
     }
-  
-    // ensure categories is always an array of objects
-    if (Array.isArray(metadata.categories)) {
-      metadata.categories = metadata.categories.map(catLine => {
-        // expect: name: "Foo" color: "bar"
-        const m = catLine.match(/name:\s*"(.*?)"\s+color:\s*"(.*?)"/);
-        if (m) return { name: m[1], color: m[2] };
-        return { name: catLine, color: 'default' };
-      });
+
+    function renderArticle(container, meta, bodyHtml) {
+        var esc = AF.escapeHtml;
+        var categories = Array.isArray(meta.categories) ? meta.categories : [];
+        var chips = categories
+            .map(function (cat) {
+                if (!cat || typeof cat !== "object") return "";
+                return '<span class="' + esc(cat.color || "default") + '">' + esc(cat.name) + "</span>";
+            })
+            .join("");
+
+        container.innerHTML =
+            '<article class="full-article">' +
+                '<div class="info">' +
+                    '<p class="icon"><i class="fa-solid fa-newspaper icon-background"></i></p>' +
+                    "<div>" +
+                        '<h1 class="name">' + esc(meta.title || "Untitled article") + "</h1>" +
+                        '<p class="description titleColor">' +
+                            '<time datetime="' + esc(meta.date || "") + '">' +
+                                esc(AF.formatDate(meta.date)) +
+                            "</time>" +
+                        "</p>" +
+                        '<a href="/articles/" title="Back to Articles" class="button backButton">' +
+                            '<i class="fa-solid fa-arrow-left"></i>' +
+                        "</a>" +
+                    "</div>" +
+                "</div>" +
+                (chips ? '<div class="categories">' + chips + "</div>" : "") +
+                "<hr>" +
+                '<div class="article-content"></div>' +
+            "</article>";
+
+        container.querySelector(".article-content").innerHTML = bodyHtml;
+    }
+
+    function renderError(container, heading, detail) {
+        document.title = heading + " - aridan.net";
+        container.innerHTML =
+            '<div class="info">' +
+                '<p class="icon"><i class="fa-solid fa-xmark icon-background"></i></p>' +
+                "<div>" +
+                    '<h1 class="name">' + AF.escapeHtml(heading) + "</h1>" +
+                    '<p class="description titleColor">' + AF.escapeHtml(detail) + "</p>" +
+                    '<a href="/articles/" class="button"><i class="fa-solid fa-arrow-left"></i>Back to Articles</a>' +
+                "</div>" +
+            "</div>";
+    }
+
+    function load() {
+        var container = document.querySelector("main.container");
+        var spinner = document.getElementById("loading");
+        if (!container) return;
+        if (spinner) spinner.style.display = "flex";
+
+        var slug = new URLSearchParams(location.search).get("article");
+
+        if (!slug) {
+            renderError(container, "No article specified", "The address is missing an article name.");
+            if (spinner) spinner.style.display = "none";
+            return;
+        }
+        if (!AF.isValidSlug(slug)) {
+            renderError(container, "Article not found", "“" + slug + "” isn't a valid article name.");
+            if (spinner) spinner.style.display = "none";
+            return;
+        }
+
+        fetch(AF.DIR_URL + encodeURIComponent(slug) + ".md", { cache: "no-cache" })
+            .then(function (res) {
+                if (res.status === 404) throw new Error("notfound");
+                if (!res.ok) throw new Error("http " + res.status);
+                return res.text();
+            })
+            .then(function (text) {
+                var parsed = AF.parse(text);
+                applyMetadata(parsed.meta);
+                renderArticle(container, parsed.meta, marked.parse(parsed.body));
+                if (window.Prism) Prism.highlightAll();
+                if (window.twemoji) twemoji.parse(container, { folder: "svg", ext: ".svg" });
+                document.dispatchEvent(new CustomEvent("article:rendered", { detail: { slug: slug } }));
+            })
+            .catch(function (err) {
+                if (err.message === "notfound") {
+                    renderError(container, "Article not found", "There's no article called “" + slug + "”.");
+                } else {
+                    console.error("Error loading article:", err);
+                    renderError(container, "Unable to display article", "Something went wrong loading this article.");
+                }
+            })
+            .finally(function () {
+                if (spinner) spinner.style.display = "none";
+            });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", load);
     } else {
-      metadata.categories = [];
+        load();
     }
-  
-    return metadata;
-  }
-  
-  // ---- 2. Markdown Parser ----
-  function parseMarkdown(markdown) {
-    // normalize newlines
-    markdown = markdown.replace(/\r\n/g, '\n').trim();
-  
-    // front matter regex
-    const fm = /^---\n([\s\S]+?)\n---\n([\s\S]*)$/;
-    const m  = markdown.match(fm);
-    if (!m) {
-      return {
-        metadata: {
-          title:      'Untitled Article',
-          date:       new Date().toLocaleDateString(),
-          categories: []
-        },
-        content: markdown
-      };
-    }
-  
-    const frontMatter = m[1];
-    const content     = m[2].trim();
-    const metadata    = parseFrontMatter(frontMatter);
-  
-    return { metadata, content };
-  }
-  
-  // (Optional) expose for debugging in console
-  // window.parseMarkdown = parseMarkdown;
-  
-  
-  // ---- 3. Fetch, Render & Highlight ----
-  async function fetchFullArticle() {
-    const loadingSpinner   = document.getElementById('loading');
-    const articleContainer = document.querySelector('main.container');
-  
-    try {
-      // show spinner
-      loadingSpinner.style.display = 'flex';
-  
-      // get ?article=foo
-      const params      = new URLSearchParams(window.location.search);
-      const articleName = params.get('article');
-      if (!articleName) throw new Error('No article specified in URL.');
-  
-      // fetch markdown
-      const res = await fetch(`/assets/content/articles/${articleName}.md`);
-      if (!res.ok) throw new Error('Article not found.');
-  
-      const md = await res.text();
-      const { metadata, content } = parseMarkdown(md);
-  
-      // build HTML
-      const articleHTML = `
-        <article class="full-article">
-          <div class="info">
-            <p class="icon"><i class="fa-solid fa-newspaper icon-background"></i></p>
-            <div>
-              <h1 class="name">${metadata.title}</h1>
-              <p class="description titleColor">${metadata.date}</p>
-              <a href="/articles/" title="Back to Articles" class="button backButton">
-                <i class="fa-solid fa-arrow-left"></i>
-              </a>
-            </div>
-          </div>
-          <hr>
-          <div class="article-content">
-            ${marked.parse(content)}
-          </div>
-        </article>
-      `;
-  
-      // inject and highlight
-      articleContainer.innerHTML = articleHTML;
-      Prism.highlightAll();
-  
-    } catch (error) {
-      console.error('Error loading article:', error);
-      articleContainer.innerHTML = `
-        <div class="info">
-          <p class="icon"><i class="fa-solid fa-xmark icon-background"></i></p>
-          <div>
-            <h1 class="name">Unable to display article</h1>
-            <p class="description titleColor">${error.message}</p>
-            <a href="/articles/" class="button"><i class="fa-solid fa-arrow-left"></i>Back to Articles</a>
-          </div>
-        </div>
-      `;
-    } finally {
-      loadingSpinner.style.display = 'none';
-    }
-  }
-  
-  // ---- 4. Initialize on DOM Ready ----
-  document.addEventListener('DOMContentLoaded', fetchFullArticle);
-  
+})();

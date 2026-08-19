@@ -1,89 +1,115 @@
-async function fetchArticles() {
-    console.group('fetchArticles()');
-    const loadingSpinner = document.getElementById('loading');
-    const articlesContainer = document.querySelector('main.container');
-    
-    if (!articlesContainer) {
-        console.error('Could not find container element with selector "main.container"');
-        return;
+(function () {
+    "use strict";
+
+    var AF = window.ArticleFormat;
+
+    function articleUrl(slug) {
+        return "/articles/view/index.html?article=" + encodeURIComponent(slug);
     }
-    
-    try {
-        // Show loading spinner before starting the fetch
-        loadingSpinner.style.display = 'block';
-        
-        console.log('Fetching articles index...');
-        const response = await fetch('/assets/content/articles/index.json');
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const articles = await response.json();
-        console.log('Articles data:', articles);
-        
-        if (!Array.isArray(articles) || articles.length === 0) {
-            throw new Error('No articles found in the index.');
-        }
 
-        // Loop through articles and insert each into the container
-        articles.forEach(article => {
-            // Ensure categories is always an array
-            const categories = Array.isArray(article.categories) ? article.categories : [];
-            
-            console.log('Creating element for article:', article.title);
-            const articleDiv = document.createElement('div');
-            articleDiv.classList.add('section', 'articlePreview');
+    function card(article) {
+        var esc = AF.escapeHtml;
+        var categories = Array.isArray(article.meta.categories) ? article.meta.categories : [];
 
-            articleDiv.innerHTML = `
-                <div class="preview">
-                    <span class="titleContainer">
-                        <h3 class="section-title">${article.title || 'Untitled Article'}</h3>
-                        <p class="date section-content">${article.date || 'Unknown date'}</p>
-                    </span>
-                    <p class="section-content previewContent">${article.preview || 'No preview available'}</p>
-                </div>
-                <div class="readMore">
-                    <div class="categories">
-                        ${categories.map(cat => `<span class="${cat.color}">${cat.name}</span>`).join('')}
-                    </div>
-                    <a href="${article.link || '#'}" title="Read more" class="button backButton">
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </a>
-                </div>
-            `;
+        var chips = categories
+            .map(function (cat) {
+                if (!cat || typeof cat !== "object") return "";
+                return '<span class="' + esc(cat.color || "default") + '">' + esc(cat.name) + "</span>";
+            })
+            .join("");
 
-            articlesContainer.appendChild(articleDiv);
-            console.log('Article added to DOM:', article.title);
-        });
-        
-        console.log('All articles processed successfully');
-    } catch (error) {
-        console.error('Error in fetchArticles:', error);
-        
-        // Display error message in the container
-        const errorMessage = document.createElement('div');
-        errorMessage.textContent = `Failed to load articles: ${error.message}. Please try again later.`;
-        errorMessage.style.color = 'red';
-        errorMessage.classList.add('error-message');
-        articlesContainer.appendChild(errorMessage);
-    } finally {
-        // Hide loading spinner after processing is complete
-        loadingSpinner.style.display = 'none';
-        console.groupEnd();
+        var el = document.createElement("div");
+        el.className = "section articlePreview";
+        el.dataset.slug = article.slug;
+        el.innerHTML =
+            '<div class="preview">' +
+                '<span class="titleContainer">' +
+                    '<h3 class="section-title">' + esc(article.meta.title || "Untitled article") + "</h3>" +
+                    '<p class="date section-content">' +
+                        '<time datetime="' + esc(article.meta.date || "") + '">' +
+                            esc(AF.formatDate(article.meta.date)) +
+                        "</time>" +
+                    "</p>" +
+                "</span>" +
+                '<p class="section-content previewContent">' + esc(article.meta.preview || "") + "</p>" +
+            "</div>" +
+            '<div class="readMore">' +
+                            '<div class="categories">' + chips + "</div>" +
+                '<div><a href="' + esc(articleUrl(article.slug)) + '" title="Read more" class="button backButton">' +
+                    '<i class="fa-solid fa-arrow-right"></i>' +
+                "</a> </div>" +
+            "</div>";
+        return el;
     }
-}
 
-// Initialize only on the articles listing page
-document.addEventListener("DOMContentLoaded", () => {
-    console.log('DOMContentLoaded event fired');
-    const path = window.location.pathname;
-    console.log('Current path:', path);
-    
-    if (path.endsWith('/articles/') || path.endsWith('/articles/index.html')) {
-        console.log('Initializing article previews...');
-        fetchArticles();
+    function message(container, text) {
+        var p = document.createElement("p");
+        p.className = "section-content";
+        p.textContent = text;
+        container.appendChild(p);
+    }
+
+    function loadArticle(slug) {
+        return fetch(AF.DIR_URL + encodeURIComponent(slug) + ".md", { cache: "no-cache" })
+            .then(function (res) {
+                if (!res.ok) throw new Error(res.status + " " + res.statusText);
+                return res.text();
+            })
+            .then(function (text) {
+                var parsed = AF.parse(text);
+                return { slug: slug, meta: parsed.meta };
+            })
+            .catch(function (err) {
+                console.error('Skipping article "' + slug + '":', err.message);
+                return null;
+            });
+    }
+
+    function render() {
+        var container = document.querySelector("main.container");
+        var spinner = document.getElementById("loading");
+        if (!container) return;
+        if (spinner) spinner.style.display = "block";
+
+        fetch(AF.INDEX_URL, { cache: "no-cache" })
+            .then(function (res) {
+                if (!res.ok) throw new Error("Could not load the article list (" + res.status + ").");
+                return res.json();
+            })
+            .then(function (slugs) {
+                if (!Array.isArray(slugs)) throw new Error("index.json should contain a list of slugs.");
+                var valid = slugs.filter(function (s) {
+                    return typeof s === "string" && AF.isValidSlug(s);
+                });
+                return Promise.all(valid.map(loadArticle));
+            })
+            .then(function (articles) {
+                var found = articles.filter(Boolean);
+                if (!found.length) {
+                    message(container, "No articles yet.");
+                    document.dispatchEvent(new CustomEvent("articles:rendered"));
+                    return;
+                }
+                found.sort(function (a, b) {
+                    return AF.dateSortKey(b.meta.date).localeCompare(AF.dateSortKey(a.meta.date));
+                });
+                var frag = document.createDocumentFragment();
+                found.forEach(function (a) { frag.appendChild(card(a)); });
+                container.appendChild(frag);
+                document.dispatchEvent(new CustomEvent("articles:rendered"));
+            })
+            .catch(function (err) {
+                console.error("Error loading articles:", err);
+                message(container, "Articles couldn't be loaded right now. Please try again later.");
+            })
+            .finally(function () {
+                if (spinner) spinner.style.display = "none";
+            });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", render);
     } else {
-        console.log('Not on articles listing page - skipping preview initialization');
+        render();
     }
-});
+})();
