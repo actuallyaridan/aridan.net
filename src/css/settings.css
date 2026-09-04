@@ -149,6 +149,54 @@ select {
     stroke-dashoffset: 25;
 }
 
+/* Liquid Glass toggles.
+
+   Off, the track is a glass trough using the same tint and hairline as every
+   other glass surface. On, it fills with the accent colour and picks up a rim
+   highlight, the way .primary buttons do - accent-filled controls stay solid
+   rather than translucent, so the state is never ambiguous.
+
+   The knob stays neutral on purpose: the accent has to read against it, and a
+   knob that also tracked the accent would leave the on state with no contrast. */
+.style-liquid-glass .checkbox-wrapper-51 .toggle:before {
+    background: var(--liquid-glass-button-slected);
+    border: 1px solid var(--liquid-glass-button-border);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.style-liquid-glass .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:before {
+    background: var(--accent-color);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.style-liquid-glass .checkbox-wrapper-51 .toggle span {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+/* Press feedback only - the knob dips. No hover tint: the toggle reads clearly
+   enough on its own, and tinting the track competed with the accent fill. */
+.style-liquid-glass .checkbox-wrapper-51 .toggle:active span {
+    transform: scale(0.92);
+}
+
+.style-liquid-glass .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:active span {
+    transform: translateX(18px) scale(0.92);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .style-liquid-glass .checkbox-wrapper-51 .toggle:active span {
+        transform: none;
+    }
+    .style-liquid-glass .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:active span {
+        transform: translateX(18px);
+    }
+}
+
 
 
 .style-flat .dangerZone {
@@ -228,7 +276,6 @@ select {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background-color: var(--button-background-color);
     padding: 24px;
     margin: 12px;
     border-radius: 8px;
@@ -295,9 +342,34 @@ input[type="radio"] {
 
 
 
-/* The :hover variant must out-specify `.style-* .button:hover` in styles.css,
+/* Selected option.
+
+   This used to be --background-color, which only ever read as "selected"
+   because the group sat on a lighter panel. With that panel gone the chip
+   landed on --modal-background-color, a near-identical tone, so the selection
+   disappeared in light mode and blended into the modal in flat.
+
+   --selected-background-color lifts it toward white in both themes, so the
+   picked option always reads as raised. Darkening it instead reads as
+   disabled, which is the opposite of what a selection should say. The edge and
+   the small drop shadow do the rest of the work, since on a light theme the
+   surface is already near-white and fill alone cannot carry it.
+
+   The :hover variants must out-specify `.style-* .button:hover` in styles.css,
    otherwise hovering the selected option makes it look unselected. */
-input[type="radio"]:checked+label,
-input[type="radio"]:checked+label.button:hover {
-    background-color: var(--background-color);
+.style-flat input[type="radio"]:checked+label.button,
+.style-flat input[type="radio"]:checked+label.button:hover {
+    background-color: var(--selected-background-color);
+    box-shadow:
+        inset 0 0 0 1px var(--liquid-glass-button-border),
+        0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+.style-liquid-glass input[type="radio"]:checked+label.button,
+.style-liquid-glass input[type="radio"]:checked+label.button:hover {
+    background: var(--selected-background-color);
+    border-color: var(--liquid-glass-button-border);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        0 2px 8px rgba(0, 0, 0, 0.18);
 }

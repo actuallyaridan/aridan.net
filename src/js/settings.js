@@ -1,17 +1,20 @@
 (function() {
-    const savedTheme = localStorage.getItem('theme');
+    // Apply the *saved* accent here, not a hardcoded one: anything else paints
+    // one colour for a frame and then swaps, which reads as a flash on nav.
+    const savedTheme = localStorage.getItem('theme') || 'auto';
+    const savedColor = localStorage.getItem('accentColor') || 'blue';
     const savedStyle = localStorage.getItem('style') || 'liquid-glass';
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     document.documentElement.className = '';
 
-    if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
-        document.documentElement.classList.add('theme-dark', 'color-blue');
+    if (savedTheme === 'dark' || (savedTheme === 'auto' && systemDark)) {
+        document.documentElement.classList.add('theme-dark');
     } else {
-        document.documentElement.classList.add('theme-light', 'color-blue');
+        document.documentElement.classList.add('theme-light');
     }
 
-    document.documentElement.classList.add(`style-${savedStyle}`);
+    document.documentElement.classList.add(`color-${savedColor}`, `style-${savedStyle}`);
 })();
 
 function initThemeSettings() {

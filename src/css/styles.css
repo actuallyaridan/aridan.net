@@ -17,10 +17,20 @@
     --danger-zone-background-color: rgba(220, 60, 60, 0.30);
     --danger-zone-hover-background-color: rgba(180, 40, 40, 0.60);
     --modal-background-color: rgb(240, 240, 240);
+    /* A picked option lifts toward white rather than darkening - a darker fill
+       reads as disabled. Always lighter than the surface it sits on. */
+    --selected-background-color: #ffffff;
     --icon-background-color: rgba(200, 200, 200, 0.30);
     --card-background-color: var(--icon-background-color);
     --border-color: #cccccc;
     color-scheme: light;
+
+    /* Monochrome is the baseline accent, used for the frame before settings.js
+       adds the .color-* class. A neutral flash is invisible; a blue one is not. */
+    --accent-color: #666666;
+    --accent-color-to-active: #6666669c;
+    --accent-color-hover: #4d4d4d;
+    --icon-color: #4d4d4d;
 
     --liquid-glass-button-border: rgba(0, 0, 0, 0.1);
     --liquid-glass-button-background: rgba(0, 0, 0, 0.05);
@@ -47,6 +57,7 @@
     --button-background-color: rgba(60, 60, 60, 0.30);
     --button-hover-background-color: #333333;
     --modal-background-color: rgb(26, 26, 26);
+    --selected-background-color: rgba(255, 255, 255, 0.16);
     --icon-background-color: rgba(60, 60, 60, 0.30);
     --card-background-color: var(--icon-background-color);
     --border-color: #333333;
@@ -76,6 +87,7 @@
         --button-background-color: rgba(60, 60, 60, 0.30);
         --button-hover-background-color: #333333;
         --modal-background-color: rgb(26, 26, 26);
+        --selected-background-color: rgba(255, 255, 255, 0.16);
         --icon-background-color: rgba(60, 60, 60, 0.30);
         --card-background-color: var(--icon-background-color);
         
