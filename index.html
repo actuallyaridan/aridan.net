@@ -4,23 +4,25 @@
 
 <head>
     <meta charset="UTF-8">
-    <script src="/src/js/settings.js" async></script>
+    <meta name="theme-color" content="#f1f1f1">
+    <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="aridan.net">
     <meta name="keywords"
         content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
     <meta name="author" content="actualluaridan">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <title>aridan.net</title>
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/src/css/styles.css">
     <link rel="stylesheet" href="/src/css/settings.css">
     <link rel="stylesheet" href="/src/css/lanyard.css">
     <link rel="stylesheet" href="/src/css/lyricsEasterEgg.css?v=3">
-    <script src="/src/js/general.js"></script>
+    <script src="/src/js/general.js" defer></script>
 
     <script src="/src/js/lanyard.js" defer></script>
     <script src="/src/js/lyricsEasterEggScript.js?v=3" defer></script>
@@ -35,23 +37,25 @@
 </head>
 
 <body>
+    <a class="skipLink" href="#mainContent">Skip to content</a>
+
     <header id="desktop-header">
         <div>
+            <nav aria-label="Main">
+                <ul class="notAList">
+                    <li class="active"><a href="/" aria-current="page">aridan.net</a></li>
+                    <li><a href="/experience/">Experience</a></li>
+                    <li><a href="/projects/">Projects</a></li>
+                    <li><a href="/articles/">Articles</a></li>
+                    <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+                    <li><a href="/pihole/">Pi-hole</a></li>
+                    <li><a href="/contact/">Contact</a></li>
+                </ul>
+            </nav>
             <ul class="notAList">
-                <li class="active"><a href="/">aridan.net</a></li>
-                <li><a href="/experience/">Experience</a></li>
-                <li><a href="/projects/">Projects</a></li>
-                <li><a href="/articles/">Articles</a></li>
-                <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                <li><a href="/pihole/">Pi-hole</a></li>
-                <li><a href="/contact/">Contact</a></li>
-            </ul>
-                      <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -59,14 +63,13 @@
     <header id="mobile-header">
         <div>
             <ul class="notAList">
-                <li class="active"><a href="/">aridan.net</a></li>
+                <li class="active"><a href="/" aria-current="page">aridan.net</a></li>
             </ul>
             <ul class="notAList">
-                <li><button title="Menu" class="noUI" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button>
-                </li>
+                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" onclick="toggleMenu()"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
             </ul>
         </div>
-        <menu class="mobileMenu" id="mobileMenuID">
+        <nav class="mobileMenu" id="mobileMenuID" aria-label="Main">
             <ul class="notAList">
                 <li><a href="/experience/">Experience</a></li>
                 <li><a href="/projects/">Projects</a></li>
@@ -75,18 +78,14 @@
                 <li><a href="/pihole/">Pi-hole</a></li>
                 <li><a href="/contact/">Contact</a></li>
             </ul>
-                      <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+            <ul class="notAList">
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
-        </menu>
-
+        </nav>
     </header>
-
-    <main class="container">
+    <main class="container" id="mainContent" tabindex="-1">
         <div class="info withBanner" fetchpriority="high">
             <img src="/assets/uploads/images/image.webp" alt="A selfie where I'm in a bus in a grey t-shit."
                 class="icon" fetchpriority="high">
@@ -102,33 +101,51 @@
                     <div></div>
                     <div></div>
                 </div>Connecting</div>
-                <p id="statusWrapperOnline" class="online hide statusWrapper"><i class="fa-solid fa-house-laptop"></i>Available
+                <p id="statusWrapperOnline" class="online hide statusWrapper"><i class="fa-solid fa-house-laptop" aria-hidden="true"></i>Available
                 </p>
-                <p id="statusWrapperOffline" class="offline hide statusWrapper"><i class="fa-solid fa-house-circle-xmark"></i>Not using a computer</p>
-                <p id="statusWrapperDnd" class="dnd hide statusWrapper"><i class="fa-solid fa-house-circle-exclamation"></i>Do
+                <p id="statusWrapperOffline" class="offline hide statusWrapper"><i class="fa-solid fa-house-circle-xmark" aria-hidden="true"></i>Not using a computer</p>
+                <p id="statusWrapperDnd" class="dnd hide statusWrapper"><i class="fa-solid fa-house-circle-exclamation" aria-hidden="true"></i>Do
                     not disturb</p>
-                <p id="statusWrapperIdle" class="idle hide statusWrapper"><i class="fa-solid fa-house"></i>Idle
+                <p id="statusWrapperIdle" class="idle hide statusWrapper"><i class="fa-solid fa-house" aria-hidden="true"></i>Idle
                 </p>
             </div>
         </div>
 
         <div class="section">
-            <section class="discordWrapper invisible-scrollbar" id="currentdiscord">
+            <section class="discordWrapper invisible-scrollbar" id="currentdiscord"
+                aria-label="What I'm doing right now">
                 <div id="lanyardDiscord">
                     <div id="loading">
                     </div>
-                    <div id="errorMessage">
-                        <p class="errorMessage">❌</p>
+                    <div id="errorMessage" role="alert">
+                        <p class="errorMessage" aria-hidden="true">❌</p>
                         <p class="errorMessage">Something went wrong.<br>Try again later.</p>
                     </div>
                     <div id="loadedLanyard">
-                        <div id="discord">
+                        <!-- Positioning context for the scroll arrows, which sit over
+                             the ends of the strip rather than in its flow. -->
+                        <div id="discordScroller">
+                        <button type="button" id="discordScrollPrev" class="button activityNav hide"
+                            title="Previous activity" aria-label="Previous activity"
+                            aria-controls="discord">
+                            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" id="discordScrollNext" class="button activityNav hide"
+                            title="Next activity" aria-label="Next activity"
+                            aria-controls="discord">
+                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                        <!-- lanyard.js adds tabindex when this actually overflows, so the
+                             strip can be scrolled from the keyboard (Chromium does not
+                             focus scroll containers on its own) without leaving a dead
+                             tab stop behind when everything already fits. -->
+                        <div id="discord" role="group" aria-label="Activities">
                             <!-- Apple Music Activity -->
                             <div id="amLanyardDiscord">
                                 <span class="titleActivity">
-                                    <i class="fa-brands fa-itunes-note">
-                                        <h3 id="amActivityName">Apple Music</h3>
-                                    </i>
+                                    <span class="activityHeading">
+                                        <i class="fa-brands fa-itunes-note" aria-hidden="true"></i><h3 id="amActivityName">Apple Music</h3>
+                                    </span>
                                     <div class="lds-ring smallLoader">
                                         <div></div>
                                         <div></div>
@@ -143,7 +160,9 @@
                                 <div id="amDiscordActivityInfo">
                                     <p id="amActivityDetails" class="titleColor">Loading</p>
                                     <p id="amActivityState" class="subtitleColor">Loading</p>
-                                    <div class="progress-bar-container" title="00:00/03:14">
+                                    <div class="progress-bar-container" id="amProgressTrack"
+                                        role="progressbar" aria-label="Track progress"
+                                        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                                         <div class="progress-bar" id="amProgressBar"></div>
                                     </div>
 
@@ -160,9 +179,10 @@
                                 </a>
                             </div>
                             <div id="discordActivity">
-                                <span class="titleActivity"> <i class="fa-regular fa-window-maximize">
-                                        <h3 id="activityName">Loading</h3>
-                                    </i>
+                                <span class="titleActivity">
+                                    <span class="activityHeading">
+                                        <i class="fa-regular fa-window-maximize" aria-hidden="true"></i><h3 id="activityName">Loading</h3>
+                                    </span>
                                     <div class="lds-ring smallLoader">
                                         <div></div>
                                         <div></div>
@@ -177,22 +197,39 @@
                                 <div id="discordActivityInfo">
                                     <p id="activityDetails" class="titleColor">Loading</p>
                                     <p id="activityState" class="subtitleColor">Loading</p>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-bar" id="progressBar"></div>
+                                    <!-- Exactly one of these two is on show at a time. The bar is
+                                         only meaningful for an activity that reports both a start
+                                         and an end; most report a start alone, which is elapsed
+                                         time and not a percentage of anything. Those get the
+                                         separator instead - the same rule in the same place, so
+                                         every activity card keeps the same shape, but with nothing
+                                         to announce it stays out of the accessibility tree. -->
+                                    <div class="progress-bar-container hide" id="ProgressTrack"
+                                        role="progressbar" aria-label="Activity progress"
+                                        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                        <div class="progress-bar" id="ProgressBar"></div>
                                     </div>
+                                    <div class="progress-bar-container activitySeparator"
+                                        id="ProgressSeparator" aria-hidden="true"></div>
                                     <div id="Timeremaning">
                                         <p id="ActivityTime" class="subTitle">-:-</p>
-                                        <p id="Remaining" class="hide subTitle"> remaining</p>
-                                        <p id="Elapsed" class="hide subTitle"> elapsed</p>
+                                        <p id="Remaining" class="hide subTitle">remaining</p>
+                                        <p id="Elapsed" class="hide subTitle">elapsed</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        </div>
                         <button type="button" id="lyricsEasterEggBtn" class="button hide">
-                            <i class="fa-solid fa-closed-captioning"></i>Look What You Made Me Block
+                            <i class="fa-solid fa-closed-captioning" aria-hidden="true"></i>Look What You Made Me Block
                         </button>
                     </div>
                 </div>
+                <!-- Shown by lanyard.js only when "Automatically update activities"
+                     is off, since that is the only time updates need asking for. -->
+                <button type="button" id="lanyardRefresh" class="button hide">
+                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>Refresh
+                </button>
             </section>
         </div>
 
@@ -206,12 +243,11 @@
                     with an SD card! I also know a bunch of languages too!</p>
             </div>
             <div class="photo-container">
-                <img class="photo" alt="Another selfie of me in a bus." src="/assets/uploads/images/on-bus.webp">
+                <img class="photo" alt="Another selfie of me in a bus." src="/assets/uploads/images/on-bus.webp" loading="lazy" decoding="async">
             </div>
         </div>
         <div class="info">
-            <h1 class="name">Hobbies</h1>
-        </div>
+            <h2 class="name">Hobbies</h2>
         </div>
 
         <div class="section">
@@ -222,18 +258,18 @@
                     doesn't play in Safari, but does work properly in other browsers. <br>Here are the specs of it if
                     you'd like to build something similar:</p>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-microchip"></i>AMD Ryzen 5 3600</li>
-                    <li><i class="fa-solid fa-gamepad"></i>Radeon RX 6700 XT</li>
-                    <li><i class="fa-solid fa-memory"></i>16GB 3200MHz DDR4 RAM in dual channel</li>
-                    <li><i class="fa-solid fa-hard-drive"></i>about 2TB of SSD storage</li>
-                    <li><i class="fa-solid fa-wifi"></i>Fenvi T919 WiFi/Bluetooth</li>
-                    <li><i class="fa-brands fa-microsoft"></i><i class="fa-brands fa-apple"></i><i class="fa-brands fa-linux"></i>Windows 11, macOS
+                    <li><i class="fa-solid fa-microchip" aria-hidden="true"></i>AMD Ryzen 5 3600</li>
+                    <li><i class="fa-solid fa-gamepad" aria-hidden="true"></i>Radeon RX 6700 XT</li>
+                    <li><i class="fa-solid fa-memory" aria-hidden="true"></i>16GB 3200MHz DDR4 RAM in dual channel</li>
+                    <li><i class="fa-solid fa-hard-drive" aria-hidden="true"></i>about 2TB of SSD storage</li>
+                    <li><i class="fa-solid fa-wifi" aria-hidden="true"></i>Fenvi T919 WiFi/Bluetooth</li>
+                    <li><i class="fa-brands fa-microsoft" aria-hidden="true"></i><i class="fa-brands fa-apple" aria-hidden="true"></i><i class="fa-brands fa-linux" aria-hidden="true"></i>Windows 11, macOS
                         Sequoia, and CachyOS Linux</li>
                 </ul>
             </div>
 
              <!--<div class="photo-container">
-                <img class="photo" alt="Me next to my desktop computer." src="/assets/uploads/images/with-pc.webp">
+                <img class="photo" alt="Me next to my desktop computer." src="/assets/uploads/images/with-pc.webp" loading="lazy" decoding="async">
             </div>-->
         </div>
 
@@ -245,18 +281,18 @@
                     fun hobby and being able to tinker with them is really calming.</p>
                 <p class="section-content">I currently have a...</p>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-mobile-screen-button"></i>a 5.5th Generation iPod Video with a 5000mAh
+                    <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 5.5th Generation iPod Video with a 5000mAh
                         battery and 128GB SD card storage, along with a transparent click wheel and top case</li>
-                    <li><i class="fa-solid fa-mobile-screen-button"></i>a 2nd Generation iPod Mini with a new battery
+                    <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 2nd Generation iPod Mini with a new battery
                         and 64GB of Compact Flash storage</li>
-                    <li><i class="fa-solid fa-mobile-screen-button"></i>a 1st Generation iPod Touch</li>
-                    <li><i class="fa-solid fa-mobile-screen-button"></i>a 3rd Generation iPod Touch</li>
+                    <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 1st Generation iPod Touch</li>
+                    <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 3rd Generation iPod Touch</li>
                 </ul>
             </div>
 
             <div class="photo-container">
                 <img class="photo" alt="A third generation iPod Classic playing music."
-                    src="/assets/uploads/images/ipod.webp">
+                    src="/assets/uploads/images/ipod.webp" loading="lazy" decoding="async">
             </div>
         </div>
 
@@ -265,7 +301,7 @@
     </footer>
     <div id="lyricsOverlay" class="hide" role="dialog" aria-modal="true" aria-label="Parody lyrics video">
         <button type="button" id="lyricsCloseBtn" aria-label="Close">
-            <i class="fa-solid fa-xmark"></i>
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
         <div id="lyricsStage"></div>
         <p id="lyricsCaption">Look What You Made Me Block - a Pi-hole parody<br>Time synced to playback</p>

@@ -141,6 +141,5 @@
   50% { opacity: 0.8; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .pi-loading { animation: none; }
-}
+/* Driven by the Reduce motion switch, which defaults to the OS preference. */
+html.reduce-motion .pi-loading { animation: none; }

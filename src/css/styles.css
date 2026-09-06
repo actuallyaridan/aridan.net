@@ -17,20 +17,21 @@
     --danger-zone-background-color: rgba(220, 60, 60, 0.30);
     --danger-zone-hover-background-color: rgba(180, 40, 40, 0.60);
     --modal-background-color: rgb(240, 240, 240);
-    /* A picked option lifts toward white rather than darkening - a darker fill
-       reads as disabled. Always lighter than the surface it sits on. */
     --selected-background-color: #ffffff;
     --icon-background-color: rgba(200, 200, 200, 0.30);
     --card-background-color: var(--icon-background-color);
     --border-color: #cccccc;
     color-scheme: light;
 
-    /* Monochrome is the baseline accent, used for the frame before settings.js
-       adds the .color-* class. A neutral flash is invisible; a blue one is not. */
     --accent-color: #666666;
     --accent-color-to-active: #6666669c;
     --accent-color-hover: #4d4d4d;
     --icon-color: #4d4d4d;
+
+    --blur-subtle: 2px;
+    --blur-soft: 5px;
+    --blur-regular: 10px;
+    --blur-heavy: 12px;
 
     --liquid-glass-button-border: rgba(0, 0, 0, 0.1);
     --liquid-glass-button-background: rgba(0, 0, 0, 0.05);
@@ -38,9 +39,7 @@
 
 }
 
-/* Dark theme class */
 .theme-dark {
-    /* Text colors */
     --text-color: #ffffff;
     --header-text-color: rgba(255, 255, 255, 0.575);
     --header-text-color-hover: rgba(255, 255, 255, 0.758);
@@ -135,6 +134,146 @@
     --accent-color-to-active: #6666669c;
     --accent-color-hover: #4d4d4d;
     --icon-color: #4d4d4d;
+}
+
+html.i18n-wait header,
+html.i18n-wait main {
+    visibility: hidden;
+}
+
+html.reduce-transparency {
+    --blur-subtle: 8px;
+    --blur-soft: 18px;
+    --blur-regular: 30px;
+    --blur-heavy: 36px;
+}
+
+html.reduce-motion #amActivityLogoLarge {
+    animation: none;
+}
+
+html.reduce-motion .mobileMenu,
+html.reduce-motion .showMenu {
+    animation: none;
+}
+
+html.reduce-motion .nav-pill {
+    display: none;
+}
+
+html.reduce-motion.style-liquid-glass #desktop-header .notAList>li>a,
+html.reduce-motion.style-liquid-glass .projectFilter>ul.notAList>li>button {
+    background-color: transparent;
+    border-radius: min(43.25rem, 4.65rem + 36.5vw);
+}
+
+html.reduce-motion.style-liquid-glass #desktop-header .notAList>li>a:hover,
+html.reduce-motion.style-liquid-glass .projectFilter>ul.notAList>li>button:hover {
+    background-color: var(--liquid-glass-button-background);
+    outline: 1px solid var(--liquid-glass-button-border);
+    outline-offset: -1px;
+    color: var(--header-text-color-hover);
+}
+
+html.reduce-motion.style-liquid-glass #desktop-header .notAList>li.active>a,
+html.reduce-motion.style-liquid-glass .projectFilter>ul.notAList>li.active>button {
+    background-color: var(--liquid-glass-button-slected);
+    outline: 1px solid var(--liquid-glass-button-border);
+    outline-offset: -1px;
+}
+
+html.reduce-motion .button:active,
+html.reduce-motion .get-button:active,
+html.reduce-motion .grid-links>a:active,
+html.reduce-motion .full-button>a:active,
+html.reduce-motion .contactMe>div>a:active {
+    transform: none;
+}
+
+html.reduce-motion .button:active:where(:not(:disabled)),
+html.reduce-motion .get-button:active,
+html.reduce-motion .grid-links>a:active,
+html.reduce-motion .full-button>a:active,
+html.reduce-motion .contactMe>div>a:active {
+    box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.3);
+}
+
+html.reduce-motion.style-liquid-glass .button:active:where(:not(:disabled)) {
+    background: rgba(127, 127, 127, 0.34);
+    border-color: rgba(127, 127, 127, 0.45);
+}
+
+html.reduce-motion.style-flat .button:active:where(:not(:disabled)),
+html.reduce-motion .grid-links>a:active,
+html.reduce-motion .full-button>a:active,
+html.reduce-motion .contactMe>div>a:active {
+    background-color: var(--button-hover-background-color);
+}
+
+html.reduce-motion.style-liquid-glass .destructive:active:where(:not(:disabled)) {
+    background: rgba(249, 76, 87, 0.4);
+    border-color: rgba(249, 76, 87, 0.6);
+}
+
+html.reduce-motion.style-flat .dangerZone:active:where(:not(:disabled)) {
+    background-color: var(--danger-zone-hover-background-color);
+}
+
+/* Keyboard focus.
+   Every interactive thing on the site styles its own hover and active states,
+   but nothing marked focus, so tabbing through a page was invisible. One outline
+   rule covers the lot. :focus-visible, not :focus, so pointer users never see it.
+   Outline rather than a colour or background change, both because it never
+   competes with the hover styling and because it stays visible on the glass
+   surfaces, where a tint has nothing to contrast against. */
+:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Radios and checkboxes in the settings panel are visually replaced by their
+   labels, so the ring has to move to whatever is actually on screen. */
+input[type="radio"]:focus-visible,
+.checkbox-wrapper-51 input[type="checkbox"]:focus-visible {
+    outline: none;
+}
+
+input[type="radio"]:focus-visible + label.button {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* The scrollable activity strip is focusable so it can be scrolled from the
+   keyboard; inset the ring so it doesn't sit outside the card. */
+#discord:focus-visible {
+    outline-offset: -2px;
+}
+
+.skipLink {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    z-index: 1001;
+    transform: translate(-50%, -150%);
+    padding: 10px 20px;
+    border-radius: 0 0 12px 12px;
+    background-color: var(--modal-background-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    transition: transform .2s ease;
+}
+
+/* :focus, not :focus-visible - a skip link is only ever reached by keyboard, and
+   it has to appear the moment it takes focus. */
+.skipLink:focus {
+    transform: translate(-50%, 0);
+}
+
+html.reduce-motion .skipLink {
+    transition: none;
 }
 
 @font-face {
@@ -239,7 +378,6 @@ ul::marker, ol::marker {
     font-size: 1em;
 }
 
-/* Navigation */
 ul.notAList, ul.specs {
     list-style-type: none;
     display: flex;
@@ -261,8 +399,8 @@ header>div {
     width: 80vw;
     height: 4em;
     background-color: var(--header-background-color);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(var(--blur-regular));
+    backdrop-filter: blur(var(--blur-regular));
     margin: auto;
     margin-top: 12px;
     padding: 12px;
@@ -271,11 +409,9 @@ header>div {
 
 .style-liquid-glass header>div {
     height: 3.2em;
-    -webkit-backdrop-filter: blur(2px);
-    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(var(--blur-subtle));
+    backdrop-filter: blur(var(--blur-subtle));
     border: 1px solid rgba(255, 255, 255, 0.15);
-    /* Top rim highlight only - no bottom inset. Elevation comes from the drop
-       shadow, which is heavier here than on anything else on the page. */
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         0 8px 32px rgba(0, 0, 0, 0.3);
@@ -292,7 +428,6 @@ li>a, li>button.noUI {
     transition: color .2s ease, border-color .2s ease, background-color .2s ease, opacity .12s ease;
 }
 
-/* Nav links are inline, so transform is a no-op here, dim them on press instead. */
 li>a:active, li>button.noUI:active {
     opacity: .55;
 }
@@ -350,18 +485,16 @@ li>a:active, li>button.noUI:active {
 
 .style-liquid-glass .nav-pill.hovering {
     background: var(--liquid-glass-button-background);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     height: 72%;
 }
 
-/* Container */
 .container {
     max-width: 600px;
     width: 100%;
 }
 
-/* App Info */
 .info {
     text-align: center;
     margin-top: 42px;
@@ -398,7 +531,6 @@ li>a:active, li>button.noUI:active {
     color: white !important;
 }
 
-/* Buttons */
 .get-button {
     background-color: var(--accent-color);
     color: var(--text-color);
@@ -421,7 +553,6 @@ li>a:active, li>button.noUI:active {
     transform: scale(0.96);
 }
 
-/* Photos */
 .photo-container {
     width: 100%;
     overflow-x: auto;
@@ -462,18 +593,24 @@ li>a:active, li>button.noUI:active {
     height: 100%;
 }
 
-/* Changelog */
 .changelog {
     text-align: left;
 }
 
-/* Features */
 .section-title,
 h2 {
     font-size: 1.5em;
     font-weight: 550;
     color: var(--secondary-title-color);
     margin-bottom: 10px;
+}
+
+/* A page has one h1. The "Hobbies" and "Education" banners further down are
+   section headings, so they're h2s - but they're still hero titles, and the
+   rule above would otherwise shrink and grey them. */
+h2.name {
+    font-size: 2em;
+    color: var(--title-color);
 }
 
 .section-content {
@@ -495,10 +632,6 @@ div.section>div {
     flex: 1;
 }
 
-/* Project status filter (Ongoing / Paused). It borrows the header nav's sliding
-   pill, but it is a control sitting in the page - not chrome - so it uses the
-   same surface tokens as the other in-content surfaces rather than the header's
-   own background, border and elevation. */
 .projectFilter {
     display: flex;
     justify-content: center;
@@ -514,10 +647,8 @@ div.section>div {
     position: relative; /* the pill sits behind the items, above this background */
     z-index: 1;
     background-color: var(--liquid-glass-button-background);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    /* Themed hairline, so it stays dark on light backgrounds - a white one only
-       reads correctly against the header's own darker chrome. */
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     border: 1px solid var(--liquid-glass-button-border);
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -526,8 +657,6 @@ div.section>div {
     border-radius: 42px;
 }
 
-/* Sections (and the separator that follows them) that the filter hides. The
-   selectors are this specific to outrank div.section and hr.onMobile. */
 div.section.hide,
 hr.onMobile.hide {
     display: none;
@@ -544,7 +673,6 @@ hr.onMobile.hide {
     text-align: right;
 }
 
-/* Links */
 a {
     text-decoration: none;
     color: var(--text-color);
@@ -555,7 +683,6 @@ a.inline {
     text-underline-offset: 2px;
 }
 
-/* Footer */
 footer {
     width: 80vw;
     height: fit-content;
@@ -618,7 +745,6 @@ section>div>div {
     text-align: left;
 }
 
-/* Horizontal Rule */
 hr {
     width: 80%;
     margin: 20px 0;
@@ -629,7 +755,6 @@ hr {
 }
 
 
-/* Mobile Menu */
 .mobileMenu {
     display: none;
     flex-direction: row;
@@ -639,8 +764,8 @@ hr {
     padding: 0 !important;
     padding-inline-start: 0 !important;
     background-color: var(--header-background-color);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(var(--blur-regular));
+    backdrop-filter: blur(var(--blur-regular));
     width: 90vw;
     position: absolute;
     top: 5.5em;
@@ -652,11 +777,9 @@ hr {
 
 }
 
-/* The dropdown is part of the nav, so it gets the same glass surface as
-   `header>div` above it. */
 .style-liquid-glass .mobileMenu {
-    -webkit-backdrop-filter: blur(2px);
-    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(var(--blur-subtle));
+    backdrop-filter: blur(var(--blur-subtle));
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 28px;
     box-shadow:
@@ -755,30 +878,24 @@ ul.specs {
     font-size: 1rem;
     cursor: pointer;
     border: none;
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     transition: opacity 0.2s ease, transform 0.1s ease;
         background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: var(--paragraph-color);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    /* Top rim highlight only - nothing on the site uses a bottom inset. Depth
-       comes from the drop shadow, which is lighter here than on the nav bars. */
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
         0 4px 16px rgba(0, 0, 0, 0.2);
 
 }
 
-/* `:where()` contributes no specificity, so these guards keep disabled buttons
-   inert without disturbing the cascade against the .primary/.secondary/
-   .destructive hover rules further down. */
 .style-flat .button:hover:where(:not(:disabled)) {
     background-color: var(--button-hover-background-color);
 }
 
-/* Glass buttons brighten instead of turning into a flat grey slab. */
 .style-liquid-glass .button:hover:where(:not(:disabled)) {
     background: rgba(127, 127, 127, 0.18);
     border-color: rgba(127, 127, 127, 0.3);
@@ -998,8 +1115,8 @@ li>a>i, li>button.noUI>i {
     background-color: rgba(0, 0, 0, 0.3);
     background-color: var(--button-background-color);
     border: 2px solid var(--button-background-color);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(var(--blur-regular));
+    backdrop-filter: blur(var(--blur-regular));
     border-radius: 12px;
 }
 
@@ -1055,11 +1172,15 @@ border: 1px solid var(--liquid-glass-button-border);
     text-align: center;
 }
 
+/* Full width, not fit-content. Below 966px .section stacks into a column with
+   align-items: center, so the cross axis is the width - and a fit-content child
+   shrank to its buttons, leaving /contact/ narrower than the hero every other
+   page fills. */
 #gridButtonsWrapper {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    width: fit-content;
+    width: 100%;
     justify-content: center;
     flex-wrap: wrap;
     flex: 1;
@@ -1085,25 +1206,25 @@ border: 1px solid var(--liquid-glass-button-border);
     text-align: right;
 }
 
-.preview > span > h3 {
+.preview > span > h2 {
     margin: 0;
     font-size: 1.2em;
     flex-grow: 1;
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2; /* Limits to 2 lines */
+    -webkit-line-clamp: 2;
     line-clamp: 2;
-    word-break: break-word; /* Ensures long words break properly */
+    word-break: break-word;
 }
 
 .previewContent {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3; /* Limits to 2 lines */
+    -webkit-line-clamp: 3;
     line-clamp: 3;
-    word-break: break-word; /* Ensures long words break properly */
+    word-break: break-word; 
 }
 
 
@@ -1128,7 +1249,6 @@ border: 1px solid var(--liquid-glass-button-border);
     margin: 0px;
 }
 
-/* Article content styles */
 #articleContent {
     margin: 20px auto;
     max-width: 900px;
@@ -1140,7 +1260,6 @@ border: 1px solid var(--liquid-glass-button-border);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Headers */
 #articleContent h1, #articleContent h2, #articleContent h3 {
     font-family: "Roboto", sans-serif;
     color: #333;
@@ -1160,7 +1279,6 @@ border: 1px solid var(--liquid-glass-button-border);
     font-size: 1.4em;
 }
 
-/* Article styles */
 .full-article {
     max-width: 800px;
     margin: 0 auto;
@@ -1208,9 +1326,6 @@ border: 1px solid var(--liquid-glass-button-border);
 }
 
 .backButton {
-    /* Needs a block box or the :active scale is ignored, but inline-block
-       rather than flex so it keeps the same text line box height as the
-       labelled buttons it sits next to. */
     display: inline-block;
     text-align: center;
     margin: 0px;
@@ -1299,6 +1414,7 @@ span.token{
     background-color: var(--danger-zone-background-color);
     color: var(--text-color);
     padding: 10px;
+    text-align: left;
     border-radius: 8px;
     margin: 10px 0;
     font-size: 1em;
@@ -1310,11 +1426,9 @@ span.token{
     .style-liquid-glass .warn {
         background: rgba(249, 76, 87, 0.15);
     border: 1px solid rgba(249, 76, 87, 0.35);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        0 4px 16px rgba(249, 76, 87, 0.1);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 #rateLimitGitHub{
@@ -1497,8 +1611,8 @@ span.token{
     background: rgba(var(--accent-color-rgb), 0.15);
     border: none;
     color: var(--accent-color);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         0 4px 16px rgba(0, 0, 0, 0.1);
@@ -1516,8 +1630,8 @@ span.token{
     background: rgba(249, 76, 87, 0.15);
     border: 1px solid rgba(249, 76, 87, 0.35);
     color: #f94c57;
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
         0 4px 16px rgba(249, 76, 87, 0.1);
@@ -1531,19 +1645,6 @@ span.token{
         0 6px 20px rgba(249, 76, 87, 0.18);
 }
 
-/* Colour feedback still reads fine without motion; the scale on press does not. */
-@media (prefers-reduced-motion: reduce) {
-    .style-flat .button:active,
-    .style-liquid-glass .button:active,
-    .get-button:active,
-    .grid-links>a:active,
-    .full-button>a:active,
-    .contactMe>div>a:active {
-        transform: none;
-    }
-}
-
-/* Animations */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -1565,7 +1666,6 @@ span.token{
 }
 
 
-/* Media Queries */
 @media screen and (max-width: 966px) {
     header>div {
         width: 90vw;

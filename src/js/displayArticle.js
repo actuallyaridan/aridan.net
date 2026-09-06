@@ -30,7 +30,7 @@
         container.innerHTML =
             '<article class="full-article">' +
                 '<div class="info">' +
-                    '<p class="icon"><i class="fa-solid fa-newspaper icon-background"></i></p>' +
+                    '<p class="icon"><i class="fa-solid fa-newspaper icon-background" aria-hidden="true"></i></p>' +
                     "<div>" +
                         '<h1 class="name">' + esc(meta.title || "Untitled article") + "</h1>" +
                         '<p class="description titleColor">' +
@@ -38,8 +38,8 @@
                                 esc(AF.formatDate(meta.date)) +
                             "</time>" +
                         "</p>" +
-                        '<a href="/articles/" title="Back to Articles" class="button backButton">' +
-                            '<i class="fa-solid fa-arrow-left"></i>' +
+                        '<a href="/articles/" title="Back to Articles" aria-label="Back to Articles" class="button backButton">' +
+                            '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>' +
                         "</a>" +
                     "</div>" +
                 "</div>" +
@@ -54,11 +54,11 @@
         document.title = heading + " - aridan.net";
         container.innerHTML =
             '<div class="info">' +
-                '<p class="icon"><i class="fa-solid fa-xmark icon-background"></i></p>' +
+                '<p class="icon"><i class="fa-solid fa-xmark icon-background" aria-hidden="true"></i></p>' +
                 "<div>" +
                     '<h1 class="name">' + AF.escapeHtml(heading) + "</h1>" +
                     '<p class="description titleColor">' + AF.escapeHtml(detail) + "</p>" +
-                    '<a href="/articles/" class="button"><i class="fa-solid fa-arrow-left"></i>Back to Articles</a>' +
+                    '<a href="/articles/" class="button"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i>Back to Articles</a>' +
                 "</div>" +
             "</div>";
     }

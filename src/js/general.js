@@ -1,10 +1,12 @@
-window.onload = function () {
-    // Parse all emojis on the page
+window.addEventListener("load", function () {
+    // Parse all emojis on the page. Twemoji comes from a CDN, so it may not be
+    // there at all - a blocked or failed script shouldn't take the page with it.
+    if (!window.twemoji) return;
     twemoji.parse(document.body, {
         folder: 'svg',
         ext: '.svg',
     });
-}
+});
 
 document.addEventListener("DOMContentLoaded", function () {
     const spans = Array.from(document.querySelectorAll(".description span"));
@@ -28,19 +30,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initialize first span and start interval
     swapSpans();
-    setInterval(swapSpans, 2000);
+    // Text that rotates on its own is exactly what Reduce motion is for: show one
+    // role and leave it. settings.js has already put the class on <html>.
+    if (!document.documentElement.classList.contains("reduce-motion")) {
+        setInterval(swapSpans, 2000);
+    }
 });
 
-function toggleMenu() {
-    document.getElementById("mobileMenuID").classList.toggle("showMenu");
+function setMenuOpen(open) {
+    const menu = document.getElementById("mobileMenuID");
+    if (!menu) return;
+    menu.classList.toggle("showMenu", open);
+    document
+        .querySelectorAll('[aria-controls="mobileMenuID"]')
+        .forEach((btn) => btn.setAttribute("aria-expanded", open ? "true" : "false"));
 }
 
-/* Desktop opens the settings in a modal; mobile hands off to /settings/, which
-   shows the same panel inline. 966px is where the header swaps over. */
+function toggleMenu() {
+    const menu = document.getElementById("mobileMenuID");
+    if (menu) setMenuOpen(!menu.classList.contains("showMenu"));
+}
+
 function toggleSettings() {
     const inline = document.getElementById("settingsInline");
     if (inline) { // already on /settings/, nothing to open
-        inline.scrollIntoView({ behavior: "smooth", block: "start" });
+        inline.scrollIntoView({
+            behavior: document.documentElement.classList.contains("reduce-motion")
+                ? "auto"
+                : "smooth",
+            block: "start"
+        });
         return;
     }
 
@@ -49,16 +68,19 @@ function toggleSettings() {
         return;
     }
 
-    const dialog = document.getElementById("settingsDialog");
-    if (!dialog) return;
-    dialog.classList.toggle("showMenuNoAnimation");
-    document.getElementById("settingsModalMenu").classList.toggle("showMenuNoAnimation");
+    if (window.SettingsModal) window.SettingsModal.toggle();
 }
-/* The sliding pill (Liquid Glass only): it sits behind the active item of a
-   nav and follows the pointer as you move across the nav. The header gets one
-   on every page, the Projects page gives one to its Ongoing/Paused filter. */
+
+// Escape closes whichever of the two panels is open. The modal handles its own
+// key when it has focus; this covers the menu, which is only ever a link list.
+document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    const menu = document.getElementById("mobileMenuID");
+    if (menu && menu.classList.contains("showMenu")) setMenuOpen(false);
+});
+
 (function () {
-    const pills = []; // [nav, pill] pairs, so every pill can be repositioned at once
+    const pills = [];
 
     function movePillTo(nav, pill, item) {
         const inner = item && item.querySelector("a, button");
@@ -70,8 +92,6 @@ function toggleSettings() {
         pill.style.opacity = "1";
     }
 
-    // Back to where the pill rests: behind the active item, or out of sight
-    // if the nav hasn't got one.
     function settle(nav, pill) {
         const activeItem = nav.querySelector("li.active");
         if (activeItem) movePillTo(nav, pill, activeItem);
@@ -116,16 +136,11 @@ function toggleSettings() {
     window.addEventListener("load", () => window.repositionNavPills());
 })();
 
-/* i18n: language switching 
+// Any non-English language loads its dictionary
+// from /src/i18n/<lang>.json (e.g. sv.json, hr.json) and swaps each element's text;
 
-   English is the source in the HTML. Any non-English language loads its dictionary
-   from /src/i18n/<lang>.json (e.g. sv.json, hr.json) and swaps each element's text;
-   anything without a translation is simply left in English (nothing breaks). Dynamic
-   bits (the role cycler, live Pi-hole numbers, GitHub star counts) are left alone.
-   To add a language: add its code to SUPPORTED, drop in <lang>.json, and add an
-   <option> to the #language select. */
 (function () {
-    const SUPPORTED = ["en", "sv", "hr", "bs"];
+    const SUPPORTED = ["en", "sv", "hr", "bs"]; // also listed in settings.js's boot - update both
     const BADGE_SUFFIX = { sv: "_sv" }; // languages with a localized Apple Music badge SVG
     const dicts = {};                   // lang -> dictionary (English text -> translation)
     let current = null;                 // active dictionary, or null for English
@@ -137,10 +152,14 @@ function toggleSettings() {
 
     const SELECTORS = [
         "head > title",
+        ".skipLink",
         "#desktop-header .notAList > li > a",
-        "#mobile-header .mobileMenu > li > a",
+        /* Descendant, not child: the mobile links sit in <ul>s inside .mobileMenu,
+           so the old `.mobileMenu > li > a` matched nothing and the whole mobile
+           menu stayed in English. */
+        "#mobile-header .mobileMenu li > a",
         "main .projectFilter li > button",
-        "main h1.name",
+        "main .name",
         "main h2.section-title",
         "main .description.titleColor",
         "main .description.white > span",
@@ -151,6 +170,12 @@ function toggleSettings() {
         "main .pi-label",
         "main .pi-stat-label",
         "main p.statusWrapper",
+        "main #lanyardRefresh",
+        // The "elapsed"/"remaining" suffix beside an activity's timer.
+        "main #Remaining",
+        "main #Elapsed",
+        "main #amRemaining",
+        "main #amElapsed",
         /* Not #editorFolderBar: its <p> wraps a <span id="editorFolderState"> that
            the editor writes into, and swapping innerHTML here would replace the
            span with plain text - after which setFolderState() updates a detached
@@ -181,7 +206,12 @@ function toggleSettings() {
         ["main .articleAdminActions [title]", "title"],
         ["main .readMore a[title]", "title"],
         ["main #editorFolderBar [title]", "title"],
-        ["main .article-navigation a[title]", "title"]
+        ["main .article-navigation a[title]", "title"],
+        ["main .activityNav[title]", "title"],
+        ["main .activityNav[aria-label]", "aria-label"],
+        // Icon-only header controls carry their name in an attribute.
+        ["header [title]", "title"],
+        ["header [aria-label]", "aria-label"]
     ];
 
     const normalize = (s) => (s || "").replace(/\s+/g, " ").trim();

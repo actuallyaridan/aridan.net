@@ -4,16 +4,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <script src="/src/js/settings.js" async></script>
+    <meta name="theme-color" content="#f1f1f1">
+    <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="aridan.net">
     <meta name="keywords"
         content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
     <meta name="author" content="actualluaridan">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <title>Projects - aridan.net</title>
 
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -21,9 +23,9 @@
     <link rel="stylesheet" href="/src/css/settings.css">
     <link rel="stylesheet" href="/src/css/lanyard.css">
 
-    <script src="/src/js/general.js"></script>
-    <script src="/src/js/getGitHubStats.js"></script>
-    <script src="/src/js/projectFilter.js"></script>
+    <script src="/src/js/general.js" defer></script>
+    <script src="/src/js/getGitHubStats.js" defer></script>
+    <script src="/src/js/projectFilter.js" defer></script>
 
     <script src="/src/js/lanyard.js" async></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
@@ -37,23 +39,25 @@
 </head>
 
 <body>
+    <a class="skipLink" href="#mainContent">Skip to content</a>
+
     <header id="desktop-header">
         <div>
+            <nav aria-label="Main">
+                <ul class="notAList">
+                    <li><a href="/">aridan.net</a></li>
+                    <li><a href="/experience/">Experience</a></li>
+                    <li class="active"><a href="/projects/" aria-current="page">Projects</a></li>
+                    <li><a href="/articles/">Articles</a></li>
+                    <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+                    <li><a href="/pihole/">Pi-hole</a></li>
+                    <li><a href="/contact/">Contact</a></li>
+                </ul>
+            </nav>
             <ul class="notAList">
-                <li><a href="/">aridan.net</a></li>
-                <li><a href="/experience/">Experience</a></li>
-                <li class="active"><a href="/projects/">Projects</a></li>
-                <li><a href="/articles/">Articles</a></li>
-                <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                <li><a href="/pihole/">Pi-hole</a></li>
-                <li><a href="/contact/">Contact</a></li>
-            </ul>
-                      <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -64,41 +68,35 @@
                 <li><a href="/">aridan.net</a></li>
             </ul>
             <ul class="notAList">
-                <li><button title="Menu" class="noUI" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button>
-                </li>
+                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" onclick="toggleMenu()"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
             </ul>
         </div>
-        <menu class="mobileMenu" id="mobileMenuID">
+        <nav class="mobileMenu" id="mobileMenuID" aria-label="Main">
             <ul class="notAList">
                 <li><a href="/experience/">Experience</a></li>
-                <li class="active"><a href="/projects/">Projects</a></li>
+                <li class="active"><a href="/projects/" aria-current="page">Projects</a></li>
                 <li><a href="/articles/">Articles</a></li>
                 <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                 <li><a href="/pihole/">Pi-hole</a></li>
                 <li><a href="/contact/">Contact</a></li>
             </ul>
-                      <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+            <ul class="notAList">
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
-        </menu>
-
+        </nav>
     </header>
-
-    <main class="container">
+    <main class="container" id="mainContent" tabindex="-1">
         <div class="info">
-            <p class="icon"><i class="fa-solid fa-terminal icon-background"></i></p>
+            <p class="icon"><i class="fa-solid fa-terminal icon-background" aria-hidden="true"></i></p>
             <div>
                 <h1 class="name">Projects</h1>
                 <p class="description titleColor">I have a few projects that I've worked on, from translations all the
                     way to a fully-fledged Twitter clone. Check them out! And by the way, the stars and forks counts are dynamic!
                 </p>
             </div>
-            <span class="warn" id="rateLimitGitHub"><p>You're rate limited on the GitHub API. Showing old values.</p></div>
-            </span>
+            <span class="warn" id="rateLimitGitHub" role="status"><p>You're rate limited on the GitHub API. Showing old values.</p></span>
         </div>
         <hr>
         <nav class="projectFilter" aria-label="Project status">
@@ -114,20 +112,20 @@
                     pixel, with my weird eye for detail - the same layouts, sprites, sounds and animations, only backed
                     by real Linux system data. Three of them so far, and the suite keeps growing.</p>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-code"></i>C++, Qt6, CMake</li>
-                    <li><i class="fa-solid fa-window-restore"></i>Device Manager, Control Panel and Minesweeper</li>
-                    <li><i class="fa-solid fa-star"></i><span id="stars-wsl">371</span> stars,
+                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>C++, Qt6, CMake</li>
+                    <li><i class="fa-solid fa-window-restore" aria-hidden="true"></i>Device Manager, Control Panel and Minesweeper</li>
+                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-wsl">371</span> stars,
                         <span id="forks-wsl">9</span> forks</li>
-                    <li><i class="fa-solid fa-bars-progress"></i>Ongoing</li>
+                    <li><i class="fa-solid fa-bars-progress" aria-hidden="true"></i>Ongoing</li>
                 </ul>
             </div>
             <div class="photo-container">
                 <img class="photo" src="/assets/uploads/images/wsl.webp"
-                    alt="The Windows 7 Device Manager, recreated on Linux, listing the hardware of an Arch Linux machine.">
+                    alt="The Windows 7 Device Manager, recreated on Linux, listing the hardware of an Arch Linux machine." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="Windows-alike Software for Linux - GitHub"
+                    <a title="Windows-alike Software for Linux - GitHub" aria-label="Windows-alike Software for Linux - GitHub"
                         href="https://github.com/actuallyaridan?tab=repositories&amp;q=linux-"><i
-                            class="fa-brands fa-github"></i></a>
+                            class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -138,20 +136,21 @@
                 <p class="section-content">The latest version of the X app for iOS, with reverted branding to Twitter
                     and other tweaks so you can gain access to paid Twitter features for free.</p>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-code-fork"></i>Forked from nyathea/FreeBird and BandarHL/BHTiwtter</li>
-                    <li><i class="fa-solid fa-code"></i>Objective-C</li>
-                    <li><i class="fa-solid fa-star"></i><span id="stars-actuallyaridan-NeoFreeBird">1600</span>
+                    <li><i class="fa-solid fa-code-fork" aria-hidden="true"></i>Forked from nyathea/FreeBird and BandarHL/BHTiwtter</li>
+                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>Objective-C</li>
+                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-actuallyaridan-NeoFreeBird">1600</span>
                         stars, <span id="forks-actuallyaridan-NeoFreeBird">101</span> forks</li>
-                    <li><i class="fa-solid fa-pause"></i>Paused</li>
+                    <li><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</li>
                 </ul>
             </div>
             <div class="photo-container">
                 <img class="photo"
-                    src="https://raw.githubusercontent.com/actuallyaridan/NeoFreeBird/88812c269efad0a5f8ab51f9830f3e007995fda2/Branding/Icon.jpg">
+                    src="https://raw.githubusercontent.com/actuallyaridan/NeoFreeBird/88812c269efad0a5f8ab51f9830f3e007995fda2/Branding/Icon.jpg"
+                    alt="The NeoFreeBird app icon." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="neofreebird.aridan.net" href="https://neofreebird.aridan.net"><i
-                            class="fa-solid fa-arrow-up-right-from-square"></i></a><a title="NeoFreeBird - GitHub"
-                        href="https://github.com/actuallyaridan/NeoFreeBird"><i class="fa-brands fa-github"></i></a>
+                    <a title="neofreebird.aridan.net" aria-label="neofreebird.aridan.net" href="https://neofreebird.aridan.net"><i
+                            class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="NeoFreeBird - GitHub" aria-label="NeoFreeBird - GitHub"
+                        href="https://github.com/actuallyaridan/NeoFreeBird"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -162,18 +161,19 @@
                 <p class="section-content">A completely self-made Twitter clone in PHP. Users can post (chirp), repost
                     (rechirp) and like posts. Made to be familiar to Twitter, yet distinct.</p>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-code"></i>PHP, HTML, CSS, JavaScript</li>
-                    <li><i class="fa-solid fa-star"></i><span id="stars-actuallyaridan-chirp">18</span> stars,
+                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>PHP, HTML, CSS, JavaScript</li>
+                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-actuallyaridan-chirp">18</span> stars,
                         <span id="forks-actuallyaridan-chirp">15</span> forks</li>
-                    <li><i class="fa-solid fa-pause"></i>Paused</li>
+                    <li><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</li>
                 </ul>
             </div>
             <div class="photo-container">
-                <img class="photo" src="/assets/uploads/images/chirp.webp">
+                <img class="photo" src="/assets/uploads/images/chirp.webp"
+                    alt="The Chirp logo, a yellow bird." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="beta.chirpsocial.net" href="https://beta.chirpsocial.net"><i
-                            class="fa-solid fa-arrow-up-right-from-square"></i></a><a title="Chirp - GitHub"
-                        href="https://github.com/actuallyaridan/chirp"><i class="fa-brands fa-github"></i></a>
+                    <a title="beta.chirpsocial.net" aria-label="beta.chirpsocial.net" href="https://beta.chirpsocial.net"><i
+                            class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="Chirp - GitHub" aria-label="Chirp - GitHub"
+                        href="https://github.com/actuallyaridan/chirp"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -184,18 +184,19 @@
                 <p class="section-content">The thing you're looking at. A fast and modern website, with dynamic parts
                     like Lanyard.</p>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-code"></i>HTML, CSS, JavaScript</li>
-                    <li><i class="fa-solid fa-star"></i><span id="stars-actuallyaridan-aridan.net">2</span> stars,
+                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>HTML, CSS, JavaScript</li>
+                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-actuallyaridan-aridan.net">2</span> stars,
                         <span id="forks-actuallyaridan-aridan.net">5</span> forks</li>
-                    <li><i class="fa-solid fa-bars-progress"></i>Ongoing</li>
+                    <li><i class="fa-solid fa-bars-progress" aria-hidden="true"></i>Ongoing</li>
                 </ul>
             </div>
             <div class="photo-container">
-                <img class="photo" src="/assets/media/favicons/android-chrome-512x512.png">
+                <img class="photo" src="/assets/media/favicons/android-chrome-512x512.png"
+                    alt="The aridan.net site icon." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="aridan.net" href="https://aridan.net"><i class="fa-solid fa-arrow-up-right-from-square"></i></a><a
-                        title="aridan.net - GitHub" href="https://github.com/actuallyaridan/aridan.net"><i
-                            class="fa-brands fa-github"></i></a>
+                    <a title="aridan.net" aria-label="aridan.net" href="https://aridan.net"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
+                        title="aridan.net - GitHub" aria-label="aridan.net - GitHub" href="https://github.com/actuallyaridan/aridan.net"><i
+                            class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -206,17 +207,18 @@
                 <p class="section-content">A new extension for Chrome and Firefox to restore Twitters old web UI. I made
                     the Swedish translation.</p>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-code"></i>JSON, localization</li>
-                    <li><i class="fa-solid fa-star"></i><span id="stars-dimdenGD-OldTwitter">2500</span> stars, <span
+                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>JSON, localization</li>
+                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-dimdenGD-OldTwitter">2500</span> stars, <span
                             id="forks-dimdenGD-OldTwitter">205</span> forks</li>
-                    <li><i class="fa-solid fa-pause"></i>Paused</li>
+                    <li><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</li>
                 </ul>
             </div>
             <div class="photo-container">
                 <img class="photo"
-                    src="https://raw.githubusercontent.com/dimdenGD/OldTwitter/refs/heads/master/images/logo512.png">
-                <div class="linkCompany"><a title="OldTwitter - GitHub" href="https://github.com/dimdenGD/OldTwitter"><i
-                            class="fa-brands fa-github"></i></a>
+                    src="https://raw.githubusercontent.com/dimdenGD/OldTwitter/refs/heads/master/images/logo512.png"
+                    alt="The OldTwitter extension logo." loading="lazy" decoding="async">
+                <div class="linkCompany"><a title="OldTwitter - GitHub" aria-label="OldTwitter - GitHub" href="https://github.com/dimdenGD/OldTwitter"><i
+                            class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>

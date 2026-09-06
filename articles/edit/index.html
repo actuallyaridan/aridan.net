@@ -4,10 +4,10 @@
 
 <head>
     <meta charset="UTF-8">    
-<script src="/src/js/settings.js" async></script>
+    <meta name="theme-color" content="#f1f1f1">
+<script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description"
         content="aridan.net">
     <meta name="keywords"
@@ -15,6 +15,8 @@
     <meta name="author" content="actualluaridan">
     <meta name="robots" content="noindex, nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <title>Edit article - aridan.net</title>
 
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -25,7 +27,7 @@
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.css">
     <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-    <script src="/src/js/general.js"></script>
+    <script src="/src/js/general.js" defer></script>
 
     <script src="/src/js/articleFormat.js" defer></script>
     <script src="/src/js/articleStore.js" defer></script>
@@ -41,23 +43,25 @@
 </head>
 
 <body class="editorPage">
+    <a class="skipLink" href="#mainContent">Skip to content</a>
+
     <header id="desktop-header">
         <div>
+            <nav aria-label="Main">
+                <ul class="notAList">
+                    <li><a href="/">aridan.net</a></li>
+                    <li><a href="/experience/">Experience</a></li>
+                    <li><a href="/projects/">Projects</a></li>
+                    <li class="active"><a href="/articles/" aria-current="page">Articles</a></li>
+                    <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+                    <li><a href="/pihole/">Pi-hole</a></li>
+                    <li><a href="/contact/">Contact</a></li>
+                </ul>
+            </nav>
             <ul class="notAList">
-                <li><a href="/">aridan.net</a></li>
-                <li><a href="/experience/">Experience</a></li>
-                <li><a href="/projects/">Projects</a></li>
-                <li class="active"><a href="/articles/">Articles</a></li>
-                <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                <li><a href="/pihole/">Pi-hole</a></li>
-                <li><a href="/contact/">Contact</a></li>
-            </ul>
-            <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -68,46 +72,42 @@
                 <li><a href="/">aridan.net</a></li>
             </ul>
             <ul class="notAList">
-                  <li><button title="Menu" class="noUI" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button></li>
+                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" onclick="toggleMenu()"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
             </ul>
         </div>
-        <menu class="mobileMenu" id="mobileMenuID">
+        <nav class="mobileMenu" id="mobileMenuID" aria-label="Main">
             <ul class="notAList">
                 <li><a href="/experience/">Experience</a></li>
                 <li><a href="/projects/">Projects</a></li>
-                <li class="active"><a href="/articles/">Articles</a></li>
+                <li class="active"><a href="/articles/" aria-current="page">Articles</a></li>
                 <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                 <li><a href="/pihole/">Pi-hole</a></li>
                 <li><a href="/contact/">Contact</a></li>
             </ul>
             <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
-        </menu>
-
+        </nav>
     </header>
-
-    <main class="container">
+    <main class="container" id="mainContent" tabindex="-1">
         <div class="info">
-            <p class="icon"><i class="fa-solid fa-pen-nib icon-background"></i></p>
+            <p class="icon"><i class="fa-solid fa-pen-nib icon-background" aria-hidden="true"></i></p>
             <div>
                 <h1 class="name">Edit article</h1>
                 <p class="description titleColor">Edit an existing article and save it back to <code>assets/content/articles/</code>. </p>
                 <div class="articleAdminBar">
-                    <a href="/articles/" class="button backButton" title="Back to Articles"><i class="fa-solid fa-arrow-left"></i></a>
+                    <a href="/articles/" class="button backButton" title="Back to Articles" aria-label="Back to Articles"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></a>
                     <button type="submit" form="editorForm" class="button primary" id="saveArticle"
                         title="Save (Ctrl+S)">
-                        <i class="fa-solid fa-floppy-disk"></i>Save
+                        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>Save
                     </button>
                     <button type="button" class="button" id="downloadArticle">
-                        <i class="fa-solid fa-download"></i>Download
+                        <i class="fa-solid fa-download" aria-hidden="true"></i>Download
                     </button>
                     <button type="button" class="button destructive" id="deleteArticle">
-                        <i class="fa-solid fa-trash-can"></i>Delete
+                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i>Delete
                     </button>
                 </div>
             </div>

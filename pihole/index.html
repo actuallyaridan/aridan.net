@@ -4,16 +4,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <script src="/src/js/settings.js" async></script>
+    <meta name="theme-color" content="#f1f1f1">
+    <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="Live ad-blocking stats from my home Pi-hole.">
     <meta name="keywords"
         content="aridan, actuallyaridan, adnan, bukvic, pi-hole, pihole, dns, ad blocking, raspberry pi, network">
     <meta name="author" content="actualluaridan">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <title>Pi-hole - aridan.net</title>
 
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -22,7 +24,7 @@
     <link rel="stylesheet" href="/src/css/lanyard.css">
     <link rel="stylesheet" href="/src/css/pihole.css">
 
-    <script src="/src/js/general.js"></script>
+    <script src="/src/js/general.js" defer></script>
     <script src="/src/js/getPiholeStats.js" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
         crossorigin="anonymous"></script>
@@ -35,23 +37,25 @@
 </head>
 
 <body>
+    <a class="skipLink" href="#mainContent">Skip to content</a>
+
     <header id="desktop-header">
         <div>
+            <nav aria-label="Main">
+                <ul class="notAList">
+                    <li><a href="/">aridan.net</a></li>
+                    <li><a href="/experience/">Experience</a></li>
+                    <li><a href="/projects/">Projects</a></li>
+                    <li><a href="/articles/">Articles</a></li>
+                    <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+                    <li class="active"><a href="/pihole/" aria-current="page">Pi-hole</a></li>
+                    <li><a href="/contact/">Contact</a></li>
+                </ul>
+            </nav>
             <ul class="notAList">
-                <li><a href="/">aridan.net</a></li>
-                <li><a href="/experience/">Experience</a></li>
-                <li><a href="/projects/">Projects</a></li>
-                <li><a href="/articles/">Articles</a></li>
-                <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                <li class="active"><a href="/pihole/">Pi-hole</a></li>
-                <li><a href="/contact/">Contact</a></li>
-            </ul>
-                      <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -62,33 +66,28 @@
                 <li><a href="/">aridan.net</a></li>
             </ul>
             <ul class="notAList">
-                <li><button title="Menu" class="noUI" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button>
-                </li>
+                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" onclick="toggleMenu()"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
             </ul>
         </div>
-        <menu class="mobileMenu" id="mobileMenuID">
+        <nav class="mobileMenu" id="mobileMenuID" aria-label="Main">
             <ul class="notAList">
                 <li><a href="/experience/">Experience</a></li>
                 <li><a href="/projects/">Projects</a></li>
                 <li><a href="/articles/">Articles</a></li>
                 <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                <li class="active"><a href="/pihole/">Pi-hole</a></li>
+                <li class="active"><a href="/pihole/" aria-current="page">Pi-hole</a></li>
                 <li><a href="/contact/">Contact</a></li>
             </ul>
-                      <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+            <ul class="notAList">
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
-        </menu>
-
+        </nav>
     </header>
-
-    <main class="container">
+    <main class="container" id="mainContent" tabindex="-1">
         <div class="info">
-            <p class="icon"><i class="fa-brands fa-raspberry-pi icon-background"></i></p>
+            <p class="icon"><i class="fa-brands fa-raspberry-pi icon-background" aria-hidden="true"></i></p>
             <div>
                 <h1 class="name">Pi-hole</h1>
                 <p class="description titleColor">Live stats from look-what-you-made-me-do, the
@@ -99,35 +98,35 @@
         <hr>
         <div class="section">
             <div>
-                <span class="warn pi-error" id="pi-error"><p>Couldn't reach the stats right now. Try again later.</p></span>
+                <span class="warn pi-error" id="pi-error" role="alert"><p>Couldn't reach the stats right now. Try again later.</p></span>
                 <div class="pi-grid">
                     <div class="pi-card">
-                        <i class="fa-solid fa-globe fa-lg"></i>
+                        <i class="fa-solid fa-globe fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-total">-</span>
                         <span class="pi-label">DNS queries</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-gauge-high fa-lg"></i>
+                        <i class="fa-solid fa-gauge-high fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-qpm">-</span>
                         <span class="pi-label">queries per minute</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-bolt fa-lg"></i>
+                        <i class="fa-solid fa-bolt fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-cached">-</span>
                         <span class="pi-label">cached requests</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-ban fa-lg"></i>
+                        <i class="fa-solid fa-ban fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-blocked">-</span>
                         <span class="pi-label">queries blocked</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-chart-pie fa-lg"></i>
+                        <i class="fa-solid fa-chart-pie fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-percent">-</span>
                         <span class="pi-label">of traffic blocked</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-list-ul fa-lg"></i>
+                        <i class="fa-solid fa-list-ul fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-domains">-</span>
                         <span class="pi-label">domains on blocklists</span>
                     </div>
@@ -141,27 +140,27 @@
                 <h2 class="section-title">Hardware</h2>
                 <div class="pi-grid">
                     <div class="pi-card">
-                        <i class="fa-solid fa-temperature-half fa-lg"></i>
+                        <i class="fa-solid fa-temperature-half fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-temp">-</span>
                         <span class="pi-label">temperature</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-microchip fa-lg"></i>
+                        <i class="fa-solid fa-microchip fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-cpu">-</span>
                         <span class="pi-label">CPU usage</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-memory fa-lg"></i>
+                        <i class="fa-solid fa-memory fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-ram">-</span>
                         <span class="pi-label">RAM usage</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-hard-drive fa-lg"></i>
+                        <i class="fa-solid fa-hard-drive fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-disk">-</span>
                         <span class="pi-label">storage used</span>
                     </div>
                     <div class="pi-card pi-card-wide">
-                        <i class="fa-solid fa-clock fa-lg"></i>
+                        <i class="fa-solid fa-clock fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-uptime">-</span>
                         <span class="pi-label">uptime</span>
                     </div>
@@ -174,42 +173,42 @@
                 <h2 class="section-title">Storage health</h2>
                 <div class="pi-grid">
                     <div class="pi-card pi-card-wide">
-                        <i class="fa-solid fa-sd-card fa-lg"></i>
+                        <i class="fa-solid fa-sd-card fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-sd-model">-</span>
                         <span class="pi-label">card model</span>
                     </div>
                     <div class="pi-card pi-health" id="pi-health">
-                        <i class="fa-solid fa-heart-pulse fa-lg"></i>
+                        <i class="fa-solid fa-heart-pulse fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-sd-status">-</span>
                         <span class="pi-label">SD card health</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-hourglass-half fa-lg"></i>
+                        <i class="fa-solid fa-hourglass-half fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-sd-age">-</span>
                         <span class="pi-label">card age</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-feather-pointed fa-lg"></i>
+                        <i class="fa-solid fa-feather-pointed fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-sd-writes">-</span>
                         <span class="pi-label">lifetime writes</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-database fa-lg"></i>
+                        <i class="fa-solid fa-database fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-sd-size">-</span>
                         <span class="pi-label">card size</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-up-down fa-lg" id="pi-sd-mode-icon"></i>
+                        <i class="fa-solid fa-up-down fa-lg" id="pi-sd-mode-icon" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-sd-mode">-</span>
                         <span class="pi-label">mount mode</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-file-circle-exclamation fa-lg"></i>
+                        <i class="fa-solid fa-file-circle-exclamation fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-sd-fserr">-</span>
                         <span class="pi-label">filesystem errors</span>
                     </div>
                     <div class="pi-card">
-                        <i class="fa-solid fa-plug-circle-exclamation fa-lg"></i>
+                        <i class="fa-solid fa-plug-circle-exclamation fa-lg" aria-hidden="true"></i>
                         <span class="pi-num pi-loading" id="pi-sd-ioerr">-</span>
                         <span class="pi-label">I/O errors</span>
                     </div>
@@ -241,11 +240,11 @@
                     security patches - rebooting on its own only when a kernel update actually needs it. If anything ever
                     fails, it's written to a log instead of failing silently.</p>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-arrows-rotate"></i>Updates its own Pi-hole software every Sunday</li>
-                    <li><i class="fa-solid fa-shield-halved"></i>Refreshes the ~2&nbsp;million-domain blocklists weekly</li>
-                    <li><i class="fa-solid fa-box-open"></i>Installs OS &amp; security updates, auto-rebooting only when required</li>
-                    <li><i class="fa-solid fa-lock"></i>Validates DNSSEC and resolves through Quad9</li>
-                    <li><i class="fa-solid fa-file-lines"></i>Logs every automated run so nothing breaks unnoticed</li>
+                    <li><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>Updates its own Pi-hole software every Sunday</li>
+                    <li><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Refreshes the ~2&nbsp;million-domain blocklists weekly</li>
+                    <li><i class="fa-solid fa-box-open" aria-hidden="true"></i>Installs OS &amp; security updates, auto-rebooting only when required</li>
+                    <li><i class="fa-solid fa-lock" aria-hidden="true"></i>Validates DNSSEC and resolves through Quad9</li>
+                    <li><i class="fa-solid fa-file-lines" aria-hidden="true"></i>Logs every automated run so nothing breaks unnoticed</li>
                 </ul>
             </div>
         </div>

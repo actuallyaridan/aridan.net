@@ -5,14 +5,15 @@
 (() => {
   "use strict";
 
-  // Config 
   const USER_ID = "701403809129168978";
   const LANYARD_WS = "wss://api.lanyard.rest/socket";
   const HIGH_RES = 512;
   const APPLE_APP_ID = "773825528921849856"; // Lanyard's Apple Music application id
 
-  // Internal state 
   let socket;
+  let autoUpdate = true;   // "Automatically update activities" in the settings panel
+  let awaitingSnapshot = false; // manual mode: close the socket after one payload
+  let refreshTimer = null;
   let rafId = 0;
   let lastTick = 0;
   let heartbeatTimer;
@@ -24,10 +25,9 @@
   let lastAppleHref = "";
   let destroyed = false;
 
-  // latest payload from Lanyard
   let discordDataLatest;
 
-  // DOM cache 
+
   const els = {
     loading: byId("loading"),
     error: byId("errorMessage"),
@@ -36,13 +36,11 @@
     lanyardDiscord: byId("lanyardDiscord"),
     amLanyardDiscord: byId("amLanyardDiscord"),
 
-    // generic activity
     activityLogoLarge: byId("activityLogoLarge"),
     activityName: byId("activityName"),
     activityDetails: byId("activityDetails"),
     activityState: byId("activityState"),
 
-    // Apple Music
     amActivityLogoLarge: byId("amActivityLogoLarge"),
     amActivityName: byId("amActivityName"),
     amActivityState: byId("amActivityState"),
@@ -51,24 +49,135 @@
     amRemaining: byId("amRemaining"),
     amElapsed: byId("amElapsed"),
 
-    // progress bar
     amProgressBar: byId("amProgressBar"),
+    amProgressTrack: byId("amProgressTrack"),
+    progressBar: byId("ProgressBar"),
+    progressTrack: byId("ProgressTrack"),
+    progressSeparator: byId("ProgressSeparator"),
 
-    // external badge
     appleLink: byId("apple-link"),
+
+    refresh: byId("lanyardRefresh"),
+
+    strip: byId("discord"),
+    scrollPrev: byId("discordScrollPrev"),
+    scrollNext: byId("discordScrollNext"),
   };
 
   ["amLanyardDiscord", "discordActivity"].forEach((id) =>
     byId(id)?.classList.add("activity")
   );
 
-  // Bootstrap 
+  // Bootstrap
   if (document.querySelector(".discordWrapper")) {
     initAccessibility();
+    autoUpdate = autoUpdateEnabled();
+    applyUpdateMode({ initial: true });
     connect();
-    startUiTicker();
     window.addEventListener("beforeunload", destroy, { once: true });
     document.addEventListener("visibilitychange", onPageVisibilityChange);
+    window.addEventListener("settings:change", onSettingsChange);
+    els.refresh?.addEventListener("click", refreshNow);
+    initStripNav();
+  }
+
+  function initStripNav() {
+    if (!els.strip) return;
+
+    els.scrollPrev?.addEventListener("click", () => scrollByActivity(-1));
+    els.scrollNext?.addEventListener("click", () => scrollByActivity(1));
+
+    els.strip.addEventListener("scroll", updateStripNav, { passive: true });
+    window.addEventListener("resize", updateStripNav);
+    els.strip.querySelectorAll("img").forEach((img) =>
+      img.addEventListener("load", updateStripNav)
+    );
+    updateStripNav();
+  }
+
+  function visibleActivities() {
+    return [...els.strip.children].filter(
+      (el) => getComputedStyle(el).display !== "none"
+    );
+  }
+
+  function scrollByActivity(direction) {
+    const stripLeft = els.strip.getBoundingClientRect().left;
+    const stops = visibleActivities().map((el) => {
+      const offset = el.getBoundingClientRect().left - stripLeft;
+      const margin = parseFloat(getComputedStyle(el).marginLeft) || 0;
+      return Math.max(0, Math.round(els.strip.scrollLeft + offset - margin));
+    });
+
+    const here = els.strip.scrollLeft;
+    const target = direction > 0
+      ? stops.find((x) => x > here + 1)
+      : [...stops].reverse().find((x) => x < here - 1);
+
+    els.strip.scrollTo({
+      left: target ?? (direction > 0 ? els.strip.scrollWidth : 0),
+      behavior: document.documentElement.classList.contains("reduce-motion")
+        ? "auto"
+        : "smooth"
+    });
+  }
+
+  function updateStripNav() {
+    if (!els.strip) return;
+    const max = els.strip.scrollWidth - els.strip.clientWidth;
+    const overflowing = max > 1;
+    const here = els.strip.scrollLeft;
+
+    els.scrollPrev?.classList.toggle("hide", !overflowing || here <= 1);
+    els.scrollNext?.classList.toggle("hide", !overflowing || here >= max - 1);
+
+    // A tab stop is only worth having while there is something to scroll to.
+    if (overflowing) els.strip.setAttribute("tabindex", "0");
+    else els.strip.removeAttribute("tabindex");
+  }
+
+  function autoUpdateEnabled() {
+    return localStorage.getItem("autoUpdateActivity") !== "false";
+  }
+
+  function applyUpdateMode(opts) {
+    const initial = !!(opts && opts.initial);
+
+    if (els.refresh) els.refresh.classList.toggle("hide", autoUpdate);
+
+    if (autoUpdate) {
+      awaitingSnapshot = false;
+      syncTicker();
+      if (!initial && socket?.readyState !== WebSocket.OPEN) connect();
+      return;
+    }
+
+    stopUiTicker();
+    if (discordDataLatest) cleanupSocket();
+    else awaitingSnapshot = true;
+  }
+
+  function onSettingsChange(e) {
+    if (e.detail?.key !== "autoUpdateActivity") return;
+    autoUpdate = !!e.detail.value;
+    applyUpdateMode({ initial: false });
+  }
+
+  function refreshNow() {
+    if (autoUpdate || destroyed) return;
+    setRefreshBusy(true);
+    awaitingSnapshot = true;
+    reconnectAttempts = 0;
+    connect();
+    refreshTimer = setTimeout(() => setRefreshBusy(false), 10000);
+  }
+
+  function setRefreshBusy(busy) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+    if (!els.refresh) return;
+    els.refresh.disabled = !!busy;
+    els.refresh.setAttribute("aria-busy", busy ? "true" : "false");
   }
 
   // WebSocket 
@@ -108,6 +217,11 @@
           toggleLoading(true);
           discordDataLatest = msg.d || {};
           updateUi();
+          if (!autoUpdate) {
+            awaitingSnapshot = false;
+            setRefreshBusy(false);
+            cleanupSocket();
+          }
           break;
       }
     };
@@ -121,10 +235,10 @@
 
   function onSocketClose() {
     if (destroyed) return;
+    if (!autoUpdate && !awaitingSnapshot) return;
     warn("Lost connection to Lanyard. Reconnecting.");
     if (heartbeatTimer) clearInterval(heartbeatTimer);
 
-    // exponential backoff with cap and jitter
     const base = Math.min(30000, 1000 * 2 ** reconnectAttempts);
     const jitter = Math.floor(Math.random() * 500);
     const delay = Math.max(1000, base) + jitter;
@@ -153,9 +267,12 @@
       clearInterval(heartbeatTimer);
       heartbeatTimer = null;
     }
-    try {
-      socket?.close();
-    } catch { }
+    if (socket) {
+      socket.onopen = socket.onmessage = socket.onerror = socket.onclose = null;
+      try {
+        socket.close();
+      } catch { }
+    }
     socket = null;
   }
 
@@ -164,17 +281,16 @@
     cleanupSocket();
     stopUiTicker();
     document.removeEventListener("visibilitychange", onPageVisibilityChange);
+    window.removeEventListener("settings:change", onSettingsChange);
   }
 
   function onPageVisibilityChange() {
-    // pause heartbeats when tab is hidden on some browsers that throttle timers
     if (document.hidden) {
       if (heartbeatTimer) {
         clearInterval(heartbeatTimer);
         heartbeatTimer = null;
       }
     } else if (socket?.readyState === WebSocket.OPEN) {
-      // resume immediately
       send({ op: 3 });
     }
   }
@@ -195,6 +311,9 @@
       show(els.loading, false);
       show(els.content, true);
       show(els.error, false);
+
+      updateStripNav();
+      syncTicker();
     } catch (e) {
       handleError(e);
     } finally {
@@ -253,10 +372,11 @@
 
     const a = activities[0];
     setText(els.activityName, a.name);
-    setText(els.activityDetails, a.details || "No details available");
+    setText(els.activityDetails, a.details);
     setText(els.activityState, a.state || "");
 
     updateActivityTime(a.timestamps);
+    updateProgressBar(a.timestamps, "");
   }
 
   function updateAppleMusicInfo(a) {
@@ -283,13 +403,28 @@
     }
   }
 
-  function updateProgressBar(timestamps) {
-    const bar = els.amProgressBar;
+  function updateProgressBar(timestamps, prefix = "am") {
+    const am = prefix === "am";
+    const bar = am ? els.amProgressBar : els.progressBar;
+    const track = am ? els.amProgressTrack : els.progressTrack;
     if (!bar) return;
 
-    if (!timestamps?.start || !timestamps?.end) {
+    const timed = !!(timestamps?.start && timestamps?.end);
+
+    /* A generic Discord activity usually reports a start and no end, which is
+       elapsed time rather than a proportion - there is nothing for a bar to
+       fill towards. Rather than leave a bar sitting empty forever, swap it for
+       the plain separator, which keeps the card the same height and rhythm as
+       one that does have a bar. Apple Music always has both, so its track is
+       always on show and it has no separator to swap to. */
+    if (!am) {
+      track?.classList.toggle("hide", !timed);
+      els.progressSeparator?.classList.toggle("hide", timed);
+    }
+
+    if (!timed) {
       bar.style.width = "0%";
-      bar.setAttribute("aria-valuenow", "0");
+      track?.setAttribute("aria-valuenow", "0");
       return;
     }
 
@@ -303,7 +438,7 @@
     else pct = ((now - start) / (end - start)) * 100;
 
     bar.style.width = `${pct}%`;
-    bar.setAttribute("aria-valuenow", String(Math.round(pct)));
+    track?.setAttribute("aria-valuenow", String(Math.round(pct)));
   }
 
   function updateActivityTime(timestamps, prefix = "") {
@@ -332,7 +467,6 @@
       const parts = image.split(/\/https?\//);
       if (parts.length > 1) {
         const rawApple = "https://" + parts[1];
-        // keep optional -NN and original extension, preserve any query string
         return rawApple.replace(
           /\/(\d+)x\1bb(-\d+)?\.(jpg|png)(\?.*)?$/i,
           `/${size}x${size}bb$2.$3$4`
@@ -377,7 +511,6 @@
     el.style.display = "block";
   }
 
-  // Helpers 
   function byId(id) { return id ? document.getElementById(id) : null; }
   function show(el, yes) { if (el) el.style.display = yes ? "flex" : "none"; }
   function setText(el, text) { if (!el) return; el.textContent = text ?? ""; show(el, !!text); }
@@ -429,7 +562,6 @@
     show(els.error, true);
   }
 
-  // Accessibility 
   function initAccessibility() {
     document.querySelectorAll(".statusWrapper").forEach((el) => {
       el.setAttribute("role", "status");
@@ -438,18 +570,12 @@
 
     if (els.activityLogoLarge) els.activityLogoLarge.setAttribute("alt", "Discord activity icon");
     if (els.amActivityLogoLarge) els.amActivityLogoLarge.setAttribute("alt", "Album art");
-
-    if (els.amProgressBar) {
-      els.amProgressBar.setAttribute("role", "progressbar");
-      els.amProgressBar.setAttribute("aria-valuemin", "0");
-      els.amProgressBar.setAttribute("aria-valuemax", "100");
-      els.amProgressBar.setAttribute("aria-valuenow", "0");
-    }
+    // The progressbar role lives on the track in the markup, not on the fill -
+    // the fill's width is the value, so it can't also be the element that
+    // carries aria-valuemin/max.
   }
 
-  // UI ticker (smooth time/progress without new payloads) 
   function tick(ts) {
-    // throttle to 10 fps, enough for smooth progress bars without cost
     if (ts - lastTick > 100) {
       lastTick = ts;
       const music = pickAppleMusic(discordDataLatest?.activities || []);
@@ -458,7 +584,10 @@
         updateActivityTime(music.timestamps, "am");
       }
       const otherTimed = (discordDataLatest?.activities || []).find((a) => a !== music && a?.timestamps);
-      if (otherTimed) updateActivityTime(otherTimed.timestamps);
+      if (otherTimed) {
+        updateActivityTime(otherTimed.timestamps);
+        updateProgressBar(otherTimed.timestamps, "");
+      }
     }
     rafId = window.requestAnimationFrame(tick);
   }
@@ -471,7 +600,21 @@
     rafId = 0;
   }
 
-  // JSONP helpers for Apple APIs 
+  /* The ticker exists to advance timers and the progress bar. With nothing
+     playing there is nothing to advance, so leaving it running just woke the
+     main thread every frame for no visible change - which on a laptop is real
+     battery for an idle page. Run it only while something is actually timed. */
+  function hasTimedActivity() {
+    return (discordDataLatest?.activities || []).some(
+      (a) => a?.timestamps?.start || a?.timestamps?.end
+    );
+  }
+
+  function syncTicker() {
+    if (autoUpdate && hasTimedActivity()) startUiTicker();
+    else stopUiTicker();
+  }
+
   function fetchJsonp(url, timeoutMs = 6000) {
     return new Promise((resolve, reject) => {
       const cb = "jsonp_" + Math.random().toString(36).slice(2);
@@ -592,7 +735,6 @@
     }
   }
 
-  // Small utilities 
   function isElementInDom(el) {
     return !!(el && el.ownerDocument && el.ownerDocument.contains(el));
   }

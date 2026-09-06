@@ -61,10 +61,8 @@
     transform: scale(0.9);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    #lyricsCloseBtn:active {
-        transform: none;
-    }
+html.reduce-motion #lyricsCloseBtn:active {
+    transform: none;
 }
 
 #lyricsStage {
@@ -140,15 +138,14 @@
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .lyricsRow {
-        animation: none;
-        opacity: 1;
-        transform: none;
-    }
+/* Driven by the Reduce motion switch, which defaults to the OS preference. */
+html.reduce-motion .lyricsRow {
+    animation: none;
+    opacity: 1;
+    transform: none;
+}
 
-    #lyricsOverlay.lyricsOpening,
-    #lyricsOverlay.lyricsClosing {
-        animation: none;
-    }
+html.reduce-motion #lyricsOverlay.lyricsOpening,
+html.reduce-motion #lyricsOverlay.lyricsClosing {
+    animation: none;
 }

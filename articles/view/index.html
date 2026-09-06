@@ -4,13 +4,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#f1f1f1">
+    <script src="/src/js/settings.js"></script>
     <meta name="description" content="aridan.net">
     <meta name="keywords" content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
     <meta name="author" content="actualluaridan">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <title>Articles - aridan.net</title>
   
     <!-- Favicon & Touch Icons -->
@@ -40,7 +43,6 @@
     <link rel="stylesheet" href="/src/css/editor.css">
   
     <!-- Settings & General Scripts (load early if they set globals) -->
-    <script src="/src/js/settings.js" async></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
     <script src="/src/js/general.js" defer></script>
@@ -69,23 +71,25 @@
   
 
 <body>
+    <a class="skipLink" href="#mainContent">Skip to content</a>
+
     <header id="desktop-header">
         <div>
+            <nav aria-label="Main">
+                <ul class="notAList">
+                    <li><a href="/">aridan.net</a></li>
+                    <li><a href="/experience/">Experience</a></li>
+                    <li><a href="/projects/">Projects</a></li>
+                    <li class="active"><a href="/articles/" aria-current="page">Articles</a></li>
+                    <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+                    <li><a href="/pihole/">Pi-hole</a></li>
+                    <li><a href="/contact/">Contact</a></li>
+                </ul>
+            </nav>
             <ul class="notAList">
-                <li><a href="/">aridan.net</a></li>
-                <li><a href="/experience/">Experience</a></li>
-                <li><a href="/projects/">Projects</a></li>
-                <li class="active"><a href="/articles/">Articles</a></li>
-                <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                <li><a href="/pihole/">Pi-hole</a></li>
-                <li><a href="/contact/">Contact</a></li>
-            </ul>
-            <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></a></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -96,29 +100,26 @@
                 <li><a href="/">aridan.net</a></li>
             </ul>
             <ul class="notAList">
-                  <li><button title="Menu" class="noUI" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button></li>
+                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" onclick="toggleMenu()"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
             </ul>
         </div>
-        <menu class="mobileMenu" id="mobileMenuID">
+        <nav class="mobileMenu" id="mobileMenuID" aria-label="Main">
             <ul class="notAList">
                 <li><a href="/experience/">Experience</a></li>
                 <li><a href="/projects/">Projects</a></li>
-                <li class="active"><a href="/articles/">Articles</a></li>
+                <li class="active"><a href="/articles/" aria-current="page">Articles</a></li>
                 <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                 <li><a href="/pihole/">Pi-hole</a></li>
                 <li><a href="/contact/">Contact</a></li>
             </ul>
             <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></a></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
-        </menu>
-
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+            </ul>
+        </nav>
     </header>
-
-    <main class="container">
+    <main class="container" id="mainContent" tabindex="-1">
 
     </main>
     <div id="loading" class="fullPage" style="display: none;">

@@ -4,23 +4,25 @@
 
 <head>
     <meta charset="UTF-8">    
-<script src="/src/js/settings.js" async></script>
+    <meta name="theme-color" content="#f1f1f1">
+<script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="aridan.net">
     <meta name="keywords"
         content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
     <meta name="author" content="actualluaridan">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <title>Experience - aridan.net</title>
 
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/src/css/styles.css">
     <link rel="stylesheet" href="/src/css/settings.css">
     <link rel="stylesheet" href="/src/css/lanyard.css">
-    <script src="/src/js/general.js"></script>
+    <script src="/src/js/general.js" defer></script>
 
     <script src="/src/js/lanyard.js" async></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
@@ -34,23 +36,25 @@
 </head>
 
 <body>
+    <a class="skipLink" href="#mainContent">Skip to content</a>
+
     <header id="desktop-header">
         <div>
+            <nav aria-label="Main">
+                <ul class="notAList">
+                    <li><a href="/">aridan.net</a></li>
+                    <li class="active"><a href="/experience/" aria-current="page">Experience</a></li>
+                    <li><a href="/projects/">Projects</a></li>
+                    <li><a href="/articles/">Articles</a></li>
+                    <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+                    <li><a href="/pihole/">Pi-hole</a></li>
+                    <li><a href="/contact/">Contact</a></li>
+                </ul>
+            </nav>
             <ul class="notAList">
-                <li><a href="/">aridan.net</a></li>
-                <li class="active"><a href="/experience/">Experience</a></li>
-                <li><a href="/projects/">Projects</a></li>
-                <li><a href="/articles/">Articles</a></li>
-                <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                <li><a href="/pihole/">Pi-hole</a></li>
-                <li><a href="/contact/">Contact</a></li>
-            </ul>
-                      <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -61,38 +65,34 @@
                 <li><a href="/">aridan.net</a></li>
             </ul>
             <ul class="notAList">
-                <li><button class="noUI" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button></li>
+                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" onclick="toggleMenu()"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
             </ul>
         </div>
-        <menu class="mobileMenu" id="mobileMenuID">
+        <nav class="mobileMenu" id="mobileMenuID" aria-label="Main">
             <ul class="notAList">
-                <li class="active"><a href="/experience/">Experience</a></li>
+                <li class="active"><a href="/experience/" aria-current="page">Experience</a></li>
                 <li><a href="/projects/">Projects</a></li>
                 <li><a href="/articles/">Articles</a></li>
                 <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                 <li><a href="/pihole/">Pi-hole</a></li>
                 <li><a href="/contact/">Contact</a></li>
             </ul>
-                      <ul class="notAList">
-                <li><button class="noUI" onClick="toggleSettings()"><i class="fa-solid fa-gear" title="Settings"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan"><i class="fa-brands fa-github"
-                            title="GitHub"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan"><i class="fa-brands fa-twitter"
-                            title="Twitter"></i></a></li>
+            <ul class="notAList">
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
-        </menu>
-
+        </nav>
     </header>
-
-    <main class="container">
+    <main class="container" id="mainContent" tabindex="-1">
         <div class="info">
-            <p class="icon"><i class="fa-solid fa-briefcase icon-background"></i></p>
+            <p class="icon"><i class="fa-solid fa-briefcase icon-background" aria-hidden="true"></i></p>
             <div>
                 <h1 class="name">Career</h1>
                 <p class="description titleColor">I've had various jobs at a few companies. I've worked in tech repair,
                     IT support for a municipality, and general support for an IoT company, and I'm only getting started!
                 </p>
-                <a class="button primary" href="mailto:adnan@aridan.net"><i class="fa-solid fa-envelope"></i>Get in touch</a>
+                <a class="button primary" href="mailto:adnan@aridan.net"><i class="fa-solid fa-envelope" aria-hidden="true"></i>Get in touch</a>
             </div>
         </div>
         <hr>
@@ -100,19 +100,20 @@
             <div>
                 <h2 class="section-title">Customer Service Agent</h2>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-building"></i>MiniFinder Sweden AB</li>
-                    <li><i class="fa-solid fa-location-dot"></i>Växjö, Sweden</li>
+                    <li><i class="fa-solid fa-building" aria-hidden="true"></i>MiniFinder Sweden AB</li>
+                    <li><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Växjö, Sweden</li>
 
-                    <li><i class="fa-solid fa-clock"></i>February 2025 - Present</li>
+                    <li><i class="fa-solid fa-clock" aria-hidden="true"></i>February 2025 - Present</li>
                 </ul>
                 <p class="section-content">At MiniFinder, I provide customer support via email, phone, and chat. I assist customers with orders and troubleshooting. I also provide feedback and ideas on applications, websites, and internal systems to help improve usability, customer experience, efficiency, and overall satisfaction for end-users and my colleagues.</p>
             </div>
             <div class="photo-container">
-                <img class="photo" src="/assets/uploads/images/minifinder.webp">
+                <img class="photo" src="/assets/uploads/images/minifinder.webp"
+                    alt="The MiniFinder Sweden AB logo." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="minifinder.com" href="https://minifinder.com"><i class="fa-solid fa-arrow-up-right-from-square"></i></a><a title="shop.minifinder.com" href="https://shop.minifinder.com"><i class="fa-solid fa-cart-shopping"></i></a><a
-                        title="MiniFinder - LinkedIn" href="https://www.linkedin.com/company/minifinder/"><i
-                            class="fa-brands fa-linkedin-in"></i></a>
+                    <a title="minifinder.com" aria-label="minifinder.com" href="https://minifinder.com"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="shop.minifinder.com" aria-label="shop.minifinder.com" href="https://shop.minifinder.com"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></a><a
+                        title="MiniFinder - LinkedIn" aria-label="MiniFinder - LinkedIn" href="https://www.linkedin.com/company/minifinder/"><i
+                            class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -121,22 +122,23 @@
             <div>
                 <h2 class="section-title">IT technician</h2>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-building"></i>Tingsryds municipality</li>
-                    <li><i class="fa-solid fa-location-dot"></i>Tingsryd, Sweden</li>
+                    <li><i class="fa-solid fa-building" aria-hidden="true"></i>Tingsryds municipality</li>
+                    <li><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Tingsryd, Sweden</li>
 
-                    <li><i class="fa-solid fa-clock"></i>September 2024 - February 2025</li>
+                    <li><i class="fa-solid fa-clock" aria-hidden="true"></i>September 2024 - February 2025</li>
                 </ul>
                 <p class="section-content">As an IT technician at Tingsryds municipality, I provided IT-based support
                     for various end-users across the municipality. I also deployed computers, and enrolled mobile
                     phones and tablets to Microsoft Intune.</p>
             </div>
             <div class="photo-container">
-                <img class="photo" src="/assets/uploads/images/tingsryd.webp">
+                <img class="photo" src="/assets/uploads/images/tingsryd.webp"
+                    alt="The coat of arms of Tingsryds municipality." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="tingsryd.se" href="https://tingsryd.se"><i class="fa-solid fa-arrow-up-right-from-square"></i></a><a
-                        title="Tingsryds municipality - LinkedIn"
+                    <a title="tingsryd.se" aria-label="tingsryd.se" href="https://tingsryd.se"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
+                        title="Tingsryds municipality - LinkedIn" aria-label="Tingsryds municipality - LinkedIn"
                         href="https://www.linkedin.com/company/tingsryds-kommun/"><i
-                            class="fa-brands fa-linkedin-in"></i></a>
+                            class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -145,31 +147,32 @@
             <div>
                 <h2 class="section-title">Technician and Web developer</h2>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-building"></i>IT Care Repairstore</li>
-                    <li><i class="fa-solid fa-location-dot"></i>Växjö, Sweden</li>
+                    <li><i class="fa-solid fa-building" aria-hidden="true"></i>IT Care Repairstore</li>
+                    <li><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Växjö, Sweden</li>
 
-                    <li><i class="fa-solid fa-clock"></i>November 2022 - October 2023</li>
+                    <li><i class="fa-solid fa-clock" aria-hidden="true"></i>November 2022 - October 2023</li>
                 </ul>
                 <p class="section-content">In my role at IT Care Repairstore, I received, diagnosed, repaired, and
                     returned customers computers, mobile phones and tablets. I was also responsible for keeping the
                     website working and up-to-date.</p>
             </div>
             <div class="photo-container">
-                <img class="photo" src="/assets/uploads/images/itcare.webp">
+                <img class="photo" src="/assets/uploads/images/itcare.webp"
+                    alt="The IT Care Repairstore logo." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="itcarestore.se" href="https://itcarestore.se"><i class="fa-solid fa-arrow-up-right-from-square"></i></a><a
-                        title="IT Care Repairstore - LinkedIn"
+                    <a title="itcarestore.se" aria-label="itcarestore.se" href="https://itcarestore.se"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
+                        title="IT Care Repairstore - LinkedIn" aria-label="IT Care Repairstore - LinkedIn"
                         href="https://www.linkedin.com/company/it-care-repairstore/"><i
-                            class="fa-brands fa-linkedin-in"></i></a>
+                            class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
 
         <hr>
         <div class="info">
-            <p class="icon"><i class="fa-solid fa-graduation-cap icon-background"></i></i></p>
+            <p class="icon"><i class="fa-solid fa-graduation-cap icon-background" aria-hidden="true"></i></p>
             <div>
-                <h1 class="name">Education</h1>
+                <h2 class="name">Education</h2>
             </div>
         </div>
         <hr>
@@ -177,9 +180,9 @@
             <div>
                 <h2 class="section-title">Computer and Networking Technology</h2>
                 <ul class="specs">
-                    <li><i class="fa-solid fa-building"></i>Teknikum</li>
-                    <li><i class="fa-solid fa-location-dot"></i>Växjö, Sweden</li>
-                    <li><i class="fa-solid fa-clock"></i>August 2020 - June 2023</li>
+                    <li><i class="fa-solid fa-building" aria-hidden="true"></i>Teknikum</li>
+                    <li><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Växjö, Sweden</li>
+                    <li><i class="fa-solid fa-clock" aria-hidden="true"></i>August 2020 - June 2023</li>
                 </ul>
                 <p class="section-content">At Teknikum, I expanded my knowledge in regards to Windows clients along with
                     learning how to properly use Windows Server, set up Active Directory and similar. I also learned how
@@ -187,9 +190,10 @@
                     my curriculum, which helped me create my Twitter clone called Chirp, and this very website.</p>
             </div>
             <div class="photo-container">
-                <img class="photo" src="/assets/uploads/images/vaxjo.webp">
+                <img class="photo" src="/assets/uploads/images/vaxjo.webp"
+                    alt="The Teknikum school logo." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="teknikum.se" href="https://teknikum.se"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    <a title="teknikum.se" aria-label="teknikum.se" href="https://teknikum.se"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>

@@ -60,8 +60,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-left: 6px;
-    margin-right: 6px;
+    /* No side margins: the strip inside has to reach the full container width,
+       and the activity cards carry their own 12px inset already. */
     margin-top: 12px;
     transition: width 0.2s;
 }
@@ -96,9 +96,9 @@ section.project>p.dcProjectName {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    -webkit-backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(var(--blur-soft));
     /* Fallback for older browsers */
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(var(--blur-soft));
     width: 65vw;
     height: auto;
     /* Fallback for aspect-ratio */
@@ -124,20 +124,18 @@ img.albumArt {
 .dnd {
     background-color: rgba(249, 76, 87, 0.15);
     border: 1px solid rgba(249, 76, 87, 0.4);
-    box-shadow: rgba(249, 76, 87, 0.3) 0px 0px 20px,
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     transition: background-color 0.2s;
 }
 
 .dcloading {
     background-color: rgba(144, 144, 144, 0.15);
     border: 1px solid rgba(144, 144, 144, 0.3);
-    box-shadow: rgba(140, 140, 140, 0.3) 0px 0px 20px,
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     transition: background-color 0.2s;
     text-align: center;
 }
@@ -145,31 +143,107 @@ img.albumArt {
 .online {
     background-color: rgba(83, 215, 105, 0.15);
     border: 1px solid rgba(83, 215, 105, 0.4);
-    box-shadow: rgba(83, 215, 105, 0.3) 0px 0px 20px,
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     transition: background-color 0.2s;
 }
 
 .idle {
     background-color: rgba(242, 132, 29, 0.15);
     border: 1px solid rgba(242, 132, 29, 0.4);
-    box-shadow: rgba(242, 132, 29, 0.3) 0px 0px 20px,
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     transition: background-color 0.2s;
+}
+
+/* The strip and everything between it and main.container. Each link in the chain
+   is a flex item that would otherwise size to its content, so without these the
+   activities push the card wider than the hero above it. min-width: 0 is what
+   actually lets a flex item shrink below its content. */
+/* The strip and everything between it and main.container. Each link is a flex
+   item that would otherwise size to its own content, leaving the strip narrower
+   than the hero on wide screens and wider than it on narrow ones. width: 100%
+   pins it to the container; min-width: 0 is what actually lets a flex item
+   shrink below its content so max-width can bite. */
+.discordWrapper,
+#lanyardDiscord,
+#loadedLanyard,
+#discordScroller {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+#discordScroller {
+    position: relative;
+    width: 100%;
 }
 
 div#discord {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    /* safe center, not center: a centred flex row that overflows puts its first
+       item at a negative offset, which no amount of scrolling can reach. "safe"
+       keeps the centring while it fits and falls back to flex-start once it does
+       not, so the first and last activities stay reachable. */
+    justify-content: safe center;
     align-items: stretch;
     flex-wrap: nowrap;
-    max-width: 80vw;
-    overflow-x: scroll;
+    /* Never wider than the container, whatever the activity count. Partial
+       activities at the edge are fine - that is the cue that there is more. */
+    max-width: 100%;
+    overflow-x: auto;
+    /* The arrows are the affordance now, so the native bar is hidden on both
+       engines. Firefox draws a full-length thumb whenever overflow is scrollable
+       even with nothing to scroll, which is what kept showing up. */
+    scrollbar-width: none;
+}
+
+div#discord::-webkit-scrollbar {
+    display: none;
+}
+
+/* Scroll arrows. Shown by lanyard.js only in the direction there is more to see,
+   and overlaid rather than in flow so appearing does not resize the card.
+
+   They carry .button as well, so the fill, hairline, blur, shadow, hover, press,
+   padding and corner radius all come from whichever style is selected - flat or
+   Liquid Glass - exactly like every other button on the site. Nothing about
+   their size is restated here, so an arrow is the same height as a labelled
+   button and stays that way if .button's padding ever changes.
+
+   Only the placement is local. Centred by letting auto block margins split the
+   leftover space rather than with translateY, so .button's :active
+   transform: scale() isn't overwritten and the press feedback survives. */
+.button.activityNav {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    text-align: center;
+    top: 0;
+    bottom: 0;
+    height: fit-content;
+    margin-block: auto;
+}
+
+.button.activityNav.hide {
+    display: none;
+}
+
+/* The global icon rule adds a right margin meant for icons that precede a label. */
+.button.activityNav > i {
+    width: auto;
+    margin-right: 0;
+}
+
+#discordScrollPrev {
+    left: 0;
+}
+
+#discordScrollNext {
+    right: 0;
 }
 
 #discordName,
@@ -219,10 +293,16 @@ div#discord {
     justify-content: space-between;
 }
 
-#activityLogoLarge,
 #activityLogoLarge {
     border-radius: 5px;
     margin: 12px;
+    /* Discord app art is not always square - GTA V's is 1200x1600 box art, and
+       the 96x96 attributes on the <img> were stretching it to fit. Sizing from
+       the height lets any aspect ratio through at a consistent card height. */
+    width: auto;
+    height: 96px;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 #amActivityLogoLarge {
@@ -293,6 +373,36 @@ div#loading>div {
 
 .lds-ring div:nth-child(3) {
     animation-delay: -0.15s;
+}
+
+/* Reduce motion: the rotation *is* this spinner, so swap the whole thing for a
+   static hourglass rather than freezing four rings mid-turn. Done in CSS because
+   the markup appears seven times across five pages. */
+html.reduce-motion .lds-ring div {
+    display: none;
+}
+
+html.reduce-motion .lds-ring::before {
+    content: "\f252"; /* fa-hourglass-half */
+    font-family: "Font Awesome 7 Free";
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+html.reduce-motion .lds-ring.smallLoader::before {
+    font-size: 0.9em;
+}
+
+/* This one sits on the coloured status row, where the ring was white. */
+html.reduce-motion .lds-ring.lanyardConnecting::before {
+    color: inherit;
 }
 
 
@@ -443,7 +553,22 @@ span.titleActivity {
     justify-content: space-between;
 }
 
-i>h3 {
+/* The icon and the activity name. The icon used to *contain* the <h3>, which put
+   a heading inside an <i> and let Font Awesome's text-align: center reach the
+   title, so long names came out centred. They're siblings now, wrapped in a
+   plain inline span that keeps the same layout. */
+.titleActivity > .activityHeading {
+    text-align: left;
+    min-width: 0;
+}
+
+/* The global icon rule's 10px is meant for icons that precede a label in a
+   button; here the h3's own margin sets the gap. */
+.titleActivity > .activityHeading > i {
+    margin-right: 0;
+}
+
+.titleActivity h3 {
     display: inline !important;
     margin-left: 0.2em;
     font-weight: normal !important;
@@ -492,6 +617,11 @@ border: 1px solid var(--liquid-glass-button-border);
     width: 100%;
 }
 
+/* Also worn by .activitySeparator, the empty rule shown in place of the bar for
+   activities that have no progress to report. It is deliberately the same box:
+   the point is that a card without a bar sits the same as one with it. Nothing
+   here is bar-specific - the fill is a separate element - so there is no
+   .activitySeparator rule to keep in step with this one. */
 .progress-bar-container {
     position: relative;
     width: 100%;
@@ -592,9 +722,10 @@ div.iconContainer {
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 12px;
-    margin: 12px;
-    width: unset;
+    /* Vertical spacing only. Any horizontal inset here narrows the activity
+       strip relative to the hero, which is what left it cutting cards off. */
+    padding: 12px 0;
+    margin: 12px 0;
     min-height: unset !important;
 }
 
@@ -626,4 +757,22 @@ div.iconContainer {
 #apple-link img {
     height: 41px;
     width: auto;
+}
+
+/* Only present when "Automatically update activities" is off - see lanyard.js.
+   Matches #lyricsEasterEggBtn so the two sit the same way in the card. */
+#lanyardRefresh {
+    margin: 12px auto 0;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+#lanyardRefresh.hide {
+    display: none;
+}
+
+#lanyardRefresh[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
 }

@@ -40,8 +40,8 @@ body.editorPage main.container {
     background: var(--liquid-glass-button-background);
     border: 1px solid var(--liquid-glass-button-border);
     color: var(--paragraph-color);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     box-shadow: none;
 }
 
@@ -286,8 +286,8 @@ main > .section > .section-content code {
     border-radius: 16px;
     background: var(--liquid-glass-button-background);
     border: 1px solid var(--liquid-glass-button-border);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
         0 4px 16px rgba(0, 0, 0, 0.2);

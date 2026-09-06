@@ -20,7 +20,7 @@
         b.className = "button " + className;
         b.title = title;
         b.setAttribute("aria-label", title);
-        b.innerHTML = '<i class="fa-solid ' + icon + '"></i>';
+        b.innerHTML = '<i class="fa-solid ' + icon + '" aria-hidden="true"></i>';
         return b;
     }
 
@@ -111,7 +111,7 @@
         edit.href = editUrl(slug);
         edit.title = t("Edit this article");
         edit.setAttribute("aria-label", t("Edit this article"));
-        edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
+        edit.innerHTML = '<i class="fa-solid fa-pen" aria-hidden="true"></i>';
 
         var del = button("destructive", t("Delete this article"), "fa-trash-can");
         if (Store.isSupported()) {
@@ -152,7 +152,7 @@
     function labelledButton(tag, className, icon, text) {
         var el = document.createElement(tag);
         el.className = "button " + className;
-        el.innerHTML = '<i class="fa-solid ' + icon + '"></i>' + text;
+        el.innerHTML = '<i class="fa-solid ' + icon + '" aria-hidden="true"></i>' + text;
         return el;
     }
 

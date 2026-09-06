@@ -1,4 +1,6 @@
 {
+  "Skip to content": "Hoppa till innehållet",
+  "Menu": "Meny",
   "Experience": "Erfarenhet",
   "Projects": "Projekt",
   "Articles": "Artiklar",
@@ -42,12 +44,17 @@
   "Idle": "Inaktiv",
   "a swedish": "en svensk",
   "Connecting": "Ansluter",
+  "Refresh": "Uppdatera",
+  "Previous activity": "Föregående aktivitet",
+  "Next activity": "Nästa aktivitet",
+  "remaining": "kvar",
+  "elapsed": "förflutet",
   "Listen on Apple Music": "Lyssna på Apple Music",
   "A black button with the Apple Music logo and text that says 'Listen on Apple Music'.": "En svart knapp med Apple Music-logotypen och texten \"Lyssna på Apple Music\".",
 
   "I'm Adnan. I'm a creative guy that loves making new solutions to old things. I love learning new things and I've liked computers, phones and networking ever since I was a child. I'm always up-to-date about their software and hardware. I even like modifying electronics to do new things like replacing the hard drive in iPods with an SD card! I also know a bunch of languages too!": "Jag heter Adnan. Jag är en kreativ kille som älskar att hitta nya lösningar på gamla problem. Jag älskar att lära mig nya saker och har gillat datorer, telefoner och nätverk ända sedan jag var barn. Jag håller mig alltid uppdaterad om deras mjukvara och hårdvara. Jag gillar till och med att modifiera elektronik för att få den att göra nya saker, som att byta ut hårddisken i en iPod mot ett SD-kort! Jag kan dessutom en massa språk!",
 
-  "Hobbies": "Fritidsintressen",
+  "Hobbies": "Intressen",
 
   "I have a computer that runs both Windows and macOS - it's a hackintosh. It runs the latest version of macOS great, with graphic acceleration, WiFi and Bluetooth. It works great, however, due to my graphics card being incompatible with macOS, DRM content, like Netflix, doesn't play in Safari, but does work properly in other browsers. Here are the specs of it if you'd like to build something similar:": "Jag har en dator som kör både Windows och macOS - det är en hackintosh. Den kör den senaste versionen av macOS utmärkt, med grafikacceleration, WiFi och Bluetooth. Den fungerar bra, men eftersom mitt grafikkort inte är kompatibelt med macOS spelas DRM-innehåll som Netflix inte upp i Safari - men det fungerar som det ska i andra webbläsare.<br>Här är specifikationerna om du vill bygga något liknande:",
 

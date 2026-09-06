@@ -60,8 +60,13 @@
         };
 
         // Someone arriving on /projects/#paused from elsewhere, or changing the
-        // hash by hand, gets the tab they asked for.
-        window.addEventListener("hashchange", () => show(fromHash()));
+        // hash by hand, gets the tab they asked for. A hash that isn't a status
+        // is left alone - the skip link is one - so jumping to an anchor doesn't
+        // silently throw the visitor back to the default tab.
+        window.addEventListener("hashchange", () => {
+            const status = location.hash.slice(1);
+            if (statuses.includes(status)) show(status);
+        });
         show(fromHash());
     }
 

@@ -15,7 +15,7 @@
         el.innerHTML =
             '<div class="preview">' +
                 '<span class="titleContainer">' +
-                    '<h3 class="section-title">' + esc(article.meta.title || "Untitled article") + "</h3>" +
+                    '<h2 class="section-title">' + esc(article.meta.title || "Untitled article") + "</h2>" +
                     '<p class="date section-content">' +
                         '<time datetime="' + esc(article.meta.date || "") + '">' +
                             esc(AF.formatDate(article.meta.date)) +
@@ -25,8 +25,8 @@
                 '<p class="section-content previewContent">' + esc(article.meta.preview || "") + "</p>" +
             "</div>" +
             '<div class="readMore">' +
-                '<div><a href="' + esc(articleUrl(article.slug)) + '" title="Read more" class="button backButton">' +
-                    '<i class="fa-solid fa-arrow-right"></i>' +
+                '<div><a href="' + esc(articleUrl(article.slug)) + '" title="Read more" aria-label="Read more" class="button backButton">' +
+                    '<i class="fa-solid fa-arrow-right" aria-hidden="true"></i>' +
                 "</a> </div>" +
             "</div>";
         return el;

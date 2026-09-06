@@ -1,4 +1,6 @@
 {
+  "Skip to content": "Preskoči na sadržaj",
+  "Menu": "Izbornik",
   "Experience": "Iskustvo",
   "Projects": "Projekti",
   "Articles": "Članci",
@@ -42,6 +44,11 @@
   "Idle": "Neaktivan",
   "a swedish": "švedski",
   "Connecting": "Povezivanje",
+  "Refresh": "Osvježi",
+  "Previous activity": "Prethodna aktivnost",
+  "Next activity": "Sljedeća aktivnost",
+  "remaining": "preostalo",
+  "elapsed": "proteklo",
   "Listen on Apple Music": "Slušaj na Apple Musicu",
   "A black button with the Apple Music logo and text that says 'Listen on Apple Music'.": "Crni gumb s logotipom Apple Musica i tekstom \"Slušaj na Apple Musicu\".",
 

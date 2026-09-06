@@ -23,8 +23,8 @@
     align-items: center;
     justify-content: center;
     background-color: var(--header-background-color);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(var(--blur-regular));
+    -webkit-backdrop-filter: blur(var(--blur-regular));
     width: fit-content;
     border-radius: 12px;
     padding: 12px;
@@ -70,9 +70,20 @@ select {
     /* Ensure the wrapper takes up full width */
 }
 
+/* Hidden the same way the radios below are, rather than with display: none.
+   display: none takes the checkbox out of the tab order entirely, which left
+   all three switches in here unreachable by keyboard and invisible to screen
+   readers - the label was the only thing left, and a label is not a control. */
 .checkbox-wrapper-51 input[type="checkbox"] {
-    visibility: hidden;
-    display: none;
+    opacity: 0;
+    position: fixed;
+    width: 0;
+}
+
+/* The switch the checkbox turns into is what's on screen, so it carries the ring. */
+.checkbox-wrapper-51 input[type="checkbox"]:focus-visible + .toggle:before {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }
 
 .checkbox-wrapper-51 .title {
@@ -110,7 +121,6 @@ select {
 
 .checkbox-wrapper-51 .toggle span {
     position: absolute;
-    top: -1;
     left: 0;
     width: 24px;
     height: 24px;
@@ -161,8 +171,8 @@ select {
 .style-liquid-glass .checkbox-wrapper-51 .toggle:before {
     background: var(--liquid-glass-button-slected);
     border: 1px solid var(--liquid-glass-button-border);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    backdrop-filter: blur(var(--blur-heavy));
     transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
 
@@ -188,13 +198,13 @@ select {
     transform: translateX(18px) scale(0.92);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .style-liquid-glass .checkbox-wrapper-51 .toggle:active span {
-        transform: none;
-    }
-    .style-liquid-glass .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:active span {
-        transform: translateX(18px);
-    }
+/* Driven by the Reduce motion switch, which defaults to the OS preference. */
+html.reduce-motion .checkbox-wrapper-51 .toggle:active span {
+    transform: none;
+}
+
+html.reduce-motion .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:active span {
+    transform: translateX(18px);
 }
 
 
