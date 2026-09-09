@@ -8,10 +8,24 @@
     <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
-    <meta name="description" content="aridan.net">
+    <meta name="description" content="Get in touch by email, or find me on Twitter, GitHub, Instagram, Threads and Apple Music.">
+    <link rel="canonical" href="https://aridan.net/contact/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="aridan.net">
+    <meta property="og:title" content="Contact - aridan.net">
+    <meta property="og:description" content="Get in touch by email, or find me on Twitter, GitHub, Instagram, Threads and Apple Music.">
+    <meta property="og:url" content="https://aridan.net/contact/">
+    <meta property="og:image" content="https://aridan.net/assets/uploads/images/banner.webp">
+    <meta property="og:image:width" content="1500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:image:alt" content="The aridan.net banner.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@actuallyaridan">
+    <meta name="twitter:creator" content="@actuallyaridan">
     <meta name="keywords"
         content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
-    <meta name="author" content="actualluaridan">
+    <meta name="author" content="Adnan Bukvic">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -25,6 +39,7 @@
     <script src="/src/js/general.js" defer></script>
 
     <script src="/src/js/lanyard.js" async></script>
+    <script src="/src/js/albumAccent.js" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
         crossorigin="anonymous"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/media/favicons/apple-touch-icon.png">
@@ -52,9 +67,9 @@
                 </ul>
             </nav>
             <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -79,8 +94,8 @@
             </ul>
             <ul class="notAList">
                 <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </nav>
     </header>
@@ -112,8 +127,6 @@ email. I'm always open to chatting and networking!</p>
         </div>
 
     </main>
-    <footer>
-    </footer>
 </body>
 
 </html>

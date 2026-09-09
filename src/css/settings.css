@@ -44,7 +44,6 @@
 
 select {
     color: var(--secondary-title-color);
-    /* must be here */
     appearance: none;
     background: transparent;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='currentColor'%3E%3Cpath d='M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z'/%3E%3C/svg%3E");
@@ -53,7 +52,6 @@ select {
     background-size: 1em;
 
     color: var(--secondary-title-color);
-    /* must be here */
     padding-right: 2.5rem;
     border: none;
     border-radius: 2px;
@@ -67,20 +65,14 @@ select {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    /* Ensure the wrapper takes up full width */
 }
 
-/* Hidden the same way the radios below are, rather than with display: none.
-   display: none takes the checkbox out of the tab order entirely, which left
-   all three switches in here unreachable by keyboard and invisible to screen
-   readers - the label was the only thing left, and a label is not a control. */
 .checkbox-wrapper-51 input[type="checkbox"] {
     opacity: 0;
     position: fixed;
     width: 0;
 }
 
-/* The switch the checkbox turns into is what's on screen, so it carries the ring. */
 .checkbox-wrapper-51 input[type="checkbox"]:focus-visible + .toggle:before {
     outline: 2px solid var(--accent-color);
     outline-offset: 2px;
@@ -89,9 +81,7 @@ select {
 .checkbox-wrapper-51 .title {
     margin-right: 10px;
     flex-grow: 1;
-    /* Allow label to take up available space */
     white-space: nowrap;
-    /* Prevent text wrapping */
 }
 
 .checkbox-wrapper-51 .toggle {
@@ -159,15 +149,6 @@ select {
     stroke-dashoffset: 25;
 }
 
-/* Liquid Glass toggles.
-
-   Off, the track is a glass trough using the same tint and hairline as every
-   other glass surface. On, it fills with the accent colour and picks up a rim
-   highlight, the way .primary buttons do - accent-filled controls stay solid
-   rather than translucent, so the state is never ambiguous.
-
-   The knob stays neutral on purpose: the accent has to read against it, and a
-   knob that also tracked the accent would leave the on state with no contrast. */
 .style-liquid-glass .checkbox-wrapper-51 .toggle:before {
     background: var(--liquid-glass-button-slected);
     border: 1px solid var(--liquid-glass-button-border);
@@ -188,8 +169,6 @@ select {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
 }
 
-/* Press feedback only - the knob dips. No hover tint: the toggle reads clearly
-   enough on its own, and tinting the track competed with the accent fill. */
 .style-liquid-glass .checkbox-wrapper-51 .toggle:active span {
     transform: scale(0.92);
 }
@@ -198,7 +177,6 @@ select {
     transform: translateX(18px) scale(0.92);
 }
 
-/* Driven by the Reduce motion switch, which defaults to the OS preference. */
 html.reduce-motion .checkbox-wrapper-51 .toggle:active span {
     transform: none;
 }
@@ -208,17 +186,14 @@ html.reduce-motion .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:a
 }
 
 
-
 .style-flat .dangerZone {
     background-color: var(--danger-zone-background-color);
 }
 
-/* Must out-specify `.style-flat .button:hover` in styles.css. */
 .style-flat .dangerZone:hover:where(:not(:disabled)) {
     background-color: var(--danger-zone-hover-background-color);
 }
 
-/* The Modal (background) */
 .modal {
     display: none;
     position: fixed;
@@ -229,10 +204,8 @@ html.reduce-motion .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:a
     height: 100vh;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.4);
-
 }
 
-/* Modal Content/Box */
 .modal-content {
     background-color: var(--modal-background-color);
     margin: 15% auto;
@@ -249,18 +222,14 @@ html.reduce-motion .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:a
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         0 16px 48px rgba(0, 0, 0, 0.4);
     
-
 }
 
-/* Wraps the shared settings controls in both the modal and /settings/. It
-   repeats .modal-content's centring because it now sits between the two. */
 .settingsPanel {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Inline on /settings/ there is no modal box to shrink to, so fill the column. */
 #settingsInline {
     width: 100%;
 }
@@ -289,7 +258,6 @@ html.reduce-motion .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:a
     padding: 24px;
     margin: 12px;
     border-radius: 8px;
-
 }
 
 .modalSettings>div>div>div {
@@ -297,8 +265,15 @@ html.reduce-motion .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:a
     margin-bottom: 12px;
 }
 
-h3>.fa-solid {
+h3>.fa-solid,
+.settingsGroupHeading>.fa-solid {
     margin-right: 5px;
+}
+
+.settingsGroupHeading {
+    font-size: 1em;
+    font-weight: 550;
+    margin: 0.5em 0;
 }
 
 .modalSettings {
@@ -316,7 +291,6 @@ input[type="radio"] {
     margin-top: 6px;
     margin-bottom: 6px;
 }
-
 
 
 .blue {
@@ -344,29 +318,6 @@ input[type="radio"] {
 }
 
 
-
-
-
-
-
-
-
-
-/* Selected option.
-
-   This used to be --background-color, which only ever read as "selected"
-   because the group sat on a lighter panel. With that panel gone the chip
-   landed on --modal-background-color, a near-identical tone, so the selection
-   disappeared in light mode and blended into the modal in flat.
-
-   --selected-background-color lifts it toward white in both themes, so the
-   picked option always reads as raised. Darkening it instead reads as
-   disabled, which is the opposite of what a selection should say. The edge and
-   the small drop shadow do the rest of the work, since on a light theme the
-   surface is already near-white and fill alone cannot carry it.
-
-   The :hover variants must out-specify `.style-* .button:hover` in styles.css,
-   otherwise hovering the selected option makes it look unselected. */
 .style-flat input[type="radio"]:checked+label.button,
 .style-flat input[type="radio"]:checked+label.button:hover {
     background-color: var(--selected-background-color);

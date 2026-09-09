@@ -23,6 +23,14 @@
         setMeta("property", "og:title", title);
         setMeta("property", "og:type", "article");
         setMeta("property", "og:url", location.href);
+
+        var canonical = document.head.querySelector('link[rel="canonical"]');
+        if (!canonical) {
+            canonical = document.createElement("link");
+            canonical.setAttribute("rel", "canonical");
+            document.head.appendChild(canonical);
+        }
+        canonical.setAttribute("href", location.href);
     }
 
     function renderArticle(container, meta, bodyHtml) {
@@ -47,7 +55,9 @@
                 '<div class="article-content"></div>' +
             "</article>";
 
-        container.querySelector(".article-content").innerHTML = bodyHtml;
+        var content = container.querySelector(".article-content");
+        content.innerHTML = bodyHtml;
+        if (window.markExternalLinks) window.markExternalLinks(content);
     }
 
     function renderError(container, heading, detail) {

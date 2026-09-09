@@ -1,26 +1,3 @@
-// aridan.net
-// lyricsEasterEggScript.js
-// The actual words for the "Look What You Made Me Do" easter egg lyrics video.
-// This is the only file you should need to touch to add/change lines.
-//
-// Format, one row per line:
-//   m:ss "the words for this row"
-//
-// Rules:
-//   - Timestamp is minutes:seconds into the track (song is 3:32 / 212s long).
-//   - A blank line starts a new phrase: the screen clears before the next
-//     line pops in. Group your rows into short phrases separated by blank lines.
-//   - Wrap a word in *asterisks* to color it (the "emphasis" look).
-//   - Wrap a word in _underscores_ to underline it.
-//   - Lines starting with # are comments and are ignored, same as blank lines
-//     (but comments don't start a new phrase).
-//
-// Example:
-//   2:21 "sweetheart"
-//   2:22 "not again"
-//
-// See lyricsEasterEgg.js for the parser/player, you shouldn't need to touch that.
-
 window.LYRICS_EASTER_EGG_SCRIPT = `
 0:00 "⋅⋅⋅"
 
@@ -183,7 +160,6 @@ window.LYRICS_EASTER_EGG_SCRIPT = `
 3:12 "LOOK WHAT *YOU* JUST MADE ME BLOCK"
 
 3:14 "LOOK WHAT YOU JUST MADE ME BLOCK"
-
 
 3:15 "OH, LOOK WHAT YOU MADE ME BLOCK"
 

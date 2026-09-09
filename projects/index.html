@@ -8,10 +8,24 @@
     <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
-    <meta name="description" content="aridan.net">
+    <meta name="description" content="Things I've built - Windows 7 software recreated pixel-for-pixel on Linux, NeoFreeBird for iOS, the Chirp social network, and this website.">
+    <link rel="canonical" href="https://aridan.net/projects/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="aridan.net">
+    <meta property="og:title" content="Projects - aridan.net">
+    <meta property="og:description" content="Things I've built - Windows 7 software recreated pixel-for-pixel on Linux, NeoFreeBird for iOS, the Chirp social network, and this website.">
+    <meta property="og:url" content="https://aridan.net/projects/">
+    <meta property="og:image" content="https://aridan.net/assets/uploads/images/banner.webp">
+    <meta property="og:image:width" content="1500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:image:alt" content="The aridan.net banner.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@actuallyaridan">
+    <meta name="twitter:creator" content="@actuallyaridan">
     <meta name="keywords"
         content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
-    <meta name="author" content="actualluaridan">
+    <meta name="author" content="Adnan Bukvic">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -28,6 +42,7 @@
     <script src="/src/js/projectFilter.js" defer></script>
 
     <script src="/src/js/lanyard.js" async></script>
+    <script src="/src/js/albumAccent.js" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
         crossorigin="anonymous"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/media/favicons/apple-touch-icon.png">
@@ -55,9 +70,9 @@
                 </ul>
             </nav>
             <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -82,8 +97,8 @@
             </ul>
             <ul class="notAList">
                 <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </nav>
     </header>
@@ -124,7 +139,7 @@
                     alt="The Windows 7 Device Manager, recreated on Linux, listing the hardware of an Arch Linux machine." loading="lazy" decoding="async">
                 <div class="linkCompany">
                     <a title="Windows-alike Software for Linux - GitHub" aria-label="Windows-alike Software for Linux - GitHub"
-                        href="https://github.com/actuallyaridan?tab=repositories&amp;q=linux-"><i
+                        href="https://github.com/actuallyaridan?tab=repositories&amp;q=linux-" target="_blank" rel="noopener"><i
                             class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
@@ -148,9 +163,9 @@
                     src="https://raw.githubusercontent.com/actuallyaridan/NeoFreeBird/88812c269efad0a5f8ab51f9830f3e007995fda2/Branding/Icon.jpg"
                     alt="The NeoFreeBird app icon." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="neofreebird.aridan.net" aria-label="neofreebird.aridan.net" href="https://neofreebird.aridan.net"><i
+                    <a title="neofreebird.aridan.net" aria-label="neofreebird.aridan.net" href="https://neofreebird.aridan.net" target="_blank" rel="noopener"><i
                             class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="NeoFreeBird - GitHub" aria-label="NeoFreeBird - GitHub"
-                        href="https://github.com/actuallyaridan/NeoFreeBird"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
+                        href="https://github.com/actuallyaridan/NeoFreeBird" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -171,9 +186,9 @@
                 <img class="photo" src="/assets/uploads/images/chirp.webp"
                     alt="The Chirp logo, a yellow bird." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="beta.chirpsocial.net" aria-label="beta.chirpsocial.net" href="https://beta.chirpsocial.net"><i
+                    <a title="beta.chirpsocial.net" aria-label="beta.chirpsocial.net" href="https://beta.chirpsocial.net" target="_blank" rel="noopener"><i
                             class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="Chirp - GitHub" aria-label="Chirp - GitHub"
-                        href="https://github.com/actuallyaridan/chirp"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
+                        href="https://github.com/actuallyaridan/chirp" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -195,7 +210,7 @@
                     alt="The aridan.net site icon." loading="lazy" decoding="async">
                 <div class="linkCompany">
                     <a title="aridan.net" aria-label="aridan.net" href="https://aridan.net"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
-                        title="aridan.net - GitHub" aria-label="aridan.net - GitHub" href="https://github.com/actuallyaridan/aridan.net"><i
+                        title="aridan.net - GitHub" aria-label="aridan.net - GitHub" href="https://github.com/actuallyaridan/aridan.net" target="_blank" rel="noopener"><i
                             class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
@@ -217,14 +232,12 @@
                 <img class="photo"
                     src="https://raw.githubusercontent.com/dimdenGD/OldTwitter/refs/heads/master/images/logo512.png"
                     alt="The OldTwitter extension logo." loading="lazy" decoding="async">
-                <div class="linkCompany"><a title="OldTwitter - GitHub" aria-label="OldTwitter - GitHub" href="https://github.com/dimdenGD/OldTwitter"><i
+                <div class="linkCompany"><a title="OldTwitter - GitHub" aria-label="OldTwitter - GitHub" href="https://github.com/dimdenGD/OldTwitter" target="_blank" rel="noopener"><i
                             class="fa-brands fa-github" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
     </main>
-    <footer>
-    </footer>
 </body>
 
 </html>

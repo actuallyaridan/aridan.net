@@ -187,8 +187,6 @@
     var CANNOT_SAVE = "Use a Chromium browser to save articles.";
     var CANNOT_DELETE = "Use a Chromium browser to delete articles.";
 
-    // Read through i18n rather than baking the English in: the dictionary may not
-    // have loaded yet when this file runs, and the language can change later.
     function t(s) { return global.i18n ? global.i18n.t(s) : s; }
 
     global.ArticleStore = {

@@ -8,10 +8,24 @@
     <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
-    <meta name="description" content="aridan.net">
+    <meta name="description" content="Adnan Bukvic - a Swedish tech enthusiast, web developer and IT technician. Hackintoshes, vintage iPod restorations, and whatever I happen to be listening to right now.">
+    <link rel="canonical" href="https://aridan.net/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="aridan.net">
+    <meta property="og:title" content="Adnan Bukvic">
+    <meta property="og:description" content="Adnan Bukvic - a Swedish tech enthusiast, web developer and IT technician. Hackintoshes, vintage iPod restorations, and whatever I happen to be listening to right now.">
+    <meta property="og:url" content="https://aridan.net/">
+    <meta property="og:image" content="https://aridan.net/assets/uploads/images/banner.webp">
+    <meta property="og:image:width" content="1500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:image:alt" content="The aridan.net banner.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@actuallyaridan">
+    <meta name="twitter:creator" content="@actuallyaridan">
     <meta name="keywords"
         content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
-    <meta name="author" content="actualluaridan">
+    <meta name="author" content="Adnan Bukvic">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -25,6 +39,7 @@
     <script src="/src/js/general.js" defer></script>
 
     <script src="/src/js/lanyard.js" defer></script>
+    <script src="/src/js/albumAccent.js" defer></script>
     <script src="/src/js/lyricsEasterEggScript.js?v=3" defer></script>
     <script src="/src/js/lyricsEasterEgg.js?v=3" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
@@ -53,9 +68,9 @@
                 </ul>
             </nav>
             <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -80,14 +95,14 @@
             </ul>
             <ul class="notAList">
                 <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </nav>
     </header>
     <main class="container" id="mainContent" tabindex="-1">
-        <div class="info withBanner" fetchpriority="high">
-            <img src="/assets/uploads/images/image.webp" alt="A selfie where I'm in a bus in a grey t-shit."
+        <div class="info withBanner">
+            <img src="/assets/uploads/images/image.webp" alt="A selfie where I'm in a bus in a grey t-shirt."
                 class="icon" fetchpriority="high">
             <div>
                 <h1 class="name">Adnan Bukvic</h1>
@@ -101,19 +116,20 @@
                     <div></div>
                     <div></div>
                 </div>Connecting</div>
-                <p id="statusWrapperOnline" class="online hide statusWrapper"><i class="fa-solid fa-house-laptop" aria-hidden="true"></i>Available
-                </p>
-                <p id="statusWrapperOffline" class="offline hide statusWrapper"><i class="fa-solid fa-house-circle-xmark" aria-hidden="true"></i>Not using a computer</p>
-                <p id="statusWrapperDnd" class="dnd hide statusWrapper"><i class="fa-solid fa-house-circle-exclamation" aria-hidden="true"></i>Do
-                    not disturb</p>
-                <p id="statusWrapperIdle" class="idle hide statusWrapper"><i class="fa-solid fa-house" aria-hidden="true"></i>Idle
-                </p>
+                <p id="statusWrapperOnline" class="online hide statusWrapper"><i class="fa-solid fa-message" aria-hidden="true"></i>Available
+                    right now</p>
+                <p id="statusWrapperOffline" class="offline hide statusWrapper"><i id="statusOfflineIcon"
+                        class="fa-solid fa-clock" aria-hidden="true"></i><span id="statusLocalTime">--:--</span> <span
+                        id="statusOfflineHint">in Sweden</span></p>
+                <p id="statusWrapperDnd" class="dnd hide statusWrapper"><i class="fa-solid fa-bell-slash" aria-hidden="true"></i>Do Not Disturb</p>
+                <p id="statusWrapperIdle" class="idle hide statusWrapper"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i>Away from keyboard</p>
             </div>
         </div>
 
         <div class="section">
             <section class="discordWrapper invisible-scrollbar" id="currentdiscord"
-                aria-label="What I'm doing right now">
+                aria-labelledby="currentdiscordHeading">
+                <h2 id="currentdiscordHeading" class="visuallyHidden">What I'm doing right now</h2>
                 <div id="lanyardDiscord">
                     <div id="loading">
                     </div>
@@ -122,8 +138,8 @@
                         <p class="errorMessage">Something went wrong.<br>Try again later.</p>
                     </div>
                     <div id="loadedLanyard">
-                        <!-- Positioning context for the scroll arrows, which sit over
-                             the ends of the strip rather than in its flow. -->
+                        <!-- Single child so #loadedLanyard can collapse as one 0fr/1fr grid row. -->
+                        <div id="loadedLanyardInner">
                         <div id="discordScroller">
                         <button type="button" id="discordScrollPrev" class="button activityNav hide"
                             title="Previous activity" aria-label="Previous activity"
@@ -135,12 +151,7 @@
                             aria-controls="discord">
                             <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                         </button>
-                        <!-- lanyard.js adds tabindex when this actually overflows, so the
-                             strip can be scrolled from the keyboard (Chromium does not
-                             focus scroll containers on its own) without leaving a dead
-                             tab stop behind when everything already fits. -->
                         <div id="discord" role="group" aria-label="Activities">
-                            <!-- Apple Music Activity -->
                             <div id="amLanyardDiscord">
                                 <span class="titleActivity">
                                     <span class="activityHeading">
@@ -152,6 +163,11 @@
                                         <div></div>
                                         <div></div>
                                     </div>
+                                    <a id="amGeniusLink" class="hide" target="_blank" rel="noopener"
+                                        title="View song information and lyrics on Genius"
+                                        aria-label="View song information and lyrics on Genius">
+                                        <i class="fa-solid fa-info" aria-hidden="true"></i>
+                                    </a>
                                 </span>
                                 <div id="amDiscordActivityImages">
                                     <img id="amActivityLogoLarge" draggable="false" width="96" height="96" alt=""
@@ -197,13 +213,6 @@
                                 <div id="discordActivityInfo">
                                     <p id="activityDetails" class="titleColor">Loading</p>
                                     <p id="activityState" class="subtitleColor">Loading</p>
-                                    <!-- Exactly one of these two is on show at a time. The bar is
-                                         only meaningful for an activity that reports both a start
-                                         and an end; most report a start alone, which is elapsed
-                                         time and not a percentage of anything. Those get the
-                                         separator instead - the same rule in the same place, so
-                                         every activity card keeps the same shape, but with nothing
-                                         to announce it stays out of the accessibility tree. -->
                                     <div class="progress-bar-container hide" id="ProgressTrack"
                                         role="progressbar" aria-label="Activity progress"
                                         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -223,10 +232,9 @@
                         <button type="button" id="lyricsEasterEggBtn" class="button hide">
                             <i class="fa-solid fa-closed-captioning" aria-hidden="true"></i>Look What You Made Me Block
                         </button>
+                        </div>
                     </div>
                 </div>
-                <!-- Shown by lanyard.js only when "Automatically update activities"
-                     is off, since that is the only time updates need asking for. -->
                 <button type="button" id="lanyardRefresh" class="button hide">
                     <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>Refresh
                 </button>
@@ -297,8 +305,6 @@
         </div>
 
     </main>
-    <footer>
-    </footer>
     <div id="lyricsOverlay" class="hide" role="dialog" aria-modal="true" aria-label="Parody lyrics video">
         <button type="button" id="lyricsCloseBtn" aria-label="Close">
             <i class="fa-solid fa-xmark" aria-hidden="true"></i>

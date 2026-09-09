@@ -1,5 +1,3 @@
-/* The desktop settings modal: just the shell. The controls inside it come from
-   settingsPanel.js, which must load first. */
 (function () {
     var FOCUSABLE = 'a[href], button:not([disabled]), select, input:not([type="hidden"]), [tabindex]:not([tabindex="-1"])';
     var opener = null;
@@ -22,8 +20,6 @@
         return !!el && el.classList.contains('showMenuNoAnimation');
     }
 
-    // Only the controls that are actually on screen - the radios and checkboxes
-    // are moved off-view, and their labels are what a pointer or a Tab lands on.
     function focusable() {
         var content = document.querySelector('#settingsModalMenu .modal-content');
         if (!content) return [];
@@ -40,21 +36,20 @@
         el.classList.toggle('showMenuNoAnimation', open);
         dialog.classList.toggle('showMenuNoAnimation', open);
 
+        document.querySelectorAll('[aria-haspopup="dialog"]').forEach(function (btn) {
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+
         if (open) {
             opener = document.activeElement;
             var first = focusable()[0];
             if (first) first.focus();
         } else if (opener) {
-            // Send focus back to the gear that opened it, rather than dropping
-            // the caret at the top of the document.
             if (document.contains(opener)) opener.focus();
             opener = null;
         }
     }
 
-    /* A dialog that leaves focus loose lets Tab wander into the page behind it,
-       where a screen reader has no way of knowing it is looking at covered
-       content. Wrap around instead. */
     function trap(e) {
         if (e.key !== 'Tab' || !isOpen()) return;
         var items = focusable();
@@ -84,15 +79,11 @@
     }
 
     function onClick(e) {
-        // The backdrop is the element itself; anything inside is the dialog box.
         if (isOpen() && e.target === backdrop()) setOpen(false);
     }
 
     function inject() {
-        // Never add it twice - a page that still has its own copy wins.
         if (document.getElementById('settingsDialog')) return;
-        // /settings/ shows the panel inline; a modal too would duplicate every
-        // control id and break the radio groups.
         if (document.getElementById('settingsInline')) return;
         if (!window.SettingsPanel) return;
         document.body.insertAdjacentHTML('beforeend', shell().trim());

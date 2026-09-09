@@ -1,24 +1,11 @@
-// aridan.net
-// lyricsEasterEgg.js
-// Plays a fake, time-synced "lyrics video" full of DNS/Pi-hole jokes whenever
-// Lanyard reports "Look What You Made Me Do" by Taylor Swift playing on Apple Music.
-// Short phrases pop in one at a time on a plain white stage, then the whole
-// phrase clears and the next one builds up. Not the real lyrics, a parody,
-// triggered purely by what's currently playing.
-//
-// The actual words/timings live in lyricsEasterEggScript.js (window.LYRICS_EASTER_EGG_SCRIPT),
-// which must load before this file. Edit that file to add or change lines.
-
 (() => {
   "use strict";
 
   const TARGET_TITLE = "look what you made me do";
   const TARGET_ARTIST = "taylor swift";
-  const HOLD_AFTER_LAST_LINE = 8; // seconds the last line stays up before a fallback loop restarts
+  const HOLD_AFTER_LAST_LINE = 8;
   const CLOSE_ANIM_MS = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? 0 : 250;
 
-  // Parses lines like: 2:21 "sweetheart", blank lines start a new phrase
-  // (the stage clears before the next line appears), # lines are comments.
   function parseScript(text) {
     const cues = [];
     let groupIndex = -1;
@@ -51,8 +38,6 @@
     return cues;
   }
 
-  // Splits "IS IN *RED*" into [{text:"IS IN ", cls:null}, {text:"RED", cls:"em"}].
-  // *word* -> colored emphasis, _word_ -> underlined.
   function parseSegments(text) {
     const segs = [];
     const re = /\*([^*]+)\*|_([^_]+)_/g;
@@ -80,8 +65,9 @@
   const closeBtn = document.getElementById("lyricsCloseBtn");
   const stage = document.getElementById("lyricsStage");
 
-  let activeSong = null; // the matching Lanyard activity object, while it's playing
+  let activeSong = null;
   let overlayOpen = false;
+  let opener = null;
   let openedAt = 0;
   let rafId = 0;
   let renderedUpTo = -1;
@@ -149,8 +135,6 @@
       syncTo(idx);
     }
 
-    // Loop back to the top once we've run out of authored content, but only when
-    // we have no real playback timestamp to anchor to (open-without-data fallback).
     if (!activeSong?.timestamps?.start && elapsed > TIMELINE_END) {
       openedAt = Date.now();
       stage.innerHTML = "";
@@ -176,6 +160,10 @@
     overlay.classList.remove("hide", "lyricsClosing");
     overlay.classList.add("lyricsOpening");
     document.body.style.overflow = "hidden";
+
+    opener = document.activeElement;
+    closeBtn?.focus();
+
     rafId = window.requestAnimationFrame(tick);
   }
 
@@ -188,11 +176,20 @@
     if (rafId) window.cancelAnimationFrame(rafId);
     rafId = 0;
 
+    if (opener && document.contains(opener)) opener.focus();
+    opener = null;
+
     closeTimeoutId = window.setTimeout(() => {
       overlay.classList.add("hide");
       overlay.classList.remove("lyricsClosing");
       closeTimeoutId = 0;
     }, CLOSE_ANIM_MS);
+  }
+
+  function trapFocus(e) {
+    if (e.key !== "Tab" || !overlayOpen || !closeBtn) return;
+    e.preventDefault();
+    closeBtn.focus();
   }
 
   window.addEventListener("lanyard:applemusic", (evt) => {
@@ -211,5 +208,6 @@
   closeBtn?.addEventListener("click", closeOverlay);
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && overlayOpen) closeOverlay();
+    else trapFocus(e);
   });
 })();

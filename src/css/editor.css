@@ -6,11 +6,7 @@ body.editorPage main.container {
     display: flex;
     gap: 12px;
     flex-wrap: nowrap;
-    /* Matches the 32px below it. The status line that used to sit above the bar
-       was contributing its min-height to this gap; it now lives inside the bar,
-       so the spacing is stated here instead of being a side effect. */
     margin-top: 32px;
-    /* It swaps between folder state, progress, success and error - ease between. */
     transition: background-color .2s ease, border-color .2s ease, color .2s ease;
     justify-content: space-between;
 }
@@ -45,7 +41,6 @@ body.editorPage main.container {
     box-shadow: none;
 }
 
-/* The bar doubles as the status line, so a success message tints it. */
 .style-flat #editorFolderBar.ok,
 .style-liquid-glass #editorFolderBar.ok {
     background-color: color-mix(in srgb, var(--accent-color) 15%, transparent);
@@ -79,7 +74,6 @@ body.editorPage main.container {
 
 .editorField small {
     color: var(--secondary-title-color);
-    opacity: .8;
 }
 
 .editorField input,
@@ -107,7 +101,6 @@ body.editorPage main.container {
     background-color: var(--button-background-color);
 }
 
-/* Text fields wear .button, but must not react like one. */
 .style-liquid-glass .editorField input.button:hover,
 .style-liquid-glass .editorField textarea.button:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -147,8 +140,8 @@ body.editorPage main.container {
 }
 
 .articleAdminNotice { min-height: 1.4em; margin: 0; }
-.articleAdminNotice.ok { color: var(--accent-color); }
-.articleAdminNotice.error { color: #ff3b30; }
+.articleAdminNotice.ok { color: var(--accent-text); }
+.articleAdminNotice.error { color: light-dark(#d70015, #ff6961); }
 
 .editorPreview .article-content {
     min-height: 200px;
@@ -243,8 +236,10 @@ main > .section > .section-content code {
 }
 
 #fieldBodyEditor .toastui-editor-contents a {
-    color: var(--accent-color);
-    text-decoration: none;
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
 }
 
 #fieldBodyEditor .toastui-editor-contents ul,
@@ -303,6 +298,16 @@ main > .section > .section-content code {
     border-radius: 0 0 16px 16px;
     background: transparent;
     border-top: 1px solid var(--liquid-glass-button-border);
+}
+
+#fieldBodyEditor .toastui-editor-mode-switch .tab-item {
+    color: var(--secondary-title-color);
+    background: transparent;
+}
+
+#fieldBodyEditor .toastui-editor-mode-switch .tab-item.active {
+    color: var(--title-color);
+    background: var(--liquid-glass-button-slected);
 }
 
 .style-liquid-glass #fieldBodyEditor .toastui-editor-md-container,

@@ -3,8 +3,6 @@
 
     var Store = window.ArticleStore;
 
-    // These buttons are built after the i18n pass, so they translate themselves
-    // and re-run everything in `retranslate` when the language changes.
     function t() {
         return window.i18n ? window.i18n.t.apply(null, arguments) : arguments[0];
     }

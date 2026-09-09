@@ -1,14 +1,6 @@
-/* Projects page: the Ongoing / Paused tabs.
-
-   Every project section carries a data-status, and the nav under the page
-   description shows one status at a time so only the relevant ones are on
-   screen. The choice is kept in the URL (/projects/#paused) so a paused
-   project can still be linked to directly. */
 (function () {
     const DEFAULT_STATUS = "ongoing";
 
-    // The separators between sections are only visible on mobile, but they still
-    // space the sections out on desktop, so they follow their section in or out.
     function isSeparator(el) {
         return el != null && el.tagName === "HR" && el.classList.contains("onMobile");
     }
@@ -25,7 +17,6 @@
             if (visible) lastShown = section;
         });
 
-        // Nothing follows the last section shown, so it doesn't need a separator.
         if (lastShown && isSeparator(lastShown.nextElementSibling)) {
             lastShown.nextElementSibling.classList.add("hide");
         }
@@ -59,10 +50,6 @@
             return statuses.includes(status) ? status : DEFAULT_STATUS;
         };
 
-        // Someone arriving on /projects/#paused from elsewhere, or changing the
-        // hash by hand, gets the tab they asked for. A hash that isn't a status
-        // is left alone - the skip link is one - so jumping to an anchor doesn't
-        // silently throw the visitor back to the default tab.
         window.addEventListener("hashchange", () => {
             const status = location.hash.slice(1);
             if (statuses.includes(status)) show(status);

@@ -4,7 +4,6 @@
     var AF = window.ArticleFormat;
     var Store = window.ArticleStore;
 
-    // Text written from here lands after the i18n pass, so it translates itself.
     function t() {
         return window.i18n ? window.i18n.t.apply(null, arguments) : arguments[0];
     }
@@ -62,6 +61,7 @@
             });
             bodyEditor.instance.on("change", markDirty);
             applyEditorTheme();
+            labelEditorControls();
             new MutationObserver(applyEditorTheme).observe(document.documentElement, {
                 attributes: true, attributeFilter: ["class"]
             });
@@ -71,10 +71,28 @@
         }
     }
 
-    /* The folder bar doubles as the status line: it shows what will happen to the
-       file ("Saving into X") until there is something to report, then the message
-       takes over until it is cleared. One place to look, instead of a message
-       appearing in a separate line above it. */
+    function labelEditorControls() {
+        if (!el.bodyHost) return;
+
+        var known = {
+            more: "More formatting options",
+            "scroll-sync": "Sync scrolling between editor and preview"
+        };
+
+        el.bodyHost.querySelectorAll("button").forEach(function (btn) {
+            if (btn.getAttribute("aria-label") || btn.textContent.trim()) return;
+
+            var name = btn.getAttribute("title");
+            if (!name) {
+                Object.keys(known).some(function (cls) {
+                    if (btn.classList.contains(cls)) { name = known[cls]; return true; }
+                    return false;
+                });
+            }
+            if (name) btn.setAttribute("aria-label", t(name));
+        });
+    }
+
     var currentDir = null;
     var statusMessage = "";
     var statusKind = "";
@@ -90,8 +108,6 @@
         if (!el.folderState || !el.folderBar) return;
         el.folderState.textContent = statusMessage || folderText();
 
-        // Red only when something is actually wrong: an error, or no folder yet
-        // and nothing else to say.
         var problem = statusKind === "error" || (!statusMessage && !currentDir);
         el.folderBar.classList.toggle("resolved", !problem);
         el.folderBar.classList.toggle("ok", statusKind === "ok");
@@ -126,8 +142,6 @@
         });
     }
 
-    /* `why` is re-read through a getter on each language change, so the tooltip
-       follows along rather than freezing in whatever language it was set in. */
     var disabledReasons = [];
 
     function disablePermanently(button, why) {
@@ -218,7 +232,6 @@
         return Store.getDir(true).then(setFolderState);
     }
 
-    // key carries {0} for arg and {1} for the error message.
     function failed(key, arg) {
         return function (err) {
             console.error(err);
@@ -410,7 +423,6 @@
         if (el.remove) el.remove.addEventListener("click", remove);
         if (el.pickFolder) el.pickFolder.addEventListener("click", pickFolder);
 
-        // This chrome is written after the i18n pass, so redraw it on every change.
         if (window.i18n) {
             window.i18n.onChange(function () {
                 renderFolderBar();
@@ -425,7 +437,7 @@
             el.pickFolder = null;
             disablePermanently(el.save, function () { return Store.CANNOT_SAVE; });
             disablePermanently(el.remove, function () { return Store.CANNOT_DELETE; });
-            renderFolderBar(); // folderText() reports the unsupported browser
+            renderFolderBar();
             el.download.classList.add("primary");
         }
 

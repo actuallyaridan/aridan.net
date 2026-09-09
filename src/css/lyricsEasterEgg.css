@@ -138,7 +138,6 @@ html.reduce-motion #lyricsCloseBtn:active {
     }
 }
 
-/* Driven by the Reduce motion switch, which defaults to the OS preference. */
 html.reduce-motion .lyricsRow {
     animation: none;
     opacity: 1;

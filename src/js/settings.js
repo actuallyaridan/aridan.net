@@ -1,9 +1,3 @@
-/* Browsers tint their own chrome from <meta name="theme-color"> - Safari 18 and
-   older paint the whole toolbar with it - and with no meta present they pick
-   something themselves, which is where the blue came from. These mirror
-   --background-color in styles.css. They are literals rather than a
-   getComputedStyle read because this file runs in <head>, before the stylesheet
-   is guaranteed to have arrived. Keep them in step with styles.css. */
 const THEME_COLORS = { light: '#f1f1f1', dark: '#121212' };
 
 function syncThemeColor(resolvedTheme) {
@@ -27,10 +21,25 @@ function applyRootSettings(theme, color, style) {
 
     root.className = kept.concat([`theme-${theme}`, `color-${color}`, `style-${style}`]).join(' ');
     syncThemeColor(theme);
+    restoreAlbumAccent(theme);
 }
 
-// addEventListener on a MediaQueryList is recent enough that older Safari still
-// needs the deprecated addListener.
+function restoreAlbumAccent(resolvedTheme) {
+    if (!prefEnabled('albumAccent')) return;
+
+    let vars;
+    try {
+        vars = (JSON.parse(localStorage.getItem('albumAccentCache')) || {})[resolvedTheme];
+    } catch (e) {
+        return;
+    }
+    if (!vars) return;
+
+    const root = document.documentElement;
+    Object.keys(vars).forEach(prop => root.style.setProperty(prop, vars[prop]));
+    root.classList.add('album-accent');
+}
+
 function onMediaChange(query, handler) {
     if (query.addEventListener) query.addEventListener('change', handler);
     else if (query.addListener) query.addListener(handler);
@@ -38,6 +47,8 @@ function onMediaChange(query, handler) {
 
 const PREF_DEFAULT = {
     autoUpdateActivity: () => true,
+    albumAccent: () => true,
+    upgradeArtwork: () => true,
     reduceMotion: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     reduceTransparency: () => window.matchMedia('(prefers-reduced-transparency: reduce)').matches
 };
@@ -65,11 +76,6 @@ function applySavedRootSettings() {
     applySavedRootSettings();
     applyAccessibilityPrefs();
 
-    /* "Follow system" resolves to theme-light or theme-dark at load, so nothing
-       was watching for the system flipping while the page sat open - the CSS
-       .theme-auto block never applies. Re-resolve on change, which also keeps
-       the browser chrome's theme-color honest. The same goes for the two
-       accessibility switches when they are left on their system default. */
     onMediaChange(window.matchMedia('(prefers-color-scheme: dark)'), function() {
         if ((localStorage.getItem('theme') || 'auto') === 'auto') applySavedRootSettings();
     });
@@ -98,7 +104,7 @@ function initThemeSettings() {
     const themeOptions = document.querySelectorAll('input[name="theme-color"]');
     const colorOptions = document.querySelectorAll('input[name="accent-color"]');
     const styleOptions = document.querySelectorAll('input[name="style"]');
-    const toggles = document.querySelectorAll('#autoUpdateActivity, #reduceMotion, #reduceTransparency');
+    const toggles = document.querySelectorAll('#autoUpdateActivity, #albumAccent, #upgradeArtwork, #reduceMotion, #reduceTransparency');
     const resetButton = document.querySelector('.dangerZone');
 
     if (themeOptions.length === 0 || colorOptions.length === 0 || !resetButton) {
@@ -226,9 +232,12 @@ function applyStyle(styleValue) {
 
             toggles.forEach(toggle => { toggle.checked = prefEnabled(toggle.id); });
             applyAccessibilityPrefs();
-            window.dispatchEvent(new CustomEvent('settings:change', {
-                detail: { key: 'autoUpdateActivity', value: prefEnabled('autoUpdateActivity') }
-            }));
+
+            Object.keys(PREF_DEFAULT).forEach(key => {
+                window.dispatchEvent(new CustomEvent('settings:change', {
+                    detail: { key: key, value: prefEnabled(key) }
+                }));
+            });
         }
     }
 }

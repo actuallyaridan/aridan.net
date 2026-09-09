@@ -1,11 +1,3 @@
-// Fetches aggregate Pi-hole stats from the site's own /api/stats endpoint
-// (backed by a Cloudflare KV store that the Pi-hole pushes to) and fills in
-// any matching elements on the page. Safe to include on any page - it only
-// touches elements that exist.
-
-// Example data used ONLY on a local dev host (localhost / 127.0.0.1), where the
-// Cloudflare Function isn't running so /api/stats can't be reached. Production
-// is never affected - it always uses the live API.
 const EXAMPLE_STATS = {
   total: 1756845,
   blocked: 272765,
@@ -34,9 +26,6 @@ const EXAMPLE_STATS = {
   sd_manufactured: "2026-05",
 };
 
-// True for any local/dev host: localhost, .local/.lan hostnames, IPv6 loopback,
-// or a private/loopback/link-local IPv4 (so a phone hitting the dev server by its
-// LAN IP, e.g. 192.168.x.x, also gets the example data instead of an error).
 function isPiholeLocalHost() {
   const h = location.hostname;
   if (!h || h === "localhost" || h.endsWith(".local") || h.endsWith(".lan")) return true;
@@ -46,22 +35,18 @@ function isPiholeLocalHost() {
   if (m) {
     const a = Number(m[1]);
     const b = Number(m[2]);
-    if (a === 127) return true;                        // loopback   127.0.0.0/8
-    if (a === 10) return true;                         // private    10.0.0.0/8
-    if (a === 192 && b === 168) return true;           // private    192.168.0.0/16
-    if (a === 172 && b >= 16 && b <= 31) return true;  // private    172.16.0.0/12
-    if (a === 169 && b === 254) return true;           // link-local 169.254.0.0/16
-    if (a === 0) return true;                          // 0.0.0.0
+    if (a === 127) return true;
+    if (a === 10) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 0) return true;
   }
   return false;
 }
 
 const PIHOLE_IS_LOCAL = isPiholeLocalHost();
 
-// Abbreviates large numbers: 1907467 -> "1.9M+", 25517 -> "25.5K+", 5 -> "5".
-// Anything under 1000 is shown in full. Values >= 1000 are floored to one decimal
-// and get a trailing "+", floored so the "+" is always truthful (the real number
-// is at least what's shown). Decimal separator follows the visitor's locale.
 function abbreviatePiholeNumber(n) {
   n = Number(n) || 0;
   if (n < 1000) return n.toLocaleString();
@@ -70,7 +55,6 @@ function abbreviatePiholeNumber(n) {
   return `${floored.toLocaleString(undefined, { maximumFractionDigits: 1 })}${suffix}+`;
 }
 
-// "4.8 GB used of 28 GB", a value under 1 GB is shown in MB ("256 MB used of 4 GB").
 function formatSize(gb) {
   const n = Number(gb) || 0;
   return n < 1 ? `${Math.round(n * 1024)} MB` : `${n} GB`;
@@ -79,7 +63,6 @@ function usedOfTotal(usedGb, totalGb) {
   return `${formatSize(usedGb)} used of ${formatSize(totalGb)}`;
 }
 
-// Compact uptime: "5d 3h", "3h 20m", or "12m".
 function formatUptime(seconds) {
   const s = Math.floor(Number(seconds) || 0);
   const d = Math.floor(s / 86400);
@@ -90,13 +73,11 @@ function formatUptime(seconds) {
   return `${m}m`;
 }
 
-// Cumulative writes: "14 GB", or "1.3 TB" once it passes 1024 GB.
 function formatWrites(gb) {
   const n = Number(gb) || 0;
   return n >= 1024 ? `${(n / 1024).toFixed(1)} TB` : `${Math.round(n)} GB`;
 }
 
-// Card age from days: "12d", "3 mo", or "1.4 yr".
 function formatAge(days) {
   const d = Math.max(0, Math.floor(Number(days) || 0));
   if (d < 60) return `${d}d`;
@@ -105,7 +86,6 @@ function formatAge(days) {
 }
 
 function renderPiholeStats(data, { example = false } = {}) {
-  // Shows the abbreviated value on screen, with the exact number as a hover tooltip.
   const setStat = (id, text, fullTitle) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -120,14 +100,11 @@ function renderPiholeStats(data, { example = false } = {}) {
   setStat("pi-domains", abbreviatePiholeNumber(data.domains_on_lists), full(data.domains_on_lists));
   setStat("pi-clients", abbreviatePiholeNumber(data.clients), full(data.clients));
 
-  // Live query rate (frequency is queries/sec; x60 = queries/min, same as the
-  // Pi-hole dashboard) and the cache-hit share of all queries.
   if (data.frequency != null) {
     setStat("pi-qpm", Math.round(Number(data.frequency) * 60).toLocaleString(), "live rate, same as the Pi-hole dashboard");
   }
   if (data.cached_percent != null) setStat("pi-cached", `${Number(data.cached_percent).toFixed(1)}%`);
 
-  // Hardware (elements only exist on the /pihole page)
   if (data.temp_c != null) setStat("pi-temp", `${Number(data.temp_c).toFixed(1)}°C`);
   if (data.cpu_percent != null) setStat("pi-cpu", `${Number(data.cpu_percent).toFixed(1)}%`);
   if (data.ram_percent != null) {
@@ -140,9 +117,6 @@ function renderPiholeStats(data, { example = false } = {}) {
   }
   if (data.uptime_seconds != null) setStat("pi-uptime", formatUptime(data.uptime_seconds));
 
-  // SD-card health (elements only exist on the /pihole page). SD cards report no
-  // vendor wear data, so the status is a traffic light over readable warning signs,
-  // with each underlying signal shown as its own card.
   if (data.sd_status != null) {
     const states = {
       ok: { label: "OK", cls: "status-ok" },
@@ -184,12 +158,10 @@ function renderPiholeStats(data, { example = false } = {}) {
     }
   }
 
-  // Reveal freshly-loaded values (removes the pulsing placeholder state).
   document.querySelectorAll(".pi-loading").forEach((el) => el.classList.remove("pi-loading"));
 }
 
 async function updatePiholeStats() {
-  // Local development: no Function to hit, so render the example data instead.
   if (PIHOLE_IS_LOCAL) {
     renderPiholeStats(EXAMPLE_STATS, { example: true });
     return;
@@ -199,7 +171,6 @@ async function updatePiholeStats() {
     const response = await fetch("/api/stats", { cache: "no-store" });
 
     if (response.status === 503) {
-      // KV has no data yet (Pi hasn't pushed, or just set up). Leave placeholders.
       console.warn("Pi-hole stats not available yet.");
       return;
     }
@@ -215,8 +186,6 @@ async function updatePiholeStats() {
 }
 
 updatePiholeStats();
-// Refresh while the tab is open (the Pi pushes every 15 min; a 5-min poll keeps it fresh).
-// Skipped on local dev since the values are static.
 if (!PIHOLE_IS_LOCAL) {
   setInterval(updatePiholeStats, 300000);
 }

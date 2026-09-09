@@ -1,15 +1,3 @@
-// Cloudflare Pages Function - /api/stats
-//
-// GET  /api/stats  -> public: returns the latest aggregate Pi-hole numbers (from KV)
-// POST /api/stats  -> private: the Pi-hole pushes new numbers here, authorised by a
-//                     shared bearer token (env var PIHOLE_PUSH_TOKEN).
-//
-// Requires two bindings on the Pages project (Settings -> Functions):
-//   - KV namespace binding named  STATS
-//   - Environment secret named    PIHOLE_PUSH_TOKEN
-//
-// Only aggregate numbers are ever stored/served - no per-domain or per-client data.
-
 const KV_KEY = "latest";
 
 const jsonHeaders = {
@@ -36,7 +24,6 @@ export async function onRequestGet({ env }) {
     status: 200,
     headers: {
       ...jsonHeaders,
-      // Cache at the edge/browser for 30s so a viral moment can't hammer us.
       "cache-control": "public, max-age=30",
       "access-control-allow-origin": "*",
     },
@@ -44,7 +31,6 @@ export async function onRequestGet({ env }) {
 }
 
 export async function onRequestPost({ request, env }) {
-  // --- auth ---
   const expected = env.PIHOLE_PUSH_TOKEN;
   const provided = (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
   if (!expected || provided.length !== expected.length || !timingSafeEqual(provided, expected)) {
@@ -61,7 +47,6 @@ export async function onRequestPost({ request, env }) {
     });
   }
 
-  // --- parse + whitelist (never trust/echo arbitrary fields) ---
   let body;
   try {
     body = await request.json();
@@ -73,8 +58,6 @@ export async function onRequestPost({ request, env }) {
   }
 
   const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
-  // Short, sanitised strings only (drop control chars, cap length) - never echo
-  // arbitrary text back to visitors.
   const str = (v, max = 40) =>
     typeof v === "string"
       ? Array.from(v)
@@ -104,7 +87,6 @@ export async function onRequestPost({ request, env }) {
     uptime_seconds: num(body.uptime_seconds),
     frequency: num(body.frequency),
     cached_percent: num(body.cached_percent),
-    // SD-card health (proxy signals - SD exposes no vendor wear data)
     sd_status: oneOf(body.sd_status, ["ok", "warning", "critical"], "ok"),
     sd_fs_mode: oneOf(body.sd_fs_mode, ["rw", "ro"], "rw"),
     sd_fs_errors: num(body.sd_fs_errors),
@@ -125,7 +107,6 @@ export async function onRequestPost({ request, env }) {
   });
 }
 
-// Constant-time string compare to avoid leaking the token via timing.
 function timingSafeEqual(a, b) {
   let mismatch = 0;
   for (let i = 0; i < a.length; i++) {

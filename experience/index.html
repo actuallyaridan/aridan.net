@@ -8,10 +8,24 @@
 <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
     <script src="/src/js/settingsModal.js" defer></script>
-    <meta name="description" content="aridan.net">
+    <meta name="description" content="Where I've worked so far: customer service at MiniFinder, IT support for Tingsryd municipality, and tech repair before that.">
+    <link rel="canonical" href="https://aridan.net/experience/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="aridan.net">
+    <meta property="og:title" content="Career - aridan.net">
+    <meta property="og:description" content="Where I've worked so far: customer service at MiniFinder, IT support for Tingsryd municipality, and tech repair before that.">
+    <meta property="og:url" content="https://aridan.net/experience/">
+    <meta property="og:image" content="https://aridan.net/assets/uploads/images/banner.webp">
+    <meta property="og:image:width" content="1500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:image:alt" content="The aridan.net banner.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@actuallyaridan">
+    <meta name="twitter:creator" content="@actuallyaridan">
     <meta name="keywords"
         content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
-    <meta name="author" content="actualluaridan">
+    <meta name="author" content="Adnan Bukvic">
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -25,6 +39,7 @@
     <script src="/src/js/general.js" defer></script>
 
     <script src="/src/js/lanyard.js" async></script>
+    <script src="/src/js/albumAccent.js" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
         crossorigin="anonymous"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/media/favicons/apple-touch-icon.png">
@@ -52,9 +67,9 @@
                 </ul>
             </nav>
             <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </header>
@@ -79,8 +94,8 @@
             </ul>
             <ul class="notAList">
                 <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
         </nav>
     </header>
@@ -111,8 +126,8 @@
                 <img class="photo" src="/assets/uploads/images/minifinder.webp"
                     alt="The MiniFinder Sweden AB logo." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="minifinder.com" aria-label="minifinder.com" href="https://minifinder.com"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="shop.minifinder.com" aria-label="shop.minifinder.com" href="https://shop.minifinder.com"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></a><a
-                        title="MiniFinder - LinkedIn" aria-label="MiniFinder - LinkedIn" href="https://www.linkedin.com/company/minifinder/"><i
+                    <a title="minifinder.com" aria-label="minifinder.com" href="https://minifinder.com" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="shop.minifinder.com" aria-label="shop.minifinder.com" href="https://shop.minifinder.com" target="_blank" rel="noopener"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></a><a
+                        title="MiniFinder - LinkedIn" aria-label="MiniFinder - LinkedIn" href="https://www.linkedin.com/company/minifinder/" target="_blank" rel="noopener"><i
                             class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
                 </div>
             </div>
@@ -135,9 +150,9 @@
                 <img class="photo" src="/assets/uploads/images/tingsryd.webp"
                     alt="The coat of arms of Tingsryds municipality." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="tingsryd.se" aria-label="tingsryd.se" href="https://tingsryd.se"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
+                    <a title="tingsryd.se" aria-label="tingsryd.se" href="https://tingsryd.se" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
                         title="Tingsryds municipality - LinkedIn" aria-label="Tingsryds municipality - LinkedIn"
-                        href="https://www.linkedin.com/company/tingsryds-kommun/"><i
+                        href="https://www.linkedin.com/company/tingsryds-kommun/" target="_blank" rel="noopener"><i
                             class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
                 </div>
             </div>
@@ -160,9 +175,9 @@
                 <img class="photo" src="/assets/uploads/images/itcare.webp"
                     alt="The IT Care Repairstore logo." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="itcarestore.se" aria-label="itcarestore.se" href="https://itcarestore.se"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
+                    <a title="itcarestore.se" aria-label="itcarestore.se" href="https://itcarestore.se" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
                         title="IT Care Repairstore - LinkedIn" aria-label="IT Care Repairstore - LinkedIn"
-                        href="https://www.linkedin.com/company/it-care-repairstore/"><i
+                        href="https://www.linkedin.com/company/it-care-repairstore/" target="_blank" rel="noopener"><i
                             class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
                 </div>
             </div>
@@ -193,14 +208,11 @@
                 <img class="photo" src="/assets/uploads/images/vaxjo.webp"
                     alt="The Teknikum school logo." loading="lazy" decoding="async">
                 <div class="linkCompany">
-                    <a title="teknikum.se" aria-label="teknikum.se" href="https://teknikum.se"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                    <a title="teknikum.se" aria-label="teknikum.se" href="https://teknikum.se" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
     </main>
-
-    <footer>
-    </footer>
 </body>
 
 </html>
