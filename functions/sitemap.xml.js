@@ -1,4 +1,4 @@
-import { SITE, articleUrl, escapeXml, loadAllArticles, toDate } from "../_lib/articles.js";
+import { SITE, articleUrl, escapeXml, loadAllArticles, toDate } from "./_lib/articles.js";
 
 // Pages that are linked from the nav. /articles/new/ and /articles/edit/ are
 // local-only editor screens, and /minecraft/ is deliberately unlisted, so none

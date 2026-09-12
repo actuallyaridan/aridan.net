@@ -1,4 +1,4 @@
-import { SITE, articleUrl, escapeXml, loadAllArticles, toDate } from "../_lib/articles.js";
+import { SITE, articleUrl, escapeXml, loadAllArticles, toDate } from "./_lib/articles.js";
 
 const FEED_URL = SITE + "/feed.xml";
 const TITLE = "aridan.net";
