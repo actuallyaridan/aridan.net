@@ -103,7 +103,7 @@
                 applyMetadata(parsed.meta);
                 renderArticle(container, parsed.meta, marked.parse(parsed.body));
                 if (window.Prism) Prism.highlightAll();
-                if (window.twemoji) twemoji.parse(container, { folder: "svg", ext: ".svg" });
+                if (window.parseEmoji) window.parseEmoji(container);
                 document.dispatchEvent(new CustomEvent("article:rendered", { detail: { slug: slug } }));
             })
             .catch(function (err) {

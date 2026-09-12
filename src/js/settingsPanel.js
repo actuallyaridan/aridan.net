@@ -1,7 +1,7 @@
 (function (global) {
     "use strict";
 
-    var VERSION = "4.17";
+    var VERSION = "5.0";
 
     function toggleMarkup(id, label) {
         return `
@@ -99,7 +99,7 @@
     </div>
     <p class="modalDescription">version ${VERSION}</p>
     <div class="modalButtons">${withDone ? `
-        <button type="button" class="button primary" onClick="toggleSettings()">Done</button>` : ""}
+        <button type="button" class="button primary" data-action="settings">Done</button>` : ""}
         <button type="button" class="button dangerZone destructive">Reset</button>
     </div>
 </div>`;

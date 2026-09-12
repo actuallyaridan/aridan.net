@@ -85,6 +85,9 @@
                 });
                 var frag = document.createDocumentFragment();
                 found.forEach(function (a) { frag.appendChild(card(a)); });
+                // These cards land long after the one-off pass on load, so
+                // emoji in a title or preview would otherwise stay as raw text.
+                if (window.parseEmoji) window.parseEmoji(frag);
                 container.appendChild(frag);
                 document.dispatchEvent(new CustomEvent("articles:rendered"));
             })

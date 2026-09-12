@@ -31,6 +31,7 @@
   const els = {
     loading: byId("loading"),
     error: byId("errorMessage"),
+    errorText: byId("errorMessageText"),
     spinner: byId("loadingSpinner"),
     content: byId("loadedLanyard"),
     lanyardDiscord: byId("lanyardDiscord"),
@@ -813,7 +814,12 @@
 
   function handleError(e) {
     console.error("Error:", e);
-    if (els.error) els.error.textContent = `An error occurred: ${e?.message || e}`;
+    // Only the copy is replaced — writing to #errorMessage itself would blow
+    // away the icon paragraph along with it.
+    if (els.errorText) els.errorText.textContent = `An error occurred: ${e?.message || e}`;
+    // "error" is not a Discord status, so it can never collide with a real one —
+    // the next successful payload swaps the chip back on its own.
+    updateStatusWrapper("error");
     show(els.spinner, false);
     showActivityCard(false);
     show(els.error, true);

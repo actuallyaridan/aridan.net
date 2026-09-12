@@ -29,10 +29,9 @@
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <title>404 - aridan.net</title>
 
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/src/css/styles.css">
     <link rel="stylesheet" href="/src/css/settings.css">
     <link rel="stylesheet" href="/src/css/lanyard.css">
@@ -40,8 +39,7 @@
 
     <script src="/src/js/lanyard.js" async></script>
     <script src="/src/js/albumAccent.js" defer></script>
-    <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"
-        crossorigin="anonymous"></script>
+    <link rel="alternate" type="application/rss+xml" title="aridan.net articles" href="/feed.xml">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/media/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/assets/media/favicons/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/assets/media/favicons/icon-512.png">
@@ -67,7 +65,7 @@
                 </ul>
             </nav>
             <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
                 <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
                 <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
@@ -80,7 +78,7 @@
                 <li><a href="/">aridan.net</a></li>
             </ul>
             <ul class="notAList">
-                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" onclick="toggleMenu()"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
+                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" data-action="menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
             </ul>
         </div>
         <nav class="mobileMenu" id="mobileMenuID" aria-label="Main">
@@ -93,7 +91,7 @@
                 <li><a href="/contact/">Contact</a></li>
             </ul>
             <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" onclick="toggleSettings()"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
                 <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
                 <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
             </ul>
@@ -101,7 +99,7 @@
     </header>
     <main class="container" id="mainContent" tabindex="-1">
         <div class="info">
-            <p class="icon">😵‍💫</p>
+            <p class="icon"><i class="fa-solid fa-face-dizzy icon-background" aria-hidden="true"></i></p>
             <div>
                 <h1 class="name">I don’t know about you, but I’m feeling 404</h1>
                 <p class="description titleColor">The page you're looking for doesn't exist. Check the URL and try again. If you used a link to go here, the page it was referring to was probably deleted.</p>
@@ -109,6 +107,20 @@
             </div>
         </div>
     </main>
+    <footer>
+        <ul class="notAList footerSocial">
+            <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+            <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+            <li><a href="https://instagram.com/actuallyaridan" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+            <li><a href="mailto:adnan@aridan.net" title="Email" aria-label="Email"><i class="fa-solid fa-at" aria-hidden="true"></i></a></li>
+            <li><a href="/feed.xml" title="RSS feed" aria-label="RSS feed"><i class="fa-solid fa-rss" aria-hidden="true"></i></a></li>
+        </ul>
+        <p class="footerNote">
+            <span>&copy; <span id="footerYear">2026</span> Adnan Bukvic <span class="rightsNote">unless stated otherwise</span></span>
+            <a class="inline" href="https://github.com/actuallyaridan/aridan.net" title="Source on GitHub" target="_blank" rel="noopener">Source on GitHub</a>
+        </p>
+        <p class="footerNote embedNote">This website embeds content from other websites and services.</p>
+    </footer>
 </body>
 
 </html>

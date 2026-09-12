@@ -7,6 +7,11 @@
   "Minecraft Server": "Minecraft poslužitelj",
   "Contact": "Kontakt",
 
+  "RSS feed": "RSS kanal",
+  "Source on GitHub": "Izvorni kod na GitHubu",
+  "unless stated otherwise": "osim ako nije drugačije navedeno",
+  "This website embeds content from other websites and services.": "Ova web stranica ugrađuje sadržaj s drugih web stranica i usluga.",
+
   "Projects - aridan.net": "Projekti - aridan.net",
   "Experience - aridan.net": "Iskustvo - aridan.net",
   "Articles - aridan.net": "Članci - aridan.net",
@@ -110,6 +115,10 @@
   "I don’t know about you, but I’m feeling 404": "Ne znam za tebe, ali ja se osjećam kao 404",
   "The page you're looking for doesn't exist. Check the URL and try again. If you used a link to go here, the page it was referring to was probably deleted.": "Stranica koju tražiš ne postoji. Provjeri adresu i pokušaj ponovno. Ako si došao putem poveznice, stranica na koju je upućivala vjerojatno je izbrisana.",
   "Go back home": "Natrag na početnu",
+
+  "Offline - aridan.net": "Offline - aridan.net",
+  "You're offline": "Offline si",
+  "This page isn't saved on your device and there's no connection to fetch it with. Pages you've already visited still open - try again once you're back online.": "Ova stranica nije spremljena na tvom uređaju, a nema veze kojom bi je se dohvatilo. Stranice koje si već posjetio i dalje se otvaraju - pokušaj ponovno kad se vratiš online.",
 
   "I have a few projects that I've worked on, from translations all the way to a fully-fledged Twitter clone. Check them out! And by the way, the stars and forks counts are dynamic!": "Imam nekoliko projekata na kojima sam radio, od prijevoda pa sve do potpuno razrađenog Twitter klona. Pogledaj ih! I usput, broj zvjezdica i forkova je dinamičan!",
   "You're rate limited on the GitHub API. Showing old values.": "Ograničen si na GitHub API-ju. Prikazuju se stare vrijednosti.",

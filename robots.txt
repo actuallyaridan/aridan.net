@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Editor screens are local-only tooling, there is nothing to index there.
+Disallow: /articles/new/
+Disallow: /articles/edit/
+
+Sitemap: https://aridan.net/sitemap.xml

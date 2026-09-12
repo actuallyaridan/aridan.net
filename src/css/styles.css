@@ -629,6 +629,11 @@ li>a:active, li>button.noUI:active {
 .info {
     text-align: center;
     margin-top: 42px;
+    /* Breathing room above the icon. Lives here rather than on .withBanner so
+       the landing page's photo and every other page's icon tile start at the
+       same offset - otherwise the icon jumps by 10px as you move between pages.
+       Padding, not margin: a margin would collapse through .info and vanish. */
+    padding-top: 10px;
 }
 
 .info>div {
@@ -811,33 +816,51 @@ a.inline {
     text-underline-offset: 2px;
 }
 
+/* margin-top: auto keeps the footer against the bottom of short pages; the
+   breathing room above it lives in padding so it survives that collapsing. */
 footer {
     width: 80vw;
-    height: fit-content;
-    min-height: 10vh;
+    box-sizing: border-box;
+    margin: auto auto 0;
+    padding: 2.5em 12px 2em;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 12px;
-    box-sizing: border-box;
-    margin: 12px;
-    flex-direction: column;
 }
 
-footer>p {
+footer ul.footerSocial {
+    flex-wrap: wrap;
+    white-space: normal;
+    margin: 0;
+    padding: 6px 0;
+    font-size: 1.2em;
+    gap: 4px 20px;
+}
+
+footer>.footerNote {
     color: var(--footer-text-color);
-    font-size: 1em;
-    margin: 12px;
-    padding: 12px;
-}
-
-footer>.poweredBySection {
+    font-size: .9em;
+    margin: 10px 0 0;
+    padding: 0;
     display: flex;
-    flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 2px 12px;
+}
+
+footer>.footerNote>a {
+    color: var(--footer-text-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--border-color);
+    transition: text-decoration-color .2s ease;
+}
+
+footer>.footerNote>a:hover {
+    text-decoration-color: currentColor;
 }
 
 section>div {
@@ -1250,6 +1273,16 @@ li>a>i, li>button.noUI>i {
     color: var(--text-color);
     text-align: center;
     padding: 10px;
+}
+
+/* The rule above pads every child, and with border-box that padding eats into
+   the photo's 128px box - rendering it at 108px while the icon tile on every
+   other page is a full 128px. Dropping that padding gives the photo its full
+   size back; the gap above it comes from .info, and the one below it has to be
+   a margin here because .withBanner>* no longer supplies it. */
+.withBanner>img.icon {
+    padding: 0;
+    margin-bottom: 10px;
 }
 
 .noBack {
@@ -1962,4 +1995,21 @@ hr.onMobile {
 .article-content strong {
     color: var(--secondary-title-color);
     font-weight: 600;
+}
+
+/* Shared utilities. These are not Lanyard-specific - .titleColor alone is used
+   on nearly every page - but they lived in lanyard.css, so any page that did not
+   load it (the offline page) silently lost them. .description resolves to
+   --invert-title-color, which is white in the light theme, so losing .titleColor
+   meant white text on a white background. */
+.titleColor {
+    color: var(--title-color);
+}
+
+.subtitleColor {
+    color: var(--paragraph-color);
+}
+
+.invisible-scrollbar::-webkit-scrollbar {
+    display: none;
 }

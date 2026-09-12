@@ -1,20 +1,49 @@
 {
+  "id": "/",
   "name": "aridan.net",
   "short_name": "aridan.net",
+  "description": "Adnan Bukvic - a Swedish tech enthusiast, web developer and IT technician. Hackintoshes, vintage iPod restorations, and whatever I happen to be listening to right now.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f1f1f1",
+  "theme_color": "#f1f1f1",
+  "categories": ["personalization", "technology"],
   "icons": [
     {
       "src": "/assets/media/favicons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/assets/media/favicons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/media/favicons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#007aff"
+  "shortcuts": [
+    {
+      "name": "Articles",
+      "url": "/articles/"
+    },
+    {
+      "name": "Pi-hole stats",
+      "url": "/pihole/"
+    },
+    {
+      "name": "Contact",
+      "url": "/contact/"
+    }
+  ]
 }

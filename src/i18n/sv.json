@@ -7,6 +7,11 @@
   "Minecraft Server": "Minecraft-server",
   "Contact": "Kontakt",
 
+  "RSS feed": "RSS-flöde",
+  "Source on GitHub": "Källkod på GitHub",
+  "unless stated otherwise": "om inget annat anges",
+  "This website embeds content from other websites and services.": "Den här webbplatsen bäddar in innehåll från andra webbplatser och tjänster.",
+
   "Projects - aridan.net": "Projekt - aridan.net",
   "Experience - aridan.net": "Erfarenhet - aridan.net",
   "Articles - aridan.net": "Artiklar - aridan.net",
@@ -110,6 +115,10 @@
   "I don’t know about you, but I’m feeling 404": "Jag vet inte hur det är med dig, men jag känner mig 404",
   "The page you're looking for doesn't exist. Check the URL and try again. If you used a link to go here, the page it was referring to was probably deleted.": "Sidan du letar efter finns inte. Kontrollera adressen och försök igen. Om du kom hit via en länk har sidan den pekade på förmodligen tagits bort.",
   "Go back home": "Tillbaka till startsidan",
+
+  "Offline - aridan.net": "Offline - aridan.net",
+  "You're offline": "Du är offline",
+  "This page isn't saved on your device and there's no connection to fetch it with. Pages you've already visited still open - try again once you're back online.": "Den här sidan är inte sparad på din enhet och det finns ingen anslutning att hämta den med. Sidor du redan har besökt går fortfarande att öppna - försök igen när du är uppkopplad.",
 
   "I have a few projects that I've worked on, from translations all the way to a fully-fledged Twitter clone. Check them out! And by the way, the stars and forks counts are dynamic!": "Jag har några projekt som jag har jobbat på, från översättningar hela vägen till en fullfjädrad Twitter-klon. Kolla in dem! Och förresten, antalet stjärnor och forkar är dynamiskt!",
   "You're rate limited on the GitHub API. Showing old values.": "Du är hastighetsbegränsad på GitHub-API:et. Visar gamla värden.",

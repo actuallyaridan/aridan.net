@@ -5,10 +5,6 @@
     src: url(/src/fonts/SevenSegment.otf) format("opentype");
 }
 
-.invisible-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
 /* Geometry tracks .button so the chips read as the same component family as the
    buttons on Experience; only the accent colour changes per state. */
 .statusWrapper {
@@ -55,6 +51,11 @@
     --status-rgb: 144, 144, 144;
 }
 
+/* The one case where red is the honest reading — the site really did fail. */
+.statusWrapper.error {
+    --status-rgb: 249, 76, 87;
+}
+
 /* Flat buttons are borderless and unblurred, so the chips are too — the tint is
    pushed up slightly to carry the state on its own. */
 .style-flat .statusWrapper {
@@ -81,8 +82,13 @@
     width: 100%;
 }
 
+/* Column, not row: #loading, #errorMessage and #loadedLanyard are meant to be
+   mutually exclusive states, but the collapsed card is only 0 tall — never 0
+   wide — so as a row item its width:100% basis still claimed half the row and
+   shoved the error card off-centre. */
 #lanyardDiscord {
     display: flex;
+    flex-direction: column;
     font-family: Jost, sans-serif;
     color: white;
     margin: auto;
@@ -671,14 +677,6 @@ border: 1px solid var(--liquid-glass-button-border);
     flex: 1;
 }
 
-.titleColor {
-    color: var(--title-color);
-}
-
-.subtitleColor {
-    color: var(--paragraph-color);
-}
-
 div#timeremaning,
 div#Timeremaning,
 div#amTimeremaning {
@@ -786,4 +784,10 @@ html.reduce-motion .progress-bar {
 #lanyardRefresh[disabled] {
     opacity: 0.6;
     pointer-events: none;
+}
+
+#errorMessage{
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }

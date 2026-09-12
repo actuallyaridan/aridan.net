@@ -1,9 +1,16 @@
-window.addEventListener("load", function () {
+// twemoji only walks the DOM it is handed, once. Anything rendered after load -
+// article cards, article bodies - has to ask for its own pass, so this is a
+// named helper rather than a one-shot, alongside markExternalLinks below.
+window.parseEmoji = function (root) {
     if (!window.twemoji) return;
-    twemoji.parse(document.body, {
+    twemoji.parse(root || document.body, {
         folder: 'svg',
         ext: '.svg',
     });
+};
+
+window.addEventListener("load", function () {
+    window.parseEmoji(document.body);
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -91,6 +98,57 @@ document.addEventListener("keydown", function (e) {
     if (menu && menu.classList.contains("showMenu")) setMenuOpen(false);
 });
 
+// Header and settings buttons declare their intent with data-action instead of
+// an inline onclick, so the CSP can refuse inline scripts outright. Delegated
+// from the document so the settings modal's own buttons work once injected.
+const ACTIONS = {
+    menu: toggleMenu,
+    settings: toggleSettings
+};
+
+document.addEventListener("click", function (e) {
+    const trigger = e.target.closest("[data-action]");
+    if (!trigger) return;
+    const action = ACTIONS[trigger.dataset.action];
+    if (action) action();
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const year = document.getElementById("footerYear");
+    if (year) year.textContent = new Date().getFullYear();
+});
+
+function isLocalHost() {
+    const h = location.hostname;
+    if (!h || h === "localhost" || h === "::1" || h.endsWith(".local") || h.endsWith(".lan")) return true;
+    const m = h.match(/^(\d{1,3})\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/);
+    if (!m) return false;
+    return Number(m[1]) === 127 || (Number(m[1]) === 169 && Number(m[2]) === 254);
+}
+
+// Registered after load so the install never competes with the first render.
+// Never on localhost: there is no build step, so a cached shell would keep
+// serving yesterday's CSS while you edit it. Any worker left over from a
+// previous visit is torn down for the same reason.
+window.addEventListener("load", function () {
+    if (!("serviceWorker" in navigator)) return;
+
+    if (isLocalHost() || /^\/articles\/(new|edit)\//.test(location.pathname)) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+            regs.forEach(function (reg) { reg.unregister(); });
+        });
+        if (window.caches) caches.keys().then(function (keys) {
+            keys.filter(function (k) { return k.startsWith("aridan-"); })
+                .forEach(function (k) { caches.delete(k); });
+        });
+        return;
+    }
+
+    navigator.serviceWorker.register("/sw.js").catch(function (err) {
+        console.warn("Service worker registration failed", err);
+    });
+});
+
 (function () {
     const pills = [];
 
@@ -165,6 +223,9 @@ document.addEventListener("keydown", function (e) {
         ".skipLink",
         "#desktop-header .notAList > li > a",
         "#mobile-header .mobileMenu li > a",
+        "footer .footerNote > a",
+        "footer .footerNote .rightsNote",
+        "footer .footerNote.embedNote",
         "main .projectFilter li > button",
         "main .name",
         "main h2.section-title",
@@ -207,7 +268,9 @@ document.addEventListener("keydown", function (e) {
         ["main .activityNav[title]", "title"],
         ["main .activityNav[aria-label]", "aria-label"],
         ["header [title]", "title"],
-        ["header [aria-label]", "aria-label"]
+        ["header [aria-label]", "aria-label"],
+        ["footer [title]", "title"],
+        ["footer [aria-label]", "aria-label"]
     ];
 
     const normalize = (s) => (s || "").replace(/\s+/g, " ").trim();

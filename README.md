@@ -14,6 +14,10 @@ Supports multiple languages and follows accessibility guidelines for a more open
 
 ## The fine print
 
-Currently hosted using Cloudlfare. 
+Currently hosted using Cloudflare Pages. The files under `functions/` are
+Cloudflare Pages Functions - they serve `/sitemap.xml` and `/feed.xml`, and
+rewrite the metadata on article pages so shared links unfurl properly. They
+don't run under a plain static server, so those three routes only work on a
+real deploy or under `wrangler pages dev`.
 
-Copyright (c) 2024 Adnan Bukvic under the MIT license
+Copyright (c) 2026 Adnan Bukvic under the MIT license
