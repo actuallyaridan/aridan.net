@@ -1,5 +1,11 @@
+# cdnjs/jsdelivr appear in connect-src, not just script-src/style-src/font-src,
+# because this same header is served on /sw.js and therefore becomes the service
+# worker's own policy. A worker's fetch() is governed by connect-src whatever the
+# response is eventually used for, so without them sw.js cannot precache or serve
+# Font Awesome and twemoji - the fetch throws, respondWith hands the page an
+# empty body, and integrity="..." then rejects both files and every icon with it.
 /*
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://itunes.apple.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.github.com https://api.lanyard.rest wss://api.lanyard.rest; manifest-src 'self'; worker-src 'self'; media-src 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://itunes.apple.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.github.com https://api.lanyard.rest wss://api.lanyard.rest https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; manifest-src 'self'; worker-src 'self'; media-src 'self'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
