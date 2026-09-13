@@ -1,6 +1,12 @@
 // Bump VERSION whenever either precache list changes; the old cache is dropped
 // on activate, so a stale shell can never outlive a deploy.
-const VERSION = "v3";
+//
+// Bump it for a CSP change in _headers too. A worker captures the policy from
+// its own script response at install time and keeps it for the life of the
+// registration - no reload, however hard, re-reads it. Only a byte-different
+// sw.js installs a new worker, and that changed etag is also what gets the file
+// past Cloudflare's edge cache so the new header is the one it installs under.
+const VERSION = "v4";
 const CACHE = "aridan-" + VERSION;
 
 // Extensionless on purpose: Pages 308s /offline.html to /offline, and a response
