@@ -260,6 +260,7 @@
   "No lyrics found for this track.": "Tekst za ovu pjesmu nije pronađen.",
   "This track is instrumental.": "Ova pjesma je instrumentalna.",
   "Couldn't load lyrics. Try again.": "Tekst se nije mogao učitati. Pokušajte ponovno.",
+  "Lyrics are not available in a test environment.": "Tekstovi pjesama nisu dostupni u testnom okruženju.",
   "not time-synced": "nije vremenski usklađeno",
   "Lyrics provided and hosted by": "Tekstove pjesama pruža i hostira"
 }

@@ -19,6 +19,8 @@
   const reduceMotion = () => !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   const t = (s) => (window.i18n ? window.i18n.t(s) : s);
 
+  const isDev = () => typeof isLocalHost === "function" && isLocalHost();
+
   let track = null;
   let overlayOpen = false;
   let opener = null;
@@ -278,6 +280,13 @@
   // swaps its contents without touching the focus or animation it is mid-way
   // through.
   async function loadInto() {
+    if (isDev()) {
+      clearStage();
+      setCaption(null);
+      setStatus("Lyrics are not available in a test environment.");
+      return;
+    }
+
     const requested = trackKey(track);
 
     // Re-opening on the same song keeps whatever is already rendered, so there

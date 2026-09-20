@@ -71,6 +71,7 @@
 
         if (key === "albumAccent") {
             enabled = !!e.detail.value;
+            log(`Album accent ${enabled ? "on" : "off"}`);
             if (enabled) start();
             else stop();
             return;
@@ -96,6 +97,8 @@
 
         if (!key) { clearAccent(); return; }
         if (!enabled) return;
+
+        log(`Getting dominant color from ${activity.assets.large_text || key}...`);
         derive(artworkCandidates(activity), token);
     }
 
@@ -103,20 +106,30 @@
         if (generation !== token || !enabled) return;
 
         if (!candidates.length) {
+            warn("No usable artwork");
             artKey = "";
             clearAccent();
             return;
         }
 
-        loadArtwork(candidates[0])
+        const url = candidates[0];
+
+        loadArtwork(url)
             .then((img) => {
                 if (generation !== token) return;
                 const hsl = dominant(img);
-                if (!hsl) { derive(candidates.slice(1), token); return; }
+                if (!hsl) {
+                    warn("No color found in", url);
+                    derive(candidates.slice(1), token);
+                    return;
+                }
                 base = hsl;
                 if (enabled) applyAccent(painted);
             })
-            .catch(() => derive(candidates.slice(1), token));
+            .catch(() => {
+                warn("Artwork failed to load:", url);
+                derive(candidates.slice(1), token);
+            });
     }
 
     function artworkCandidates(activity) {
@@ -245,17 +258,21 @@
     function applyAccent(animate) {
         if (!base) return;
 
-        const vars = accentVars(base, root.classList.contains("theme-dark"));
+        const dark = root.classList.contains("theme-dark");
+        const vars = accentVars(base, dark);
 
         root.classList.toggle("accent-crossfade", !!animate);
         Object.keys(vars).forEach((prop) => root.style.setProperty(prop, vars[prop]));
         root.classList.add("album-accent");
+
+        log(`Setting accent color to ${vars["--accent-color"]}`);
 
         painted = true;
         cacheAccent();
     }
 
     function clearAccent() {
+        if (root.classList.contains("album-accent")) log("Clearing accent color");
         root.classList.remove("accent-crossfade");
         PROPS.forEach((prop) => root.style.removeProperty(prop));
         root.classList.remove("album-accent");
@@ -278,7 +295,9 @@
             const dark = root.classList.contains("theme-dark");
             if (dark === wasDark) return;
             wasDark = dark;
-            if (enabled && base) applyAccent(false);
+            if (!enabled || !base) return;
+            log(`Refitting accent color for ${dark ? "dark" : "light"} theme`);
+            applyAccent(false);
         }).observe(root, { attributes: true, attributeFilter: ["class"] });
     }
 
@@ -372,6 +391,9 @@
         destroyed = true;
         disconnect();
     }
+
+    function log(...a) { console.log("[AlbumAccent]", ...a); }
+    function warn(...a) { console.warn("[AlbumAccent]", ...a); }
 
     function prefOn(key) {
         return localStorage.getItem(key) !== "false";

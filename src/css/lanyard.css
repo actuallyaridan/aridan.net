@@ -135,6 +135,7 @@
 
 #loadedLanyardInner {
     min-height: 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -219,6 +220,7 @@ img.albumArt {
 #discordScroller {
     position: relative;
     width: 100%;
+    isolation: isolate;
 }
 
 div#discord {
@@ -239,11 +241,15 @@ div#discord::-webkit-scrollbar {
 .button.activityNav {
     position: absolute;
     z-index: 2;
-    display: block;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
     top: 0;
     bottom: 0;
-    height: fit-content;
     margin-block: auto;
 }
 
