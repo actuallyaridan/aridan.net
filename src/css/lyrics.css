@@ -1,0 +1,234 @@
+#lyricsBtn {
+    margin: 12px auto 0;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+#lyricsBtn.hide {
+    display: none;
+}
+
+/* The footer's default 12px gap separates independent notes; this line is one
+   sentence, so it wants a word space instead. */
+footer>.footerNote.lyricsNote {
+    gap: 2px 5px;
+}
+
+#lyricsOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-color);
+    overflow: hidden;
+}
+
+#lyricsOverlay.hide {
+    display: none;
+}
+
+#lyricsOverlay.lyricsOpening {
+    animation: lyricsFadeIn 0.25s ease;
+}
+
+#lyricsOverlay.lyricsClosing {
+    animation: lyricsFadeOut 0.25s ease forwards;
+}
+
+#lyricsCloseBtn {
+    position: absolute;
+    top: max(20px, env(safe-area-inset-top));
+    right: max(20px, env(safe-area-inset-right));
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--card-background-color);
+    color: var(--text-color);
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease, transform .12s ease;
+}
+
+#lyricsCloseBtn>i {
+    margin: 0;
+}
+
+#lyricsCloseBtn:hover {
+    background: var(--button-hover-background-color);
+    border-color: var(--secondary-title-color);
+}
+
+#lyricsCloseBtn:active {
+    transform: scale(0.9);
+}
+
+html.reduce-motion #lyricsCloseBtn:active {
+    transform: none;
+}
+
+/* The stage scrolls, not the overlay: the active line is centred by scrolling
+   this box, and the caption below has to stay put while that happens. It takes
+   the leftover column height rather than all of it, so scrolling lines pass
+   above the caption instead of under it - min-height:0 is what allows a flex
+   child to be shorter than its content and actually scroll.
+
+   The tall block padding is what lets the very first and very last lines reach
+   the middle of the box, and the mask fades them out as they near the edges. */
+#lyricsStage {
+    /* Positioned so it is the offsetParent of its rows: scrollToActive() reads
+       offsetTop expecting a distance into the scrolling content, which is only
+       true if the measurement starts at this box. */
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    max-width: 900px;
+    padding: 0 8vw;
+    box-sizing: border-box;
+    overflow-y: auto;
+    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    /* stretch, not center: a centred flex item shrinks to its own text, so
+       every line would start at a different x and text-align would only show
+       up on the ones that wrap. Full-width rows give them all one left edge. */
+    align-items: stretch;
+    gap: 0.55em;
+    mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+}
+
+#lyricsStage::-webkit-scrollbar {
+    display: none;
+}
+
+/* Half-height spacers rather than block padding. Padding counts towards a
+   border-box height and is never shrunk, so 50vh top and bottom held the stage
+   at a hard 100vh floor - taller than the column had to give, which shoved the
+   caption past the bottom of the screen. Flex items are content: they scroll
+   with the lyrics instead of setting a minimum on the box. */
+#lyricsStage::before,
+#lyricsStage::after {
+    content: "";
+    flex: 0 0 50%;
+}
+
+/* Unsynced lyrics have no line to centre, so they start at the top and are
+   simply read. */
+#lyricsStage.isUnsynced {
+    padding-block: 10vh 4vh;
+    justify-content: flex-start;
+}
+
+#lyricsStage.isUnsynced::before,
+#lyricsStage.isUnsynced::after {
+    content: none;
+}
+
+.lyricsRow {
+    font-family: Jost, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    font-size: clamp(1.35em, 4.6vw, 2.5em);
+    line-height: 1.2;
+    text-align: left;
+    /* Grows to the right off a fixed left edge, so the start of the line does
+       not drift sideways as it becomes active. */
+    transform-origin: left center;
+    margin: 0;
+    /* Dimmed until its moment: only the line being sung is at full strength,
+       which is what makes the position in the song readable at a glance. */
+    color: var(--paragraph-color);
+    opacity: 0.45;
+    transition: opacity .35s ease, color .35s ease, transform .35s ease;
+}
+
+.lyricsRow.isActive {
+    color: var(--title-color);
+    opacity: 1;
+    transform: scale(1.04);
+}
+
+/* Nothing is being timed, so nothing is dimmed. */
+.lyricsRow.isStatic {
+    opacity: 1;
+    color: var(--title-color);
+    font-size: clamp(1.1em, 3.4vw, 1.6em);
+    font-weight: 600;
+}
+
+.lyricsPlain {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35em;
+}
+
+#lyricsStatus {
+    font-family: Jost, sans-serif;
+    color: var(--paragraph-color);
+    font-size: 1.1em;
+    text-align: center;
+    margin: 0;
+    padding: 0 8vw;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#lyricsStatus.hide {
+    display: none;
+}
+
+#lyricsCaption {
+    flex: 0 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    color: var(--paragraph-color);
+    font-family: Jost, sans-serif;
+    font-size: 0.8em;
+    margin: 0;
+    padding: 10px 12px max(16px, env(safe-area-inset-bottom));
+}
+
+@keyframes lyricsFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes lyricsFadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+html.reduce-motion .lyricsRow {
+    transition: none;
+    transform: none;
+}
+
+html.reduce-motion .lyricsRow.isActive {
+    transform: none;
+}
+
+html.reduce-motion #lyricsOverlay.lyricsOpening,
+html.reduce-motion #lyricsOverlay.lyricsClosing {
+    animation: none;
+}

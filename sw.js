@@ -6,7 +6,7 @@
 // registration - no reload, however hard, re-reads it. Only a byte-different
 // sw.js installs a new worker, and that changed etag is also what gets the file
 // past Cloudflare's edge cache so the new header is the one it installs under.
-const VERSION = "v4";
+const VERSION = "v5";
 const CACHE = "aridan-" + VERSION;
 
 // Extensionless on purpose: Pages 308s /offline.html to /offline, and a response
@@ -25,7 +25,7 @@ const PRECACHE = [
     "/src/css/pihole.css",
     "/src/css/minecraft.css",
     "/src/css/editor.css",
-    "/src/css/lyricsEasterEgg.css",
+    "/src/css/lyrics.css",
     "/src/js/settings.js",
     "/src/js/settingsPanel.js",
     "/src/js/settingsModal.js",

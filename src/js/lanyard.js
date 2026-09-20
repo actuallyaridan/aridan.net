@@ -344,7 +344,7 @@
   }
 
   // #loadedLanyard animates open/closed, so it is toggled by class rather than
-  // by display — display:none cannot transition.
+  // by display, display:none cannot transition.
   function showActivityCard(yes) {
     els.content?.classList.toggle("showActivity", !!yes);
   }
@@ -431,7 +431,7 @@
 
   // The cards sit in a centred flex row, so revealing one also shoves its
   // neighbour sideways. FLIP: note where each card is, apply the change, then
-  // animate from the old box — new cards fade up, existing ones slide across.
+  // animate from the old box, new cards fade up, existing ones slide across.
   function animateActivityChange(mutate) {
     const cards = [els.amLanyardDiscord, byId("discordActivity")].filter(Boolean);
 
@@ -562,7 +562,7 @@
 
   // Genius slugs are the whole "artist song" string lowercased with everything
   // non-alphanumeric collapsed to hyphens, then only the first letter capitalised
-  // — "Severina" + "Postelja Od Vina" -> "Severina-postelja-od-vina".
+  //, "Severina" + "Postelja Od Vina" -> "Severina-postelja-od-vina".
   function geniusSlug(text) {
     const cleaned = String(text || "")
       .normalize("NFKD")
@@ -772,7 +772,7 @@
   }
 
   // Applying an update is synchronous, so switching the spinner off in the same
-  // task left it without a single frame to paint in — it could never be seen.
+  // task left it without a single frame to paint in, it could never be seen.
   // Hold it on long enough to register; back-to-back updates coalesce into one.
   function flashLoading() {
     clearTimeout(loaderTimer);
@@ -814,10 +814,10 @@
 
   function handleError(e) {
     console.error("Error:", e);
-    // Only the copy is replaced — writing to #errorMessage itself would blow
+    // Only the copy is replaced, writing to #errorMessage itself would blow
     // away the icon paragraph along with it.
     if (els.errorText) els.errorText.textContent = `An error occurred: ${e?.message || e}`;
-    // "error" is not a Discord status, so it can never collide with a real one —
+    // "error" is not a Discord status, so it can never collide with a real one,
     // the next successful payload swaps the chip back on its own.
     updateStatusWrapper("error");
     show(els.spinner, false);

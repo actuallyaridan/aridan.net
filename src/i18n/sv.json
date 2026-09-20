@@ -49,10 +49,10 @@
   "Available right now": "Tillgänglig just nu",
   "Away from keyboard": "Borta från tangentbordet",
   "Do Not Disturb": "Stör ej",
-  "in Sweden — probably asleep": "i Sverige — sover nog",
-  "in Sweden — probably at work": "i Sverige — är nog på jobbet",
-  "in Sweden — probably out": "i Sverige — är nog ute",
-  "in Sweden — probably away": "i Sverige — är nog borta",
+  "in Sweden, probably asleep": "i Sverige, sover nog",
+  "in Sweden, probably at work": "i Sverige, är nog på jobbet",
+  "in Sweden, probably out": "i Sverige, är nog ute",
+  "in Sweden, probably away": "i Sverige, är nog borta",
   "a swedish": "en svensk",
   "Connecting": "Ansluter",
   "Refresh": "Uppdatera",
@@ -252,5 +252,14 @@
   "Edit": "Redigera",
   "What I'm doing right now": "Vad jag gör just nu",
   "More formatting options": "Fler formateringsalternativ",
-  "Sync scrolling between editor and preview": "Synkronisera rullning mellan redigerare och förhandsgranskning"
+  "Sync scrolling between editor and preview": "Synkronisera rullning mellan redigerare och förhandsgranskning",
+
+  "Lyrics": "Låttext",
+  "Close": "Stäng",
+  "Loading lyrics…": "Laddar låttext…",
+  "No lyrics found for this track.": "Ingen låttext hittades för det här spåret.",
+  "This track is instrumental.": "Det här spåret är instrumentalt.",
+  "Couldn't load lyrics. Try again.": "Låttexten kunde inte laddas. Försök igen.",
+  "not time-synced": "inte tidssynkad",
+  "Lyrics provided and hosted by": "Låttexter tillhandahålls och lagras av"
 }

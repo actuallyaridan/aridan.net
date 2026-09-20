@@ -49,10 +49,10 @@
   "Available right now": "Dostupan upravo sada",
   "Away from keyboard": "Odsutan od tastature",
   "Do Not Disturb": "Ne uznemiravaj",
-  "in Sweden — probably asleep": "u Švedskoj — vjerovatno spavam",
-  "in Sweden — probably at work": "u Švedskoj — vjerovatno sam na poslu",
-  "in Sweden — probably out": "u Švedskoj — vjerovatno sam vani",
-  "in Sweden — probably away": "u Švedskoj — vjerovatno me nema",
+  "in Sweden, probably asleep": "u Švedskoj, vjerovatno spavam",
+  "in Sweden, probably at work": "u Švedskoj, vjerovatno sam na poslu",
+  "in Sweden, probably out": "u Švedskoj, vjerovatno sam vani",
+  "in Sweden, probably away": "u Švedskoj, vjerovatno me nema",
   "a swedish": "švedski",
   "Connecting": "Povezivanje",
   "Refresh": "Osvježi",
@@ -252,5 +252,14 @@
   "Edit": "Uredi",
   "What I'm doing right now": "Šta trenutno radim",
   "More formatting options": "Više opcija formatiranja",
-  "Sync scrolling between editor and preview": "Sinhronizuj pomjeranje između uređivača i pregleda"
+  "Sync scrolling between editor and preview": "Sinhronizuj pomjeranje između uređivača i pregleda",
+
+  "Lyrics": "Tekst pjesme",
+  "Close": "Zatvori",
+  "Loading lyrics…": "Učitavanje teksta…",
+  "No lyrics found for this track.": "Tekst za ovu pjesmu nije pronađen.",
+  "This track is instrumental.": "Ova pjesma je instrumentalna.",
+  "Couldn't load lyrics. Try again.": "Tekst se nije mogao učitati. Pokušajte ponovo.",
+  "not time-synced": "nije vremenski usklađeno",
+  "Lyrics provided and hosted by": "Tekstove pjesama pruža i hostuje"
 }
