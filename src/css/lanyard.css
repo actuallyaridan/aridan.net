@@ -27,7 +27,7 @@
     touch-action: manipulation;
     -webkit-appearance: none;
     appearance: none;
-    text-align: right;
+    text-align: center;
     margin: 4px 0;
     display: block;
 }

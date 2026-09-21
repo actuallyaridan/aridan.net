@@ -148,14 +148,63 @@ html.reduce-motion #lyricsCloseBtn:active {
     transition: opacity .35s ease, color .35s ease, transform .35s ease;
 }
 
+/* The line being sung is the one thing on screen worth colouring, so it takes
+   the accent: the album's own colour while the album-accent setting is on, the
+   chosen theme's otherwise. --accent-text rather than --accent-color because
+   this is text - that is the variable both the themes and albumAccent.js fit
+   for contrast against the page background. */
 .lyricsRow.isActive {
-    color: var(--title-color);
+    color: var(--accent-text);
     opacity: 1;
     transform: scale(1.04);
 }
 
-/* Nothing is being timed, so nothing is dimmed. */
-.lyricsRow.isStatic {
+/* The stand-in for a stretch with no words in it. Unlike a lyric, which stays
+   in the list dimmed so the song can be read ahead of and behind, a break is
+   only interesting while it is happening: out of the flow entirely the rest of
+   the time, so the lines either side of it sit together. */
+.lyricsRow.lyricsDots {
+    display: none;
+}
+
+.lyricsRow.lyricsDots.isActive {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+    /* Matches a line of text's height, so the break reads as one line's worth
+       of silence. Held with flex:0 0 auto because the stage is a column flex
+       container that overflows: a row whose min-content height is only a dot
+       tall would otherwise be shrunk to exactly that. */
+    flex: 0 0 auto;
+    height: 1.2em;
+    /* Appears in its own right rather than fading up from the dimmed state a
+       lyric starts in - it was not on screen a moment ago. */
+    animation: lyricsDotsIn 0.28s ease both;
+}
+
+.lyricsDot {
+    width: 0.4em;
+    height: 0.4em;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+@keyframes lyricsDotsIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Nothing is being timed, so nothing is dimmed - whether that is because the
+   lyrics came back without timings at all, or because they have timings and the
+   presence carried no start timestamp to measure them against. Without this the
+   second case left every line at the dimmed 0.45 with nothing ever lit. */
+.lyricsRow.isStatic,
+#lyricsStage.isUnsynced .lyricsRow {
     opacity: 1;
     color: var(--title-color);
     font-size: clamp(1.1em, 3.4vw, 1.6em);
@@ -226,6 +275,11 @@ html.reduce-motion .lyricsRow {
 
 html.reduce-motion .lyricsRow.isActive {
     transform: none;
+}
+
+/* The dots still mark the break; they just arrive outright. */
+html.reduce-motion .lyricsRow.lyricsDots.isActive {
+    animation: none;
 }
 
 html.reduce-motion #lyricsOverlay.lyricsOpening,

@@ -260,7 +260,7 @@
   "No lyrics found for this track.": "Ingen låttext hittades för det här spåret.",
   "This track is instrumental.": "Det här spåret är instrumentalt.",
   "Couldn't load lyrics. Try again.": "Låttexten kunde inte laddas. Försök igen.",
-  "Lyrics are not available in a test environment.": "Låttexter är inte tillgängliga i en testmiljö.",
+  "Lyrics are not available in this test environment.": "Låttexter är inte tillgängliga i denna testmiljö.",
   "not time-synced": "inte tidssynkad",
   "Lyrics provided and hosted by": "Låttexter tillhandahålls och lagras av"
 }

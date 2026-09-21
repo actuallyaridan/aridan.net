@@ -8,6 +8,12 @@
 
     const SAMPLE = 128;
 
+    const MIN_LEVEL = 40;
+    const MIN_CHROMA = 16;
+
+    const HUE_BUCKETS = 24;
+    const HUE_STEP = 360 / HUE_BUCKETS;
+
     const PROPS = [
         "--accent-color",
         "--accent-color-hover",
@@ -30,7 +36,7 @@
     let enabled = prefOn("albumAccent");
     let autoUpdate = prefOn("autoUpdateActivity");
     let base = null;
-    let artKey = "";
+    let artKey = null;
     let lastActivity = null;
     let generation = 0;
     let painted = false;
@@ -188,30 +194,62 @@
             return null;
         }
 
-        const bins = new Map();
+        const buckets = [];
+        for (let i = 0; i < HUE_BUCKETS; i++) buckets.push({ w: 0, x: 0, y: 0, s: 0, l: 0 });
+
+        let mono = 0;
+        let monoCount = 0;
+
         for (let i = 0; i < pixels.length; i += 4) {
             if (pixels[i + 3] < 128) continue;
+
             const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
-            const key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
-            const bin = bins.get(key);
-            if (bin) { bin.r += r; bin.g += g; bin.b += b; bin.n++; }
-            else bins.set(key, { r, g, b, n: 1 });
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+
+            mono += (max + min) / 510;
+            monoCount++;
+
+            if (max < MIN_LEVEL || max - min < MIN_CHROMA) continue;
+
+            const hsl = rgbToHsl(r, g, b);
+            const midtone = Math.exp(-Math.pow(hsl.l - 0.5, 2) / 0.1);
+            const w = ((max - min) / 255) * midtone;
+            const rad = hsl.h * Math.PI / 180;
+
+            const bucket = buckets[Math.floor(hsl.h / HUE_STEP) % HUE_BUCKETS];
+            bucket.w += w;
+            bucket.x += w * Math.cos(rad);
+            bucket.y += w * Math.sin(rad);
+            bucket.s += w * hsl.s;
+            bucket.l += w * hsl.l;
         }
 
-        let best = null;
-        let bestScore = 0;
+        let peak = -1;
+        let peakWeight = 0;
+        for (let i = 0; i < HUE_BUCKETS; i++) {
+            const left = buckets[(i + HUE_BUCKETS - 1) % HUE_BUCKETS];
+            const right = buckets[(i + 1) % HUE_BUCKETS];
+            const weight = left.w + 2 * buckets[i].w + right.w;
+            if (weight > peakWeight) { peakWeight = weight; peak = i; }
+        }
 
-        bins.forEach((bin) => {
-            const hsl = rgbToHsl(bin.r / bin.n, bin.g / bin.n, bin.b / bin.n);
+        if (peak < 0) return monoCount ? { h: 0, s: 0, l: mono / monoCount } : null;
 
-            const vividness = 0.08 + Math.pow(hsl.s, 1.5);
-            const midtone = Math.exp(-Math.pow(hsl.l - 0.5, 2) / 0.1);
-            const score = bin.n * vividness * midtone;
+        const mass = [
+            buckets[(peak + HUE_BUCKETS - 1) % HUE_BUCKETS],
+            buckets[peak],
+            buckets[(peak + 1) % HUE_BUCKETS]
+        ].reduce(
+            (a, bk) => ({ w: a.w + bk.w, x: a.x + bk.x, y: a.y + bk.y, s: a.s + bk.s, l: a.l + bk.l }),
+            { w: 0, x: 0, y: 0, s: 0, l: 0 }
+        );
 
-            if (score > bestScore) { bestScore = score; best = hsl; }
-        });
-
-        return best;
+        return {
+            h: ((Math.atan2(mass.y, mass.x) * 180 / Math.PI) + 360) % 360,
+            s: mass.s / mass.w,
+            l: mass.l / mass.w
+        };
     }
 
     function accentVars(colour, dark) {

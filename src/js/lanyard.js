@@ -806,10 +806,10 @@
     return activities.find(isAppleMusic) || null;
   }
 
+  // Anchored: an artist can have "by" inside their name - "Bobby Womack" - and
+  // only a leading one is Cider's prefix. Mirrored by artistOf() in lyrics.js.
   function formatActivityState(state) {
-    if (!state) return "";
-    const byRegex = /by\s*(?:\(.*\)|[^)]+)/;
-    return byRegex.test(state) ? state.replace(/by\s+/, "") : state;
+    return String(state || "").trim().replace(/^by\s+/i, "");
   }
 
   function handleError(e) {
