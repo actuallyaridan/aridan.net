@@ -75,13 +75,6 @@
 .statusWrapper.hide {
     display: none;
 }
-
-.divider {
-    border: solid 1px rgba(128, 128, 128, 0.4);
-    border: solid 1px rgba(var(--accent-color), 0.4);
-    width: 100%;
-}
-
 /* Column, not row: #loading, #errorMessage and #loadedLanyard are meant to be
    mutually exclusive states, but the collapsed card is only 0 tall, never 0
    wide, so as a row item its width:100% basis still claimed half the row and
@@ -168,32 +161,6 @@ html.reduce-motion #loadedLanyard {
 #dcActivityHeaderName {
     line-height: 2.5;
     margin-left: 12px;
-}
-
-section.project>p.dcProjectName {
-    color: white;
-}
-
-.img-holder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    -webkit-backdrop-filter: blur(var(--blur-soft));
-    backdrop-filter: blur(var(--blur-soft));
-    width: 65vw;
-    height: auto;
-    aspect-ratio: 16 / 9;
-}
-
-.img-holder>p {
-    margin: 12px;
-}
-
-.img-holder>a {
-    padding: 6px;
-    background-color: var(--card-background-color);
-    background-color: rgba(var(--darker-accent-color), 0.30);
 }
 
 img.albumArt {
@@ -300,11 +267,6 @@ div#discord::-webkit-scrollbar {
     margin-top: 6px;
     padding-top: 6px;
 }
-
-.discordPFP {
-    border-radius: 10px;
-}
-
 #discordActivity,
 #amLanyardDiscord,
 #lyricsCard {
@@ -346,12 +308,6 @@ div#discord::-webkit-scrollbar {
     height: 32px;
     position: absolute;
 }
-
-
-.discordName {
-    display: flex;
-}
-
 div#loading>div {
     display: flex;
     align-items: center;
@@ -417,18 +373,12 @@ html.reduce-motion .lds-ring.lanyardConnecting::before {
     color: inherit;
 }
 
-
 .lds-ring.smallLoader {
     display: none;
     position: relative;
     width: 1em;
     height: 1em;
 }
-
-.showSmallLoader {
-    display: inline-block !important;
-}
-
 .lanyardConnecting {
     display: inline-block !important;
     color: white;
@@ -460,7 +410,6 @@ html.reduce-motion .lds-ring.lanyardConnecting::before {
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     border-color: white transparent transparent transparent;
 }
-
 
 .lds-ring.smallLoader div:nth-child(1) {
     animation-delay: -0.45s;
@@ -537,7 +486,6 @@ html.reduce-motion .lds-ring.lanyardConnecting::before {
     }
 }
 
-
 #discordInfo {
     display: flex;
     flex-direction: column;
@@ -548,7 +496,6 @@ html.reduce-motion .lds-ring.lanyardConnecting::before {
     border-radius: 12px;
     background-color: var(--card-background-color);
 }
-
 
 span.titleActivity {
     text-align: left;
@@ -574,37 +521,6 @@ span.titleActivity {
     margin-left: 0.2em;
     font-weight: normal !important;
 }
-
-/* Last child of .titleActivity's space-between row, so it lands at the top right
-   in line with the Apple Music heading. Bare icon that picks up the heading's own
-   colour, brightening to full contrast on hover like the icon links on Experience. */
-#amGeniusLink {
-    display: inline-flex;
-    align-items: center;
-    flex: none;
-    color: var(--paragraph-color);
-    text-decoration: none;
-    cursor: pointer;
-    transition: color .2s ease, opacity .12s ease;
-}
-
-#amGeniusLink:hover {
-    color: var(--text-color);
-}
-
-#amGeniusLink:active {
-    opacity: .55;
-}
-
-#amGeniusLink > i {
-    margin-right: 0;
-}
-
-/* .hide is a class, so it would lose to the id selector above. */
-#amGeniusLink.hide {
-    display: none;
-}
-
 
 #discordActivity,
 #amLanyardDiscord {
@@ -664,16 +580,6 @@ border: 1px solid var(--liquid-glass-button-border);
     width: 0%;
     transition: width 0.5s;
 }
-
-.time-counter {
-    position: absolute;
-    right: 10px;
-    top: -25px;
-    font-size: 14px;
-    color: wheat;
-    white-space: nowrap;
-}
-
 #discordActivityInfo,
 #amDiscordActivityInfo {
     width: 100%;
@@ -702,34 +608,9 @@ div#amTimeremaning>p {
     color: var(--paragraph-color);
 }
 
-div.iconContainer {
-    width: 100%;
-    display: flex;
-    align-items: end;
-    justify-content: right;
-}
-
-.poweredBy {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 12px;
-    padding: 12px;
-    border-radius: 12px;
-    background-color: var(--card-background-color);
-}
-
-.lanyard-logo {
-    width: 92px;
-    margin: 12px;
-    border-radius: 12px;
-}
-
 .discord {
     background-color: #7289da;
 }
-
 
 .discordWrapper {
     background-color: unset;
@@ -742,7 +623,6 @@ div.iconContainer {
     margin: 12px 0;
     min-height: unset !important;
 }
-
 
 .progress-bar {
     height: 100%;
@@ -758,7 +638,6 @@ div.iconContainer {
 html.reduce-motion .progress-bar {
     transition: none;
 }
-
 
 #apple-link{
     display: flex;

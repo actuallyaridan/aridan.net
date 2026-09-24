@@ -6,7 +6,7 @@
 // registration - no reload, however hard, re-reads it. Only a byte-different
 // sw.js installs a new worker, and that changed etag is also what gets the file
 // past Cloudflare's edge cache so the new header is the one it installs under.
-const VERSION = "v5";
+const VERSION = "v6";
 const CACHE = "aridan-" + VERSION;
 
 // Extensionless on purpose: Pages 308s /offline.html to /offline, and a response
@@ -30,6 +30,8 @@ const PRECACHE = [
     "/src/js/settingsPanel.js",
     "/src/js/settingsModal.js",
     "/src/js/general.js",
+    "/src/js/i18n.js",
+    "/src/js/lanyardClient.js",
     "/assets/media/favicons/icon-192.png",
     "/assets/media/favicons/site.webmanifest"
 ];
@@ -78,38 +80,57 @@ const BYPASS = [
 ];
 
 function shouldBypass(pathname) {
-    return BYPASS.some((re) => re.test(pathname));
+    for (const pattern of BYPASS) {
+        if (pattern.test(pathname)) return true;
+    }
+    return false;
 }
 
 self.addEventListener("install", (event) => {
-    event.waitUntil(
-        caches
-            .open(CACHE)
-            // Individually, because addAll is all-or-nothing: one slow CDN would
-            // otherwise fail the whole install and leave the site with no worker.
-            .then((cache) =>
-                Promise.all(
-                    PRECACHE.map((url) => cache.add(url).catch(() => {})).concat(
-                        CDN_PRECACHE.map((url) =>
-                            fetch(cdnRequest(url))
-                                .then((res) => (res.ok ? cache.put(cdnRequest(url), res) : null))
-                                .catch(() => {})
-                        )
-                    )
-                )
-            )
-            .then(() => self.skipWaiting())
-    );
+    event.waitUntil(install());
 });
 
+async function install() {
+    const cache = await caches.open(CACHE);
+    const jobs = [];
+
+    // Individually, because addAll is all-or-nothing: one slow CDN would
+    // otherwise fail the whole install and leave the site with no worker.
+    for (const url of PRECACHE) {
+        const job = cache.add(url).catch(() => {
+        });
+        jobs.push(job);
+    }
+
+    for (const url of CDN_PRECACHE) {
+        const job = fetch(cdnRequest(url))
+            .then((res) => {
+                if (!res.ok) return null;
+                return cache.put(cdnRequest(url), res);
+            })
+            .catch(() => {
+            });
+        jobs.push(job);
+    }
+
+    await Promise.all(jobs);
+
+    await self.skipWaiting();
+}
+
 self.addEventListener("activate", (event) => {
-    event.waitUntil(
-        caches
-            .keys()
-            .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-            .then(() => self.clients.claim())
-    );
+    event.waitUntil(activate());
 });
+
+async function activate() {
+    const keys = await caches.keys();
+
+    for (const key of keys) {
+        if (key !== CACHE) await caches.delete(key);
+    }
+
+    await self.clients.claim();
+}
 
 async function networkFirst(request) {
     const cache = await caches.open(CACHE);
@@ -138,22 +159,28 @@ async function cacheFirst(request) {
     return response;
 }
 
+// The cached copy goes back at once and a fresh one is fetched for next time, at
+// the cost of one-version-old CSS on the first load after a deploy.
 async function staleWhileRevalidate(request) {
     const cache = await caches.open(CACHE);
     const cached = await cache.match(request);
 
+    // Deliberately not awaited: this keeps running after the response has gone back.
     const network = fetch(request)
         .then((response) => {
+            // clone() because the page is about to read this body too.
             if (response && response.ok) cache.put(request, response.clone());
             return response;
         })
         .catch(() => cached);
 
-    return cached || network;
+    if (cached) return cached;
+    return network;
 }
 
 self.addEventListener("fetch", (event) => {
     const request = event.request;
+
     if (request.method !== "GET") return;
 
     const url = new URL(request.url);
@@ -161,7 +188,9 @@ self.addEventListener("fetch", (event) => {
     if (url.origin !== self.location.origin) {
         // Only the version-pinned CDN assets above. Everything else third-party
         // keeps using the browser's own HTTP cache.
-        if (CDN_IMMUTABLE.test(request.url)) event.respondWith(cacheFirst(request));
+        if (CDN_IMMUTABLE.test(request.url)) {
+            event.respondWith(cacheFirst(request));
+        }
         return;
     }
 

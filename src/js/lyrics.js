@@ -14,8 +14,14 @@
   const CLOSE_ANIM_MS = 250;
   const SCROLL_RESUME_MS = 6000;
   const GAP_MIN = 5;
-  const reduceMotion = () => !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  const t = (s) => (window.i18n ? window.i18n.t(s) : s);
+  function reduceMotion() {
+    return matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function t(text) {
+    if (window.i18n) return window.i18n.t(text);
+    return text;
+  }
 
   let track = null;
   let overlayOpen = false;
@@ -32,8 +38,14 @@
 
   const answers = new Map();
 
-  const trackKey = (a) => (a ? [a.artist, a.title, a.album].join("|").toLowerCase() : "");
+  function trackKey(track) {
+    if (!track) return "";
+    const parts = [track.artist, track.title, track.album];
+    return parts.join("|").toLowerCase();
+  }
 
+  // Anchored: an artist can have "by" inside their name - "Bobby Womack" - and
+  // only a leading one is Cider's prefix. Mirrored by artistOf() in lanyard.js.
   function artistOf(state) {
     return String(state || "").trim().replace(/^by\s+/i, "");
   }
@@ -48,12 +60,16 @@
     const start = a.timestamps?.start || 0;
     const end = a.timestamps?.end || 0;
 
+    // LRCLIB uses the length to pick between recordings of the same song.
+    let duration = 0;
+    if (start && end) duration = (end - start) / 1000;
+
     return {
-      title,
-      artist,
+      title: title,
+      artist: artist,
       album: String(a.assets?.large_text || "").trim(),
-      start,
-      duration: start && end ? (end - start) / 1000 : 0,
+      start: start,
+      duration: duration,
     };
   }
 
@@ -66,29 +82,41 @@
     if (want.album) params.set("album", want.album);
     if (want.duration) params.set("duration", String(Math.round(want.duration)));
 
-    const pending = fetch("/api/lyrics?" + params, { headers: { accept: "application/json" } })
-      .then(async (res) => {
-        const type = res.headers.get("content-type") || "";
-        if (!type.includes("application/json")) {
-          const err = new Error(
-            `/api/lyrics returned ${res.status} ${type || "with no content type"} - ` +
-              "Pages Functions only run under the Cloudflare runtime"
-          );
-          err.noBackend = true;
-          throw err;
-        }
+    const request = fetch("/api/lyrics?" + params, {
+      headers: { accept: "application/json" }
+    });
 
-        const body = await res.json();
-        if (res.ok || res.status === 404) return body;
-        throw new Error(`lyrics request failed: ${res.status} ${body.reason || ""}`.trim());
-      })
-      .catch((err) => {
-        answers.delete(key);
+    const pending = request.then(async (res) => {
+      const type = res.headers.get("content-type") || "";
+
+      // Anything other than JSON means the endpoint is not really there: Pages
+      // Functions only run under the Cloudflare runtime, not a static server.
+      if (!type.includes("application/json")) {
+        const err = new Error(
+          "/api/lyrics returned " + res.status + " " +
+          (type || "with no content type") +
+          " - Pages Functions only run under the Cloudflare runtime"
+        );
+        err.noBackend = true;
         throw err;
-      });
+      }
 
-    answers.set(key, pending);
-    return pending;
+      const body = await res.json();
+
+      // 404 is a real answer here, so it is handled like a success.
+      if (res.ok || res.status === 404) return body;
+
+      throw new Error("lyrics request failed: " + res.status + " " + (body.reason || ""));
+    });
+
+    // A failed lookup must not stay in the cache, or a retry gets the same rejection.
+    const guarded = pending.catch((err) => {
+      answers.delete(key);
+      throw err;
+    });
+
+    answers.set(key, guarded);
+    return guarded;
   }
 
   function setStatus(key) {
@@ -106,9 +134,16 @@
       return;
     }
 
-    const line = `${track.title} - ${track.artist}`;
-    const unsynced = shownData?.found && !shownData.synced;
-    caption.textContent = unsynced ? `${line} · ${t("not time-synced")}` : line;
+    const line = track.title + " - " + track.artist;
+
+    const haveLyrics = shownData && shownData.found;
+    const unsynced = haveLyrics && !shownData.synced;
+
+    if (unsynced) {
+      caption.textContent = line + " \u00b7 " + t("not time-synced");
+    } else {
+      caption.textContent = line;
+    }
   }
 
   function clearStage() {
@@ -141,17 +176,29 @@
   }
 
   function renderSynced(lines) {
-    if (lines[0].t >= GAP_MIN) cues.push({ t: 0, el: dotsRow() });
+    if (lines[0].t >= GAP_MIN) {
+      cues.push({ t: 0, el: dotsRow() });
+    }
 
-    lines.forEach((line, i) => {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
       if (line.text) {
         cues.push({ t: line.t, el: textRow(line.text) });
-        return;
+        continue;
       }
+
       const next = lines[i + 1];
-      const gap = next ? next.t - line.t : Infinity;
-      cues.push({ t: line.t, el: gap >= GAP_MIN ? dotsRow() : null });
-    });
+
+      let gap = Infinity;
+      if (next) gap = next.t - line.t;
+
+      let el = null;
+      if (gap >= GAP_MIN) el = dotsRow();
+
+      // A cue with el: null still takes a slot, so the highlight lands on nothing.
+      cues.push({ t: line.t, el: el });
+    }
   }
 
   function renderPlain(text) {
@@ -193,10 +240,13 @@
 
   function scrollToActive(el) {
     if (Date.now() < resumeScrollAt) return;
-    stage.scrollTo({
-      top: el.offsetTop - stage.clientHeight / 2 + el.offsetHeight / 2,
-      behavior: reduceMotion() ? "auto" : "smooth",
-    });
+
+    const top = el.offsetTop - (stage.clientHeight / 2) + (el.offsetHeight / 2);
+
+    let behavior = "smooth";
+    if (reduceMotion()) behavior = "auto";
+
+    stage.scrollTo({ top: top, behavior: behavior });
   }
 
   function highlight(index) {
@@ -218,7 +268,9 @@
     const elapsed = (Date.now() - track.start) / 1000;
 
     let index = 0;
-    while (index + 1 < cues.length && cues[index + 1].t <= elapsed) index++;
+    while (index + 1 < cues.length && cues[index + 1].t <= elapsed) {
+      index++;
+    }
 
     highlight(index);
     rafId = window.requestAnimationFrame(tick);
@@ -280,11 +332,11 @@
       shownData = null;
       shownKey = "";
       setCaption();
-      setStatus(
-        err.noBackend
-          ? "Lyrics are not available in this test environment."
-          : "Couldn't load lyrics. Try again."
-      );
+      if (err.noBackend) {
+        setStatus("Lyrics are not available in this test environment.");
+      } else {
+        setStatus("Couldn't load lyrics. Try again.");
+      }
     }
   }
 
@@ -301,18 +353,19 @@
     if (opener && document.contains(opener)) opener.focus();
     opener = null;
 
-    closeTimeoutId = window.setTimeout(
-      () => {
-        overlay.classList.add("hide");
-        overlay.classList.remove("lyricsClosing");
-        closeTimeoutId = 0;
-      },
-      reduceMotion() ? 0 : CLOSE_ANIM_MS
-    );
+    // display:none cannot be animated, so it is only applied after the fade.
+    let wait = CLOSE_ANIM_MS;
+    if (reduceMotion()) wait = 0;
+
+    closeTimeoutId = window.setTimeout(function () {
+      overlay.classList.add("hide");
+      overlay.classList.remove("lyricsClosing");
+      closeTimeoutId = 0;
+    }, wait);
   }
 
-  window.addEventListener("lanyard:applemusic", (evt) => {
-    const next = readTrack(evt.detail);
+  window.Lanyard.subscribe((presence) => {
+    const next = readTrack(window.Lanyard.appleMusic(presence));
     const changed = trackKey(next) !== trackKey(track);
     track = next;
 
@@ -335,16 +388,22 @@
   document.addEventListener("keydown", (e) => {
     if (!overlayOpen) return;
 
-    if (e.key === "Escape") closeOverlay();
-    else if (e.key === "Tab") {
+    if (e.key === "Escape") {
+      closeOverlay();
+      return;
+    }
+
+    // Tab is pinned to the close button, so focus cannot wander into the page.
+    if (e.key === "Tab") {
       e.preventDefault();
       closeBtn?.focus();
     }
   });
 
-  const humanScroll = () => {
+  function humanScroll() {
     resumeScrollAt = Date.now() + SCROLL_RESUME_MS;
-  };
+  }
+
   stage.addEventListener("wheel", humanScroll, { passive: true });
   stage.addEventListener("touchmove", humanScroll, { passive: true });
 

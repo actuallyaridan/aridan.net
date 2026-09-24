@@ -4,7 +4,8 @@
     var AF = window.ArticleFormat;
 
     function setMeta(attr, key, value) {
-        var el = document.head.querySelector("meta[" + attr + '="' + key + '"]');
+        var selector = "meta[" + attr + '="' + key + '"]';
+        var el = document.head.querySelector(selector);
         if (!el) {
             el = document.createElement("meta");
             el.setAttribute(attr, key);
@@ -34,27 +35,33 @@
     }
 
     function renderArticle(container, meta, bodyHtml) {
-        var esc = AF.escapeHtml;
-        container.innerHTML =
-            '<article class="full-article">' +
-                '<div class="info">' +
-                    '<p class="icon"><i class="fa-solid fa-newspaper icon-background" aria-hidden="true"></i></p>' +
-                    "<div>" +
-                        '<h1 class="name">' + esc(meta.title || "Untitled article") + "</h1>" +
-                        '<p class="description titleColor">' +
-                            '<time datetime="' + esc(meta.date || "") + '">' +
-                                esc(AF.formatDate(meta.date)) +
-                            "</time>" +
-                        "</p>" +
-                        '<a href="/articles/" title="Back to Articles" aria-label="Back to Articles" class="button backButton">' +
-                            '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>' +
-                        "</a>" +
-                    "</div>" +
-                "</div>" +
-                "<hr>" +
-                '<div class="article-content"></div>' +
-            "</article>";
+        // Escaped, so a title containing < or & cannot become real markup.
+        var title = AF.escapeHtml(meta.title || "Untitled article");
+        var rawDate = AF.escapeHtml(meta.date || "");
+        var shownDate = AF.escapeHtml(AF.formatDate(meta.date));
 
+        container.innerHTML = `
+            <article class="full-article">
+                <div class="info">
+                    <p class="icon">
+                        <i class="fa-solid fa-newspaper icon-background" aria-hidden="true"></i>
+                    </p>
+                    <div>
+                        <h1 class="name">${title}</h1>
+                        <p class="description titleColor">
+                            <time datetime="${rawDate}">${shownDate}</time>
+                        </p>
+                        <a href="/articles/" title="Back to Articles"
+                           aria-label="Back to Articles" class="button backButton">
+                            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+                <hr>
+                <div class="article-content"></div>
+            </article>`;
+
+        // Already HTML, produced by marked, so it must not be escaped.
         var content = container.querySelector(".article-content");
         content.innerHTML = bodyHtml;
         if (window.markExternalLinks) window.markExternalLinks(content);
@@ -62,15 +69,23 @@
 
     function renderError(container, heading, detail) {
         document.title = heading + " - aridan.net";
-        container.innerHTML =
-            '<div class="info">' +
-                '<p class="icon"><i class="fa-solid fa-xmark icon-background" aria-hidden="true"></i></p>' +
-                "<div>" +
-                    '<h1 class="name">' + AF.escapeHtml(heading) + "</h1>" +
-                    '<p class="description titleColor">' + AF.escapeHtml(detail) + "</p>" +
-                    '<a href="/articles/" class="button"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i>Back to Articles</a>' +
-                "</div>" +
-            "</div>";
+
+        var safeHeading = AF.escapeHtml(heading);
+        var safeDetail = AF.escapeHtml(detail);
+
+        container.innerHTML = `
+            <div class="info">
+                <p class="icon">
+                    <i class="fa-solid fa-xmark icon-background" aria-hidden="true"></i>
+                </p>
+                <div>
+                    <h1 class="name">${safeHeading}</h1>
+                    <p class="description titleColor">${safeDetail}</p>
+                    <a href="/articles/" class="button">
+                        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>Back to Articles
+                    </a>
+                </div>
+            </div>`;
     }
 
     function load() {
@@ -82,12 +97,18 @@
         var slug = new URLSearchParams(location.search).get("article");
 
         if (!slug) {
-            renderError(container, "No article specified", "The address is missing an article name.");
+            renderError(container,
+                "No article specified",
+                "The address is missing an article name.");
             if (spinner) spinner.style.display = "none";
             return;
         }
+
+        // Checked before it reaches a URL, so a typed address cannot escape the folder.
         if (!AF.isValidSlug(slug)) {
-            renderError(container, "Article not found", "“" + slug + "” isn't a valid article name.");
+            renderError(container,
+                "Article not found",
+                "\u201c" + slug + "\u201d isn't a valid article name.");
             if (spinner) spinner.style.display = "none";
             return;
         }
@@ -100,19 +121,32 @@
             })
             .then(function (text) {
                 var parsed = AF.parse(text);
+
                 applyMetadata(parsed.meta);
-                renderArticle(container, parsed.meta, marked.parse(parsed.body));
+
+                var bodyHtml = marked.parse(parsed.body);
+                renderArticle(container, parsed.meta, bodyHtml);
+
                 if (window.Prism) Prism.highlightAll();
                 if (window.parseEmoji) window.parseEmoji(container);
-                document.dispatchEvent(new CustomEvent("article:rendered", { detail: { slug: slug } }));
+
+                var event = new CustomEvent("article:rendered", {
+                    detail: { slug: slug }
+                });
+                document.dispatchEvent(event);
             })
             .catch(function (err) {
                 if (err.message === "notfound") {
-                    renderError(container, "Article not found", "There's no article called “" + slug + "”.");
-                } else {
-                    console.error("Error loading article:", err);
-                    renderError(container, "Unable to display article", "Something went wrong loading this article.");
+                    renderError(container,
+                        "Article not found",
+                        "There's no article called \u201c" + slug + "\u201d.");
+                    return;
                 }
+
+                console.error("Error loading article:", err);
+                renderError(container,
+                    "Unable to display article",
+                    "Something went wrong loading this article.");
             })
             .finally(function () {
                 if (spinner) spinner.style.display = "none";

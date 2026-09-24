@@ -1,5 +1,13 @@
 (function () {
-    var FOCUSABLE = 'a[href], button:not([disabled]), select, input:not([type="hidden"]), [tabindex]:not([tabindex="-1"])';
+    // Everything inside the dialog that the Tab key can reach.
+    var FOCUSABLE = [
+        'a[href]',
+        'button:not([disabled])',
+        'select',
+        'input:not([type="hidden"])',
+        '[tabindex]:not([tabindex="-1"])'
+    ].join(', ');
+
     var opener = null;
 
     function shell() {
@@ -23,9 +31,17 @@
     function focusable() {
         var content = document.querySelector('#settingsModalMenu .modal-content');
         if (!content) return [];
-        return [...content.querySelectorAll(FOCUSABLE)].filter(function (el) {
-            return el.offsetParent !== null || el.getClientRects().length > 0;
-        });
+
+        var visible = [];
+
+        for (const el of content.querySelectorAll(FOCUSABLE)) {
+            // A null offsetParent usually means display:none, but is also true of
+            // position:fixed, so getClientRects is checked as well.
+            var isVisible = el.offsetParent !== null || el.getClientRects().length > 0;
+            if (isVisible) visible.push(el);
+        }
+
+        return visible;
     }
 
     function setOpen(open) {
@@ -36,33 +52,50 @@
         el.classList.toggle('showMenuNoAnimation', open);
         dialog.classList.toggle('showMenuNoAnimation', open);
 
-        document.querySelectorAll('[aria-haspopup="dialog"]').forEach(function (btn) {
-            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        });
+        for (const btn of document.querySelectorAll('[aria-haspopup="dialog"]')) {
+            if (open) {
+                btn.setAttribute('aria-expanded', 'true');
+            } else {
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        }
 
         if (open) {
             opener = document.activeElement;
             var first = focusable()[0];
             if (first) first.focus();
-        } else if (opener) {
+            return;
+        }
+
+        // Hand focus back, as long as that element is still in the page.
+        if (opener) {
             if (document.contains(opener)) opener.focus();
             opener = null;
         }
     }
 
+    // Makes Tab wrap inside the dialog instead of walking out of it.
     function trap(e) {
-        if (e.key !== 'Tab' || !isOpen()) return;
+        if (e.key !== 'Tab') return;
+        if (!isOpen()) return;
+
         var items = focusable();
-        if (!items.length) return;
+        if (items.length === 0) return;
 
         var first = items[0];
         var last = items[items.length - 1];
         var here = document.activeElement;
 
-        if (e.shiftKey && (here === first || !items.includes(here))) {
-            e.preventDefault();
-            last.focus();
-        } else if (!e.shiftKey && here === last) {
+        // Backwards off the front, or from outside the dialog, lands on the last item.
+        if (e.shiftKey) {
+            if (here === first || !items.includes(here)) {
+                e.preventDefault();
+                last.focus();
+            }
+            return;
+        }
+
+        if (here === last) {
             e.preventDefault();
             first.focus();
         }
@@ -89,6 +122,7 @@
         document.body.insertAdjacentHTML('beforeend', shell().trim());
         document.addEventListener('keydown', onKeydown);
         backdrop().addEventListener('click', onClick);
+        window.SettingsPanel.announceReady();
     }
 
     window.SettingsModal = {

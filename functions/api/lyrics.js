@@ -99,19 +99,34 @@ async function lookup(artist, track, album, duration) {
   return best(Array.isArray(results) ? results : [], duration);
 }
 
+// Synced lyrics beat plain ones, then the length closest to the track we asked
+// about wins.
 function best(results, duration) {
   if (!results.length) return null;
 
-  const ranked = results
-    .map((r) => ({
-      row: r,
-      unsynced: r.syncedLyrics ? 0 : 1,
-      drift: duration && r.duration ? Math.abs(r.duration - duration) : Infinity,
-    }))
-    .sort((a, b) => a.unsynced - b.unsynced || a.drift - b.drift);
+  const ranked = results.map((r) => {
+    let unsynced = 1;
+    if (r.syncedLyrics) unsynced = 0;
+
+    // Unknown lengths sort last.
+    let drift = Infinity;
+    if (duration && r.duration) {
+      drift = Math.abs(r.duration - duration);
+    }
+
+    return { row: r, unsynced: unsynced, drift: drift };
+  });
+
+  ranked.sort((a, b) => {
+    // Drift is only consulted when the synced flags tie.
+    if (a.unsynced !== b.unsynced) return a.unsynced - b.unsynced;
+    return a.drift - b.drift;
+  });
 
   const top = ranked[0];
+
   if (duration && top.drift > MAX_DURATION_DRIFT) return null;
+
   return top.row;
 }
 
@@ -135,9 +150,15 @@ async function lrclib(path, params) {
     // backing off is to stop adding to the pile-up.
     if (!RETRY_STATUS.has(res.status) || attempt >= UPSTREAM_RETRIES) break;
 
+    // Never wait more than two seconds: someone has the lyrics panel open.
     const after = Number(res.headers.get("retry-after"));
-    const wait = Number.isFinite(after) && after > 0 ? Math.min(after * 1000, 2000) : RETRY_DELAY_MS;
-    await new Promise((r) => setTimeout(r, wait));
+
+    let wait = RETRY_DELAY_MS;
+    if (Number.isFinite(after) && after > 0) {
+      wait = Math.min(after * 1000, 2000);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, wait));
   }
 
   // 404 is the documented "no such track" answer and is a result, not a fault.
@@ -174,12 +195,19 @@ function parseLrc(lrc) {
 
     const stamps = [];
     let consumed = 0;
-    let m;
-    while ((m = STAMP.exec(raw))) {
-      if (m.index !== consumed) break;
+    let match;
+
+    while ((match = STAMP.exec(raw))) {
+      if (match.index !== consumed) break;
       consumed = STAMP.lastIndex;
-      stamps.push(parseInt(m[1], 10) * 60 + parseFloat(m[2].replace(":", ".")));
+
+      // Some files write the fraction with a colon, so normalise that first.
+      const minutes = parseInt(match[1], 10);
+      const seconds = parseFloat(match[2].replace(":", "."));
+
+      stamps.push(minutes * 60 + seconds);
     }
+
     if (!stamps.length) continue;
 
     // One line can carry several timestamps when a phrase repeats; each is its
@@ -188,7 +216,11 @@ function parseLrc(lrc) {
     // lets the player clear the screen instead of leaving a lyric hanging
     // through the outro.
     const text = raw.slice(consumed).trim();
-    for (const t of stamps) out.push({ t: Math.round(t * 100) / 100, text });
+
+    for (const stamp of stamps) {
+        const rounded = Math.round(stamp * 100) / 100;
+      out.push({ t: rounded, text: text });
+    }
   }
 
   out.sort((a, b) => a.t - b.t);

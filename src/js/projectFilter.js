@@ -1,33 +1,47 @@
 (function () {
     const DEFAULT_STATUS = "ongoing";
 
+    // The rules between sections, hidden along with the section they follow.
     function isSeparator(el) {
-        return el != null && el.tagName === "HR" && el.classList.contains("onMobile");
+        if (el == null) return false;
+        if (el.tagName !== "HR") return false;
+        return el.classList.contains("onMobile");
     }
 
     function show(status) {
         let lastShown = null;
 
-        document.querySelectorAll("main .section[data-status]").forEach((section) => {
+        for (const section of document.querySelectorAll("main .section[data-status]")) {
             const visible = section.dataset.status === status;
             section.classList.toggle("hide", !visible);
-            if (isSeparator(section.nextElementSibling)) {
-                section.nextElementSibling.classList.toggle("hide", !visible);
-            }
-            if (visible) lastShown = section;
-        });
 
+            const next = section.nextElementSibling;
+            if (isSeparator(next)) {
+                next.classList.toggle("hide", !visible);
+            }
+
+            if (visible) lastShown = section;
+        }
+
+        // A rule after the last visible section would hang off the bottom.
         if (lastShown && isSeparator(lastShown.nextElementSibling)) {
             lastShown.nextElementSibling.classList.add("hide");
         }
 
-        document.querySelectorAll(".projectFilter li").forEach((li) => {
+        for (const li of document.querySelectorAll(".projectFilter li")) {
             const button = li.querySelector("button[data-status]");
-            if (!button) return;
+            if (!button) continue;
+
             const active = button.dataset.status === status;
+
             li.classList.toggle("active", active);
-            button.setAttribute("aria-pressed", active ? "true" : "false");
-        });
+
+            if (active) {
+                button.setAttribute("aria-pressed", "true");
+            } else {
+                button.setAttribute("aria-pressed", "false");
+            }
+        }
 
         if (typeof repositionNavPills === "function") repositionNavPills();
     }
@@ -37,24 +51,29 @@
         if (!filter) return;
 
         const buttons = [...filter.querySelectorAll("button[data-status]")];
-        buttons.forEach((button) => {
+
+        for (const button of buttons) {
             button.addEventListener("click", () => {
                 show(button.dataset.status);
+
+                // replaceState, so flicking between filters does not fill up Back.
                 history.replaceState(null, "", "#" + button.dataset.status);
             });
-        });
+        }
 
         const statuses = buttons.map((button) => button.dataset.status);
-        const fromHash = () => {
-            const status = location.hash.slice(1);
-            return statuses.includes(status) ? status : DEFAULT_STATUS;
-        };
 
         window.addEventListener("hashchange", () => {
             const status = location.hash.slice(1);
             if (statuses.includes(status)) show(status);
         });
-        show(fromHash());
+
+        const fromUrl = location.hash.slice(1);
+        if (statuses.includes(fromUrl)) {
+            show(fromUrl);
+        } else {
+            show(DEFAULT_STATUS);
+        }
     }
 
     if (document.readyState === "loading") {

@@ -26,74 +26,110 @@ const EXAMPLE_STATS = {
   sd_manufactured: "2026-05",
 };
 
+// The Pi-hole is only reachable from inside my own network; everywhere else gets
+// the example numbers above.
 function isPiholeLocalHost() {
-  const h = location.hostname;
-  if (!h || h === "localhost" || h.endsWith(".local") || h.endsWith(".lan")) return true;
-  if (h === "::1") return true;
+  const host = location.hostname;
 
-  const m = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (m) {
-    const a = Number(m[1]);
-    const b = Number(m[2]);
-    if (a === 127) return true;
-    if (a === 10) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 0) return true;
-  }
+  if (!host) return true;
+  if (host === "localhost") return true;
+  if (host === "::1") return true;
+  if (host.endsWith(".local")) return true;
+  if (host.endsWith(".lan")) return true;
+
+  const IPV4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+  const parts = host.match(IPV4);
+  if (!parts) return false;
+
+  const first = Number(parts[1]);
+  const second = Number(parts[2]);
+
+  if (first === 0) return true;
+  if (first === 127) return true;                           // loopback
+  if (first === 10) return true;
+  if (first === 192 && second === 168) return true;
+  if (first === 172 && second >= 16 && second <= 31) return true;
+  if (first === 169 && second === 254) return true;         // link-local
+
   return false;
 }
 
 const PIHOLE_IS_LOCAL = isPiholeLocalHost();
 
+// Rounded down, hence the "+", so the headline is never larger than the truth.
 function abbreviatePiholeNumber(n) {
-  n = Number(n) || 0;
-  if (n < 1000) return n.toLocaleString();
-  const [value, suffix] = n >= 1e6 ? [n / 1e6, "M"] : [n / 1e3, "K"];
-  const floored = Math.floor(value * 10) / 10;
-  return `${floored.toLocaleString(undefined, { maximumFractionDigits: 1 })}${suffix}+`;
+  const value = Number(n) || 0;
+
+  if (value < 1000) return value.toLocaleString();
+
+  let scaled;
+  let suffix;
+
+  if (value >= 1000000) {
+    scaled = value / 1000000;
+    suffix = "M";
+  } else {
+    scaled = value / 1000;
+    suffix = "K";
+  }
+
+  const floored = Math.floor(scaled * 10) / 10;
+
+  const text = floored.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  return text + suffix + "+";
 }
 
 function formatSize(gb) {
   const n = Number(gb) || 0;
-  return n < 1 ? `${Math.round(n * 1024)} MB` : `${n} GB`;
-}
-function usedOfTotal(usedGb, totalGb) {
-  return `${formatSize(usedGb)} used of ${formatSize(totalGb)}`;
+
+  if (n < 1) return Math.round(n * 1024) + " MB";
+  return n + " GB";
 }
 
+function usedOfTotal(usedGb, totalGb) {
+  return formatSize(usedGb) + " used of " + formatSize(totalGb);
+}
+
+// Only the two largest units, so five days shows as "5d 3h".
 function formatUptime(seconds) {
-  const s = Math.floor(Number(seconds) || 0);
-  const d = Math.floor(s / 86400);
-  const h = Math.floor((s % 86400) / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  if (d > 0) return `${d}d ${h}h`;
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
+  const total = Math.floor(Number(seconds) || 0);
+
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+
+  if (days > 0) return days + "d " + hours + "h";
+  if (hours > 0) return hours + "h " + minutes + "m";
+  return minutes + "m";
 }
 
 function formatWrites(gb) {
   const n = Number(gb) || 0;
-  return n >= 1024 ? `${(n / 1024).toFixed(1)} TB` : `${Math.round(n)} GB`;
+
+  if (n >= 1024) return (n / 1024).toFixed(1) + " TB";
+  return Math.round(n) + " GB";
 }
 
 function formatAge(days) {
   const d = Math.max(0, Math.floor(Number(days) || 0));
-  if (d < 60) return `${d}d`;
-  if (d < 730) return `${Math.floor(d / 30.44)} mo`;
-  return `${(d / 365.25).toFixed(1)} yr`;
+
+  if (d < 60) return d + "d";
+  if (d < 730) return Math.floor(d / 30.44) + " mo";
+  return (d / 365.25).toFixed(1) + " yr";
 }
 
 function renderPiholeStats(data, { example = false } = {}) {
-  const setStat = (id, text, fullTitle) => {
+  function setStat(id, text, fullTitle) {
     const el = document.getElementById(id);
     if (!el) return;
+
     el.textContent = text;
     if (fullTitle != null) el.title = fullTitle;
-  };
+  }
 
-  const full = (n) => Number(n).toLocaleString();
+  function full(n) {
+    return Number(n).toLocaleString();
+  }
   setStat("pi-total", abbreviatePiholeNumber(data.total), full(data.total));
   setStat("pi-blocked", abbreviatePiholeNumber(data.blocked), full(data.blocked));
   setStat("pi-percent", `${Number(data.percent).toFixed(1)}%`);
@@ -101,19 +137,36 @@ function renderPiholeStats(data, { example = false } = {}) {
   setStat("pi-clients", abbreviatePiholeNumber(data.clients), full(data.clients));
 
   if (data.frequency != null) {
-    setStat("pi-qpm", Math.round(Number(data.frequency) * 60).toLocaleString(), "live rate, same as the Pi-hole dashboard");
+    // The API reports queries per second; the card shows per minute.
+    const perMinute = Math.round(Number(data.frequency) * 60);
+    setStat("pi-qpm", perMinute.toLocaleString(), "live rate, same as the Pi-hole dashboard");
   }
-  if (data.cached_percent != null) setStat("pi-cached", `${Number(data.cached_percent).toFixed(1)}%`);
+  if (data.cached_percent != null) {
+    setStat("pi-cached", Number(data.cached_percent).toFixed(1) + "%");
+  }
 
-  if (data.temp_c != null) setStat("pi-temp", `${Number(data.temp_c).toFixed(1)}°C`);
-  if (data.cpu_percent != null) setStat("pi-cpu", `${Number(data.cpu_percent).toFixed(1)}%`);
-  if (data.ram_percent != null) {
-    setStat("pi-ram", `${Math.round(Number(data.ram_percent))}%`,
-      data.ram_total_gb != null ? usedOfTotal(data.ram_used_gb, data.ram_total_gb) : undefined);
+  if (data.temp_c != null) {
+    setStat("pi-temp", Number(data.temp_c).toFixed(1) + "\u00b0C");
   }
+
+  if (data.cpu_percent != null) {
+    setStat("pi-cpu", Number(data.cpu_percent).toFixed(1) + "%");
+  }
+
+  if (data.ram_percent != null) {
+    let hover;
+    if (data.ram_total_gb != null) {
+      hover = usedOfTotal(data.ram_used_gb, data.ram_total_gb);
+    }
+    setStat("pi-ram", Math.round(Number(data.ram_percent)) + "%", hover);
+  }
+
   if (data.disk_percent != null) {
-    setStat("pi-disk", `${Math.round(Number(data.disk_percent))}%`,
-      data.disk_total_gb != null ? usedOfTotal(data.disk_used_gb, data.disk_total_gb) : undefined);
+    let hover;
+    if (data.disk_total_gb != null) {
+      hover = usedOfTotal(data.disk_used_gb, data.disk_total_gb);
+    }
+    setStat("pi-disk", Math.round(Number(data.disk_percent)) + "%", hover);
   }
   if (data.uptime_seconds != null) setStat("pi-uptime", formatUptime(data.uptime_seconds));
 
@@ -123,42 +176,83 @@ function renderPiholeStats(data, { example = false } = {}) {
       warning: { label: "WARN", cls: "status-warn" },
       critical: { label: "ERR", cls: "status-crit" },
     };
-    const s = states[String(data.sd_status)] || states.ok;
+
+    const state = states[String(data.sd_status)] || states.ok;
 
     const statusEl = document.getElementById("pi-sd-status");
-    if (statusEl) statusEl.textContent = s.label;
+    if (statusEl) statusEl.textContent = state.label;
+
+    // All three come off first, so no stale colour class is left behind.
     const card = document.getElementById("pi-health");
     if (card) {
       card.classList.remove("status-ok", "status-warn", "status-crit");
-      card.classList.add(s.cls);
+      card.classList.add(state.cls);
     }
   }
   if (data.sd_model != null) setStat("pi-sd-model", data.sd_model || "unknown");
+  // Read only usually means a disk error, so it gets a padlock instead of arrows.
   if (data.sd_fs_mode != null) {
-    const ro = data.sd_fs_mode === "ro";
-    setStat("pi-sd-mode", ro ? "r/o" : "r/w");
-    const modeIcon = document.getElementById("pi-sd-mode-icon");
-    if (modeIcon) modeIcon.className = ro
-      ? "fa-solid fa-arrow-down-up-lock fa-lg"
-      : "fa-solid fa-up-down fa-lg";
-  }
-  if (data.sd_fs_errors != null) setStat("pi-sd-fserr", `${Number(data.sd_fs_errors) || 0}`);
-  if (data.sd_mmc_errors != null) setStat("pi-sd-ioerr", `${Number(data.sd_mmc_errors) || 0}`);
-  if (data.sd_lifetime_writes_gb != null) setStat("pi-sd-writes", formatWrites(data.sd_lifetime_writes_gb));
-  if (data.sd_capacity_gb != null) setStat("pi-sd-size", `${Math.round(Number(data.sd_capacity_gb))} GB`);
-  if (data.sd_age_days != null) setStat("pi-sd-age", formatAge(data.sd_age_days));
+    const readOnly = data.sd_fs_mode === "ro";
 
-  const updatedEl = document.getElementById("pi-updated");
-  if (updatedEl) {
-    if (example) {
-      updatedEl.textContent = "example data (local dev)";
-    } else if (data.updated) {
-      const mins = Math.max(0, Math.round((Date.now() - data.updated) / 60000));
-      updatedEl.textContent = mins === 0 ? "just now" : `${mins} min ago`;
+    if (readOnly) {
+      setStat("pi-sd-mode", "r/o");
+    } else {
+      setStat("pi-sd-mode", "r/w");
+    }
+
+    const modeIcon = document.getElementById("pi-sd-mode-icon");
+    if (modeIcon) {
+      if (readOnly) {
+        modeIcon.className = "fa-solid fa-arrow-down-up-lock fa-lg";
+      } else {
+        modeIcon.className = "fa-solid fa-up-down fa-lg";
+      }
     }
   }
 
-  document.querySelectorAll(".pi-loading").forEach((el) => el.classList.remove("pi-loading"));
+  if (data.sd_fs_errors != null) {
+    setStat("pi-sd-fserr", String(Number(data.sd_fs_errors) || 0));
+  }
+
+  if (data.sd_mmc_errors != null) {
+    setStat("pi-sd-ioerr", String(Number(data.sd_mmc_errors) || 0));
+  }
+  if (data.sd_lifetime_writes_gb != null) {
+    setStat("pi-sd-writes", formatWrites(data.sd_lifetime_writes_gb));
+  }
+
+  if (data.sd_capacity_gb != null) {
+    setStat("pi-sd-size", Math.round(Number(data.sd_capacity_gb)) + " GB");
+  }
+  if (data.sd_age_days != null) setStat("pi-sd-age", formatAge(data.sd_age_days));
+
+  renderUpdatedLine(data, example);
+
+  // The cards start greyed out; this has to run whatever happened above.
+  for (const el of document.querySelectorAll(".pi-loading")) {
+    el.classList.remove("pi-loading");
+  }
+}
+
+function renderUpdatedLine(data, example) {
+  const updatedEl = document.getElementById("pi-updated");
+  if (!updatedEl) return;
+
+  if (example) {
+    updatedEl.textContent = "example data (local dev)";
+    return;
+  }
+
+  if (!data.updated) return;
+
+  const ageMs = Date.now() - data.updated;
+  const mins = Math.max(0, Math.round(ageMs / 60000));
+
+  if (mins === 0) {
+    updatedEl.textContent = "just now";
+  } else {
+    updatedEl.textContent = mins + " min ago";
+  }
 }
 
 async function updatePiholeStats() {
@@ -170,22 +264,30 @@ async function updatePiholeStats() {
   try {
     const response = await fetch("/api/stats", { cache: "no-store" });
 
+    // 503 means the Pi has not reported in yet, which fixes itself.
     if (response.status === 503) {
       console.warn("Pi-hole stats not available yet.");
       return;
     }
-    if (!response.ok) throw new Error(`stats API error: ${response.status}`);
+
+    if (!response.ok) {
+      throw new Error("stats API error: " + response.status);
+    }
 
     const data = await response.json();
     renderPiholeStats(data);
   } catch (error) {
     console.error("Failed to fetch Pi-hole stats:", error);
+
     const errEl = document.getElementById("pi-error");
     if (errEl) errEl.style.display = "block";
   }
 }
 
+const FIVE_MINUTES = 5 * 60 * 1000;
+
 updatePiholeStats();
+
 if (!PIHOLE_IS_LOCAL) {
-  setInterval(updatePiholeStats, 300000);
+  setInterval(updatePiholeStats, FIVE_MINUTES);
 }

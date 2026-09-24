@@ -16,28 +16,6 @@
     width: 100%;
 }
 
-.cookies {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--header-background-color);
-    backdrop-filter: blur(var(--blur-regular));
-    -webkit-backdrop-filter: blur(var(--blur-regular));
-    width: fit-content;
-    border-radius: 12px;
-    padding: 12px;
-}
-
-.cookieTitle {
-    color: var(--title-color);
-}
-
-.cookies>button {
-    margin-left: 12px;
-}
-
 #liquidGlassDisabled{
     display: flex;
 }
@@ -58,7 +36,6 @@ select {
     margin-right: 2rem;
     padding: 1rem;
 }
-
 
 .checkbox-wrapper-51 {
     display: flex;
@@ -185,7 +162,6 @@ html.reduce-motion .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:a
     transform: translateX(18px);
 }
 
-
 .style-flat .dangerZone {
     background-color: var(--danger-zone-background-color);
 }
@@ -292,7 +268,6 @@ input[type="radio"] {
     margin-bottom: 6px;
 }
 
-
 .blue {
     background-color: #007aff;
 }
@@ -316,7 +291,6 @@ input[type="radio"] {
 .showMenuNoAnimation{
     display: flex;
 }
-
 
 .style-flat input[type="radio"]:checked+label.button,
 .style-flat input[type="radio"]:checked+label.button:hover {

@@ -1,7 +1,7 @@
 (function (global) {
     "use strict";
 
-    var VERSION = "5.0.2";
+    var VERSION = "5.0.3";
 
     function toggleMarkup(id, label) {
         return `
@@ -22,6 +22,12 @@
                     </div>`;
     }
 
+    function languageOptions() {
+        return Object.entries(LANGUAGES)
+            .map(([code, name]) => `<option value="${code}">${name}</option>`)
+            .join("");
+    }
+
     function markup(opts) {
         var withDone = !!(opts && opts.withDone);
         var h = "h" + ((opts && opts.headingLevel) || 3);
@@ -31,12 +37,7 @@
         <div>
             <${h} class="settingsGroupHeading" id="settingsLanguageHeading"><i class="fa-solid fa-language" aria-hidden="true"></i>Language</${h}>
             <div>
-                <select name="language" id="language" class="button" aria-labelledby="settingsLanguageHeading">
-                    <option value="en" selected>English</option>
-                    <option value="sv">Svenska (Swedish)</option>
-                    <option value="hr">Hrvatski (Croatian)</option>
-                    <option value="bs">Bosanski (Bosnian)</option>
-                </select>
+                <select name="language" id="language" class="button" aria-labelledby="settingsLanguageHeading">${languageOptions()}</select>
             </div>
         </div>
         <div>
@@ -110,9 +111,15 @@
         if (!host || host.getAttribute("data-rendered")) return;
         host.innerHTML = markup({ withDone: false, headingLevel: 2 });
         host.setAttribute("data-rendered", "1");
+        announceReady();
     }
 
-    global.SettingsPanel = { VERSION: VERSION, markup: markup };
+    // settings.js and i18n.js wire up the controls once the markup is in.
+    function announceReady() {
+        document.dispatchEvent(new CustomEvent("settings:panelready"));
+    }
+
+    global.SettingsPanel = { VERSION: VERSION, markup: markup, announceReady: announceReady };
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", renderInline);

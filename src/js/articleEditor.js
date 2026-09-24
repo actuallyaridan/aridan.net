@@ -154,7 +154,14 @@
 
     function refreshDisabledReasons() {
         disabledReasons.forEach(function (pair) {
-            pair[0].title = typeof pair[1] === "function" ? pair[1]() : pair[1];
+            var element = pair[0];
+            var reason = pair[1];
+
+            if (typeof reason === "function") {
+                element.title = reason();
+            } else {
+                element.title = reason;
+            }
         });
     }
 
@@ -168,25 +175,48 @@
 
     function fillForm(meta, body) {
         el.title.value = meta.title || "";
-        el.date.value = AF.formatDate(meta.date).match(/^\d{4}-\d{2}-\d{2}$/)
-            ? AF.formatDate(meta.date)
-            : "";
+
+        // <input type="date"> only accepts YYYY-MM-DD; anything else is left blank.
+        var formatted = AF.formatDate(meta.date);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(formatted)) {
+            el.date.value = formatted;
+        } else {
+            el.date.value = "";
+        }
+
         el.preview.value = meta.preview || "";
         bodyEditor.set(body || "");
+
         dirty = false;
     }
 
+    // `field` is what to focus, and is null for the body, which is not an input.
     function validate() {
-        if (!el.title.value.trim()) return { field: el.title, message: t("Give the article a title.") };
-        if (!el.slug.value.trim()) return { field: el.slug, message: t("Give the article a file name.") };
-        if (!AF.isValidSlug(el.slug.value.trim())) {
+        if (!el.title.value.trim()) {
+            return { field: el.title, message: t("Give the article a title.") };
+        }
+
+        var slug = el.slug.value.trim();
+
+        if (!slug) {
+            return { field: el.slug, message: t("Give the article a file name.") };
+        }
+
+        if (!AF.isValidSlug(slug)) {
             return {
                 field: el.slug,
                 message: t("File name can only use lowercase letters, numbers and dashes.")
             };
         }
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(el.date.value)) return { field: el.date, message: t("Pick a date.") };
-        if (!bodyEditor.get().trim()) return { field: null, message: t("The article has no body yet.") };
+
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(el.date.value)) {
+            return { field: el.date, message: t("Pick a date.") };
+        }
+
+        if (!bodyEditor.get().trim()) {
+            return { field: null, message: t("The article has no body yet.") };
+        }
+
         return null;
     }
 
@@ -259,75 +289,113 @@
 
         ensureFolder()
             .then(function (dir) {
-                if (!dir) { status(t("No folder selected, so nothing was saved."), "error"); return; }
+                if (!dir) {
+                    status(t("No folder selected, so nothing was saved."), "error");
+                    return;
+                }
 
                 return Store.exists(dir, slug).then(function (already) {
-                    if (already && slug !== originalSlug &&
-                        !confirm(t("{0}.md already exists in this folder. Overwrite it?", slug))) {
-                        status(t("Nothing was saved."));
-                        return;
+                    // Saving over the article being edited needs no confirmation.
+                    var wouldClobber = already && slug !== originalSlug;
+
+                    if (wouldClobber) {
+                        var question = t("{0}.md already exists in this folder. Overwrite it?", slug);
+                        if (!confirm(question)) {
+                            status(t("Nothing was saved."));
+                            return;
+                        }
                     }
+
                     return Store.writeArticle(dir, slug, contents)
-                        .then(function () { return Store.rebuildIndex(dir); })
                         .then(function () {
-                            dirty = false;
+                            return Store.rebuildIndex(dir);
+                        })
+                        .then(function () {
+                            dirty = false;   // stops the "unsaved changes" prompt
                             status(t("Saved {0}.md. Opening it…", slug), "ok");
                             location.href = viewUrl(slug);
                         });
                 });
             })
             .catch(failed("Couldn't save {0}.md: {1}", slug))
-            .finally(function () { setBusy(false); });
+            .finally(function () {
+                setBusy(false);
+            });
     }
 
     function remove() {
-        if (busy || !originalSlug) return;
-        if (!confirm(t('Delete "{0}"?', originalSlug) + "\n\n" +
-                     t("This deletes the file from assets/content/articles/ and cannot be undone."))) {
-            return;
-        }
+        if (busy) return;
+        if (!originalSlug) return;   // nothing saved yet, nothing to delete
+
+        var question = t('Delete "{0}"?', originalSlug);
+        var warning = t("This deletes the file from assets/content/articles/ and cannot be undone.");
+
+        if (!confirm(question + "\n\n" + warning)) return;
 
         setBusy(true);
         status(t("Deleting…"));
 
         ensureFolder()
             .then(function (dir) {
-                if (!dir) { status(t("No folder selected, so nothing was deleted."), "error"); return; }
+                if (!dir) {
+                    status(t("No folder selected, so nothing was deleted."), "error");
+                    return;
+                }
+
                 return Store.deleteArticle(dir, originalSlug)
-                    .then(function () { return Store.rebuildIndex(dir); })
+                    .then(function () {
+                        return Store.rebuildIndex(dir);
+                    })
                     .then(function () {
                         dirty = false;
                         location.href = "/articles/";
                     });
             })
             .catch(failed("Couldn't delete {0}: {1}", originalSlug))
-            .finally(function () { setBusy(false); });
+            .finally(function () {
+                setBusy(false);
+            });
     }
 
+    // The fallback for browsers without the folder-picking API.
     function download() {
         var problem = validate();
-        if (problem) { reportProblem(problem); return; }
+        if (problem) {
+            reportProblem(problem);
+            return;
+        }
 
         var slug = el.slug.value.trim();
-        var url = URL.createObjectURL(new Blob([buildFile()], { type: "text/markdown" }));
+
+        var blob = new Blob([buildFile()], { type: "text/markdown" });
+        var url = URL.createObjectURL(blob);
+
         var a = document.createElement("a");
         a.href = url;
         a.download = slug + ".md";
         document.body.appendChild(a);
         a.click();
         a.remove();
-        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
 
-        status(
-            isEdit
-                ? t("Downloaded {0}.md. Replace the file of the same name with it in assets/content/articles/.", slug)
-                : t('Downloaded {0}.md. Move it into assets/content/articles/ and add "{0}" to index.json.', slug),
-            "ok"
-        );
+        // Released once the download has had a moment to start.
+        setTimeout(function () {
+            URL.revokeObjectURL(url);
+        }, 1000);
+
+        var message;
+        if (isEdit) {
+            message = t("Downloaded {0}.md. Replace the file of the same name with it in assets/content/articles/.", slug);
+        } else {
+            message = t('Downloaded {0}.md. Move it into assets/content/articles/ and add "{0}" to index.json.', slug);
+        }
+
+        status(message, "ok");
     }
 
     function showSpinner(state) {
-        if (el.spinner) el.spinner.style.display = state ? "block" : "none";
+        if (!el.spinner) return;
+        if (state) el.spinner.style.display = "block";
+        else el.spinner.style.display = "none";
     }
 
     function revealForm() {

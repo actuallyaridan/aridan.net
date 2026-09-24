@@ -75,14 +75,6 @@
 .pi-health.status-crit .pi-num {
   color: light-dark(#cb1108, #f85149);
 }
-
-.pi-widget {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-top: 0.75rem;
-}
-
 .pi-stat {
   flex: 1 1 140px;
   background-color: var(--card-background-color);
@@ -99,15 +91,6 @@
 .style-liquid-glass .pi-stat:hover {
   background-color: var(--liquid-glass-button-slected);
 }
-
-.pi-stat-num {
-  display: block;
-  font-size: 1.8rem;
-  font-weight: 500;
-  color: var(--title-color);
-  line-height: 1.5;
-}
-
 .pi-stat-label {
   display: block;
   margin-top: 0.2rem;

@@ -1,61 +1,82 @@
+/* Theme, accent colour, style and preferences. Loaded without `defer` and first
+ * on every page, because the root classes have to be on <html> before anything
+ * paints or the page flashes in the wrong theme.
+ */
+
 const THEME_COLORS = { light: '#f1f1f1', dark: '#121212' };
 
-function syncThemeColor(resolvedTheme) {
-    let meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('name', 'theme-color');
-        document.head.appendChild(meta);
-    }
-    meta.setAttribute('content', THEME_COLORS[resolvedTheme] || THEME_COLORS.light);
-}
+const DEFAULTS = { theme: 'auto', accentColor: 'blue', style: 'liquid-glass' };
 
-function applyRootSettings(theme, color, style) {
-    const root = document.documentElement;
-    const kept = root.className.split(/\s+/)
-        .filter(cls => cls && !/^(theme|color|style)-/.test(cls));
-
-    if (theme === 'auto') {
-        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-
-    root.className = kept.concat([`theme-${theme}`, `color-${color}`, `style-${style}`]).join(' ');
-    syncThemeColor(theme);
-    restoreAlbumAccent(theme);
-}
-
-function restoreAlbumAccent(resolvedTheme) {
-    if (!prefEnabled('albumAccent')) return;
-
-    let vars;
-    try {
-        vars = (JSON.parse(localStorage.getItem('albumAccentCache')) || {})[resolvedTheme];
-    } catch (e) {
-        return;
-    }
-    if (!vars) return;
-
-    const root = document.documentElement;
-    Object.keys(vars).forEach(prop => root.style.setProperty(prop, vars[prop]));
-    root.classList.add('album-accent');
-}
-
-function onMediaChange(query, handler) {
-    if (query.addEventListener) query.addEventListener('change', handler);
-    else if (query.addListener) query.addListener(handler);
-}
+// The one list of languages: settingsPanel.js and i18n.js both read it.
+const LANGUAGES = {
+    en: 'English',
+    sv: 'Svenska (Swedish)',
+    hr: 'Hrvatski (Croatian)',
+    bs: 'Bosanski (Bosnian)'
+};
 
 const PREF_DEFAULT = {
     autoUpdateActivity: () => true,
     albumAccent: () => true,
     upgradeArtwork: () => true,
-    reduceMotion: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    reduceTransparency: () => window.matchMedia('(prefers-reduced-transparency: reduce)').matches
+    reduceMotion: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
+    reduceTransparency: () => matchMedia('(prefers-reduced-transparency: reduce)').matches
 };
 
 function prefEnabled(key) {
     const saved = localStorage.getItem(key);
-    return saved === null ? PREF_DEFAULT[key]() : saved === 'true';
+
+    // null means never written, which is not the same as having been set to false.
+    if (saved === null) {
+        const getDefault = PREF_DEFAULT[key];
+        return getDefault();
+    }
+
+    return saved === 'true';
+}
+
+function setting(key) {
+    return localStorage.getItem(key) || DEFAULTS[key];
+}
+
+function resolvedTheme() {
+    const theme = setting('theme');
+
+    if (theme !== 'auto') return theme;
+
+    const osPrefersDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    if (osPrefersDark) return 'dark';
+    return 'light';
+}
+
+function applyRootSettings() {
+    const root = document.documentElement;
+    const theme = resolvedTheme();
+
+    // Assigning to className replaces the whole attribute, so classes that are
+    // not ours - reduce-motion, album-accent, i18n-wait - are carried over by hand.
+    const kept = [];
+    for (const cls of root.className.split(' ')) {
+        if (!cls) continue;
+        if (cls.startsWith('theme-')) continue;
+        if (cls.startsWith('color-')) continue;
+        if (cls.startsWith('style-')) continue;
+        kept.push(cls);
+    }
+
+    kept.push('theme-' + theme);
+    kept.push('color-' + setting('accentColor'));
+    kept.push('style-' + setting('style'));
+
+    root.className = kept.join(' ');
+
+    syncThemeColor(theme);
+    restoreAlbumAccent(theme);
+
+    // The pill is positioned in pixels, so a resized nav leaves it behind.
+    if (typeof window.repositionNavPills === 'function') {
+        requestAnimationFrame(window.repositionNavPills);
+    }
 }
 
 function applyAccessibilityPrefs() {
@@ -64,192 +85,157 @@ function applyAccessibilityPrefs() {
     root.classList.toggle('reduce-transparency', prefEnabled('reduceTransparency'));
 }
 
-function applySavedRootSettings() {
-    applyRootSettings(
-        localStorage.getItem('theme') || 'auto',
-        localStorage.getItem('accentColor') || 'blue',
-        localStorage.getItem('style') || 'liquid-glass'
-    );
+function syncThemeColor(theme) {
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('name', 'theme-color');
+        document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', THEME_COLORS[theme] || THEME_COLORS.light);
 }
 
-(function() {
-    applySavedRootSettings();
-    applyAccessibilityPrefs();
+// Painting albumAccent.js's cached variables back before the first frame is what
+// stops the accent snapping from blue to the album's colour on every navigation.
+function restoreAlbumAccent(theme) {
+    if (!prefEnabled('albumAccent')) return;
 
-    onMediaChange(window.matchMedia('(prefers-color-scheme: dark)'), function() {
-        if ((localStorage.getItem('theme') || 'auto') === 'auto') applySavedRootSettings();
-    });
-    onMediaChange(window.matchMedia('(prefers-reduced-motion: reduce)'), applyAccessibilityPrefs);
-    onMediaChange(window.matchMedia('(prefers-reduced-transparency: reduce)'), applyAccessibilityPrefs);
+    const raw = localStorage.getItem('albumAccentCache');
 
-    const SUPPORTED = ['en', 'sv', 'hr', 'bs'];
+    let cache;
+    try {
+        cache = JSON.parse(raw);
+    } catch {
+        return;
+    }
 
-    let lang = localStorage.getItem('lang') || 'en';
-    if (!SUPPORTED.includes(lang)) lang = 'en';
+    if (!cache) return;
+
+    const vars = cache[theme];
+    if (!vars) return;
+
+    const root = document.documentElement;
+
+    // Custom properties only take through setProperty; root.style['--x'] is a no-op.
+    for (const [prop, value] of Object.entries(vars)) {
+        root.style.setProperty(prop, value);
+    }
+
+    root.classList.add('album-accent');
+}
+
+applyRootSettings();
+applyAccessibilityPrefs();
+
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (setting('theme') === 'auto') applyRootSettings();
+});
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', applyAccessibilityPrefs);
+matchMedia('(prefers-reduced-transparency: reduce)').addEventListener('change', applyAccessibilityPrefs);
+
+// Fetched here rather than in i18n.js so the request is in flight while the rest
+// of the scripts are parsed. i18n-wait hides the page until the strings land.
+(function preloadLanguage() {
+    const lang = localStorage.getItem('lang');
+
+    if (!lang) return;                 // nothing saved
+    if (lang === 'en') return;         // English is what the HTML already says
+    if (!(lang in LANGUAGES)) return;  // unknown value, ignore it
+
+    document.documentElement.classList.add('i18n-wait');
     document.documentElement.setAttribute('lang', lang);
 
-    if (lang !== 'en') {
-        document.documentElement.classList.add('i18n-wait');
-        window.__i18nPreload = {
-            lang: lang,
-            dict: fetch(`/src/i18n/${lang}.json`).then(r => r.json())
-        };
-        setTimeout(() => document.documentElement.classList.remove('i18n-wait'), 1500);
-    }
+    // The promise is parked, not the data, so i18n.js waits on this same fetch.
+    const dict = fetch('/src/i18n/' + lang + '.json').then(function (response) {
+        return response.json();
+    });
+
+    window.__i18nPreload = { lang: lang, dict: dict };
+
+    setTimeout(() => document.documentElement.classList.remove('i18n-wait'), 1500);
 })();
 
-let settingsWired = false;
-
-function initThemeSettings() {
-    const themeOptions = document.querySelectorAll('input[name="theme-color"]');
-    const colorOptions = document.querySelectorAll('input[name="accent-color"]');
-    const styleOptions = document.querySelectorAll('input[name="style"]');
-    const toggles = document.querySelectorAll('#autoUpdateActivity, #albumAccent, #upgradeArtwork, #reduceMotion, #reduceTransparency');
-    const resetButton = document.querySelector('.dangerZone');
-
-    if (themeOptions.length === 0 || colorOptions.length === 0 || !resetButton) {
-        setTimeout(initThemeSettings, 100);
-        return;
-    }
-
-    if (settingsWired) {
-        initializeSettings();
-        return;
-    }
-    settingsWired = true;
-
-    initializeSettings();
-
-    toggles.forEach(toggle => {
-        toggle.addEventListener('change', function() {
-            handlePrefChange(this.id, this.checked);
-        });
+function announceChange(key, value) {
+    const event = new CustomEvent('settings:change', {
+        detail: { key: key, value: value }
     });
-
-    themeOptions.forEach(option => {
-        option.addEventListener('change', function() {
-            handleThemeChange(this.value);
-        });
-    });
-
-    colorOptions.forEach(option => {
-        option.addEventListener('change', function() {
-            handleColorChange(this.value);
-        });
-    });
-
-    styleOptions.forEach(option => {
-        option.addEventListener('change', function() {
-            handleStyleChange(this.value);
-        });
-    });
-
-    resetButton.addEventListener('click', resetSettings);
-
-    function initializeSettings() {
-        toggles.forEach(toggle => { toggle.checked = prefEnabled(toggle.id); });
-
-        const savedTheme = localStorage.getItem('theme') || 'auto';
-        const themeRadio = document.querySelector(`input[name="theme-color"][value="${savedTheme}"]`);
-        if (themeRadio) themeRadio.checked = true;
-        applyTheme(savedTheme);
-
-        const savedColor = localStorage.getItem('accentColor') || 'blue';
-        const colorRadio = document.querySelector(`input[name="accent-color"][value="${savedColor}"]`);
-        if (colorRadio) colorRadio.checked = true;
-        applyAccentColor(savedColor);
-
-        const savedStyle = localStorage.getItem('style') || 'liquid-glass';
-        const styleRadio = document.querySelector(`input[name="style"][value="${savedStyle}"]`);
-        if (styleRadio) styleRadio.checked = true;
-        applyStyle(savedStyle);
-    }
-
-    function handlePrefChange(key, enabled) {
-        localStorage.setItem(key, String(enabled));
-        applyAccessibilityPrefs();
-        window.dispatchEvent(new CustomEvent('settings:change', {
-            detail: { key: key, value: enabled }
-        }));
-    }
-
-    function handleThemeChange(themeValue) {
-        localStorage.setItem('theme', themeValue);
-        applyTheme(themeValue);
-    }
-
-    function applyTheme(themeValue) {
-        applyRootSettings(
-            themeValue,
-            localStorage.getItem('accentColor') || 'blue',
-            localStorage.getItem('style') || 'liquid-glass'
-        );
-    }
-
-    function handleColorChange(colorValue) {
-        localStorage.setItem('accentColor', colorValue);
-        applyAccentColor(colorValue);
-    }
-
-    function applyAccentColor(colorValue) {
-        const classes = document.documentElement.className.split(' ').filter(cls => !cls.startsWith('color-'));
-        document.documentElement.className = classes.join(' ') + ` color-${colorValue}`;
-    }
-
-    function handleStyleChange(styleValue) {
-        localStorage.setItem('style', styleValue);
-        applyStyle(styleValue);
-    }
-
-function applyStyle(styleValue) {
-    const classes = document.documentElement.className.split(' ').filter(cls => !cls.startsWith('style-'));
-    document.documentElement.className = classes.join(' ') + ` style-${styleValue}`;
-    
-    if (styleValue === 'liquid-glass') {
-        requestAnimationFrame(() => {
-            if (typeof repositionNavPills === 'function') repositionNavPills();
-        });
-    }
+    window.dispatchEvent(event);
 }
 
-    function resetSettings() {
-        if (confirm('Are you sure you want to reset all settings to default?')) {
-            localStorage.removeItem('theme');
-            localStorage.removeItem('accentColor');
-            localStorage.removeItem('style');
-            Object.keys(PREF_DEFAULT).forEach(key => localStorage.removeItem(key));
+// A deferred script would miss "settings:panelready", so the DOM is the source
+// of truth and the event is only how earlier scripts get told.
+function onSettingsPanel(fn) {
+    if (document.querySelector('.settingsPanel')) fn();
+    else document.addEventListener('settings:panelready', fn, { once: true });
+}
 
-            const autoTheme = document.querySelector('input[name="theme-color"][value="auto"]');
-            const blueColor = document.querySelector('input[name="accent-color"][value="blue"]');
-            const liquidGlass = document.querySelector('input[name="style"][value="liquid-glass"]');
-            if (autoTheme) autoTheme.checked = true;
-            if (blueColor) blueColor.checked = true;
-            if (liquidGlass) liquidGlass.checked = true;
+onSettingsPanel(function wirePanel() {
+    // Only checkboxes whose id names a real preference.
+    const toggles = [];
+    for (const box of document.querySelectorAll('.settingsPanel input[type="checkbox"]')) {
+        if (box.id in PREF_DEFAULT) toggles.push(box);
+    }
 
-            applyTheme('auto');
-            applyAccentColor('blue');
-            applyStyle('liquid-glass');
+    const radios = {
+        'theme-color': 'theme',
+        'accent-color': 'accentColor',
+        'style': 'style'
+    };
 
-            toggles.forEach(toggle => { toggle.checked = prefEnabled(toggle.id); });
+    function syncControls() {
+        for (const toggle of toggles) {
+            toggle.checked = prefEnabled(toggle.id);
+        }
+
+        for (const [name, key] of Object.entries(radios)) {
+            const value = setting(key);
+            const selector = 'input[name="' + name + '"][value="' + value + '"]';
+            const radio = document.querySelector(selector);
+            if (radio) radio.checked = true;
+        }
+    }
+
+    for (const toggle of toggles) {
+        toggle.addEventListener('change', function () {
+            localStorage.setItem(toggle.id, String(toggle.checked));
             applyAccessibilityPrefs();
+            announceChange(toggle.id, toggle.checked);
+        });
+    }
 
-            Object.keys(PREF_DEFAULT).forEach(key => {
-                window.dispatchEvent(new CustomEvent('settings:change', {
-                    detail: { key: key, value: prefEnabled(key) }
-                }));
+    for (const [name, key] of Object.entries(radios)) {
+        for (const radio of document.querySelectorAll('input[name="' + name + '"]')) {
+            radio.addEventListener('change', function () {
+                localStorage.setItem(key, radio.value);
+                applyRootSettings();
             });
         }
     }
-}
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initThemeSettings);
-} else {
-    setTimeout(initThemeSettings, 0);
-}
+    const resetButton = document.querySelector('.dangerZone');
 
-document.addEventListener('readystatechange', function() {
-    if (document.readyState === 'complete') {
-        setTimeout(initThemeSettings, 0);
+    if (resetButton) {
+        resetButton.addEventListener('click', function () {
+            if (!confirm('Are you sure you want to reset all settings to default?')) return;
+
+            // Deleted rather than written back as defaults, so prefEnabled reads
+            // them as "never touched" and asks the operating system again.
+            for (const key of Object.keys(DEFAULTS)) {
+                localStorage.removeItem(key);
+            }
+            for (const key of Object.keys(PREF_DEFAULT)) {
+                localStorage.removeItem(key);
+            }
+
+            syncControls();
+            applyRootSettings();
+            applyAccessibilityPrefs();
+
+            for (const key of Object.keys(PREF_DEFAULT)) {
+                announceChange(key, prefEnabled(key));
+            }
+        });
     }
+
+    syncControls();
 });

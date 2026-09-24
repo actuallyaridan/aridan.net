@@ -8,27 +8,36 @@
     }
 
     function card(article) {
-        var esc = AF.escapeHtml;
+        // Escaped, so a title with a < in it shows as text.
+        var title = AF.escapeHtml(article.meta.title || "Untitled article");
+        var rawDate = AF.escapeHtml(article.meta.date || "");
+        var shownDate = AF.escapeHtml(AF.formatDate(article.meta.date));
+        var preview = AF.escapeHtml(article.meta.preview || "");
+        var href = AF.escapeHtml(articleUrl(article.slug));
+
         var el = document.createElement("div");
         el.className = "section articlePreview";
         el.dataset.slug = article.slug;
-        el.innerHTML =
-            '<div class="preview">' +
-                '<span class="titleContainer">' +
-                    '<h2 class="section-title">' + esc(article.meta.title || "Untitled article") + "</h2>" +
-                    '<p class="date section-content">' +
-                        '<time datetime="' + esc(article.meta.date || "") + '">' +
-                            esc(AF.formatDate(article.meta.date)) +
-                        "</time>" +
-                    "</p>" +
-                "</span>" +
-                '<p class="section-content previewContent">' + esc(article.meta.preview || "") + "</p>" +
-            "</div>" +
-            '<div class="readMore">' +
-                '<div><a href="' + esc(articleUrl(article.slug)) + '" title="Read more" aria-label="Read more" class="button backButton">' +
-                    '<i class="fa-solid fa-arrow-right" aria-hidden="true"></i>' +
-                "</a> </div>" +
-            "</div>";
+
+        el.innerHTML = `
+            <div class="preview">
+                <span class="titleContainer">
+                    <h2 class="section-title">${title}</h2>
+                    <p class="date section-content">
+                        <time datetime="${rawDate}">${shownDate}</time>
+                    </p>
+                </span>
+                <p class="section-content previewContent">${preview}</p>
+            </div>
+            <div class="readMore">
+                <div>
+                    <a href="${href}" title="Read more" aria-label="Read more"
+                       class="button backButton">
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>`;
+
         return el;
     }
 
@@ -67,26 +76,42 @@
                 return res.json();
             })
             .then(function (slugs) {
-                if (!Array.isArray(slugs)) throw new Error("index.json should contain a list of slugs.");
-                var valid = slugs.filter(function (s) {
-                    return typeof s === "string" && AF.isValidSlug(s);
+                if (!Array.isArray(slugs)) {
+                    throw new Error("index.json should contain a list of slugs.");
+                }
+
+                var valid = [];
+                slugs.forEach(function (slug) {
+                    if (typeof slug !== "string") return;
+                    if (!AF.isValidSlug(slug)) return;
+                    valid.push(slug);
                 });
+
                 return Promise.all(valid.map(loadArticle));
             })
             .then(function (articles) {
+                // loadArticle returns null for anything that failed.
                 var found = articles.filter(Boolean);
-                if (!found.length) {
+
+                if (found.length === 0) {
                     message(container, "No articles found...yet!");
                     document.dispatchEvent(new CustomEvent("articles:rendered"));
                     return;
                 }
+
+                // The sort keys are YYYY-MM-DD, so plain text comparison is date order.
                 found.sort(function (a, b) {
-                    return AF.dateSortKey(b.meta.date).localeCompare(AF.dateSortKey(a.meta.date));
+                    var keyA = AF.dateSortKey(a.meta.date);
+                    var keyB = AF.dateSortKey(b.meta.date);
+                    return keyB.localeCompare(keyA);
                 });
+
+                // Added in one go, so the browser only lays the page out once.
                 var frag = document.createDocumentFragment();
-                found.forEach(function (a) { frag.appendChild(card(a)); });
-                // These cards land long after the one-off pass on load, so
-                // emoji in a title or preview would otherwise stay as raw text.
+                found.forEach(function (a) {
+                    frag.appendChild(card(a));
+                });
+                // These cards land long after the one-off emoji pass on load.
                 if (window.parseEmoji) window.parseEmoji(frag);
                 container.appendChild(frag);
                 document.dispatchEvent(new CustomEvent("articles:rendered"));

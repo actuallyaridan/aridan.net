@@ -3,9 +3,13 @@
 
     var Store = window.ArticleStore;
 
-    function t() {
-        return window.i18n ? window.i18n.t.apply(null, arguments) : arguments[0];
+    function t(...args) {
+        if (window.i18n) return window.i18n.t(...args);
+        return args[0];
     }
+
+    // These buttons are built in JavaScript, so i18n.js cannot find them by
+    // selector. Each pushes a function here that redraws its own text.
     var retranslate = [];
 
     function editUrl(slug) {
@@ -25,8 +29,14 @@
     function notice(text, kind) {
         var bar = document.getElementById("articleAdminNotice");
         if (!bar) return;
+
         bar.textContent = text || "";
-        bar.className = "articleAdminNotice" + (kind ? " " + kind : "");
+
+        if (kind) {
+            bar.className = "articleAdminNotice " + kind;
+        } else {
+            bar.className = "articleAdminNotice";
+        }
     }
 
     function addNoticeBar(parent) {
@@ -68,17 +78,29 @@
     }
 
     function removeArticle(slug, onGone) {
-        if (!confirm(t('Delete "{0}"?', slug) + "\n\n" +
-                     t("This deletes the file from assets/content/articles/ and cannot be undone."))) {
-            return;
-        }
+        var question = t('Delete "{0}"?', slug);
+        var warning = t("This deletes the file from assets/content/articles/ and cannot be undone.");
+
+        if (!confirm(question + "\n\n" + warning)) return;
+
         notice(t("Deleting {0}…", slug));
+
+        // Prompting for a folder is only allowed because this runs from a click.
         Store.getDir(true)
             .then(function (dir) {
-                if (!dir) { notice(t("No folder selected, so nothing was deleted."), "error"); return; }
+                if (!dir) {
+                    notice(t("No folder selected, so nothing was deleted."), "error");
+                    return;
+                }
+
                 return Store.deleteArticle(dir, slug)
-                    .then(function () { return Store.rebuildIndex(dir); })
-                    .then(function (slugs) { onGone(slugs); });
+                    .then(function () {
+                        // index.json would keep advertising the deleted article.
+                        return Store.rebuildIndex(dir);
+                    })
+                    .then(function (slugs) {
+                        onGone(slugs);
+                    });
             })
             .catch(function (err) {
                 console.error(err);
@@ -112,13 +134,20 @@
         edit.innerHTML = '<i class="fa-solid fa-pen" aria-hidden="true"></i>';
 
         var del = button("destructive", t("Delete this article"), "fa-trash-can");
+
         if (Store.isSupported()) {
             del.addEventListener("click", function () {
                 removeArticle(slug, function (slugs) {
                     card.remove();
-                    notice(slugs.length === 1
-                        ? t("Deleted {0}.md. 1 article left.", slug)
-                        : t("Deleted {0}.md. {1} articles left.", slug, slugs.length), "ok");
+
+                    var message;
+                    if (slugs.length === 1) {
+                        message = t("Deleted {0}.md. 1 article left.", slug);
+                    } else {
+                        message = t("Deleted {0}.md. {1} articles left.", slug, slugs.length);
+                    }
+
+                    notice(message, "ok");
                 });
             });
         } else {
@@ -137,14 +166,21 @@
         group.appendChild(edit);
         group.appendChild(del);
 
+        // Before the "read more" arrow, so the arrow stays last in the row.
         var arrow = actions.querySelector("a.backButton");
-        if (arrow) arrow.parentNode.insertBefore(group, arrow);
-        else actions.appendChild(group);
+        if (arrow) {
+            arrow.parentNode.insertBefore(group, arrow);
+        } else {
+            actions.appendChild(group);
+        }
     }
 
     function enhance() {
         addNewButton();
-        document.querySelectorAll(".articlePreview[data-slug]").forEach(decorate);
+
+        for (const card of document.querySelectorAll(".articlePreview[data-slug]")) {
+            decorate(card);
+        }
     }
 
     function labelledButton(tag, className, icon, text) {
@@ -191,11 +227,14 @@
     }
 
     function init() {
-        if (!Store || !Store.isLocalHost()) return;
+        if (!Store) return;
+        if (!Store.isLocalHost()) return;
 
         if (window.i18n) {
             window.i18n.onChange(function () {
-                retranslate.forEach(function (fn) { fn(); });
+                for (const redraw of retranslate) {
+                    redraw();
+                }
             });
         }
 
@@ -205,16 +244,22 @@
             document.addEventListener("article:rendered", function (event) {
                 decorateArticle(event.detail.slug);
             });
+
             if (document.querySelector(".full-article")) {
                 var slug = new URLSearchParams(location.search).get("article");
                 if (slug) decorateArticle(slug);
             }
+
             return;
         }
 
         document.addEventListener("articles:rendered", enhance);
-        if (document.querySelector(".articlePreview[data-slug]")) enhance();
-        else addNewButton();
+
+        if (document.querySelector(".articlePreview[data-slug]")) {
+            enhance();
+        } else {
+            addNewButton();
+        }
     }
 
     if (document.readyState === "loading") {
