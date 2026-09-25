@@ -1,0 +1,155 @@
+/* The lyrics control bar's own always-glass look, set aside.
+
+   Not linked from any page. The bar uses the site's .button styles, so it
+   follows the Flat / Liquid Glass setting like everything else; this is the
+   earlier design, where the bar was always frosted glass - the three modes
+   sitting inside one pill, the current one filled with the accent, and white
+   glass over the album colours in immersive mode.
+
+   To switch to it, link it after lyrics.css in index.html (and add it to
+   PRECACHE in sw.js, bumping VERSION):
+
+       <link rel="stylesheet" href="/src/css/lyricsGlassControls.css">
+
+   Every selector starts at #lyricsControls or #lyricsOverlay so that it
+   outranks the site's `.style-flat .button` and `.style-liquid-glass .button`
+   rules, whichever style is chosen. */
+
+/* ---------- Shared glass ---------- */
+
+#lyricsControls .lyricsModes,
+#lyricsControls .lyricsIconBtn {
+    border: 1px solid var(--border-color);
+    background: var(--card-background-color);
+    box-shadow: none;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+/* ---------- The style switcher: one pill with the three modes inside ---------- */
+
+#lyricsControls .lyricsModes {
+    height: auto;
+    padding: 4px;
+    border-radius: 999px;
+}
+
+/* The switcher is the header's navigator (.pillNav) underneath: its list
+   padding and its sliding pill are switched off, since this design marks the
+   current mode by filling the button instead. */
+#lyricsControls .lyricsModes ul.notAList {
+    gap: 4px;
+    padding: 0;
+}
+
+#lyricsControls .lyricsModes .nav-pill {
+    display: none;
+}
+
+#lyricsControls .lyricsModeBtn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    border: 0;
+    border-radius: 999px;
+    padding: 7px 14px;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    color: var(--text-color);
+    font-family: Jost, sans-serif;
+    font-size: 0.9em;
+    font-weight: normal;
+    cursor: pointer;
+    transition: background-color .2s ease, transform .12s ease;
+}
+
+#lyricsControls .lyricsModeBtn>i {
+    margin: 0;
+}
+
+#lyricsControls .lyricsModeBtn:hover {
+    background: var(--button-hover-background-color);
+    box-shadow: none;
+}
+
+/* The mode in use. White on the accent, like a primary button. */
+#lyricsControls .lyricsModeBtn[aria-pressed="true"],
+#lyricsControls .lyricsModeBtn[aria-pressed="true"]:hover {
+    background: var(--accent-color);
+    color: #fff;
+    box-shadow: none;
+}
+
+/* ---------- Round buttons ---------- */
+
+#lyricsControls .lyricsIconBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--text-color);
+    font-size: 1.05em;
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease, transform .12s ease;
+}
+
+#lyricsControls .lyricsIconBtn:hover {
+    background: var(--button-hover-background-color);
+    border-color: var(--secondary-title-color);
+    box-shadow: none;
+}
+
+#lyricsControls .lyricsIconBtn:active,
+#lyricsControls .lyricsModeBtn:active {
+    transform: scale(0.92);
+}
+
+/* A phone has no room for the words, so the modes are icons alone. */
+@media (max-width: 560px) {
+    #lyricsControls .lyricsModes {
+        gap: 4px;
+    }
+
+    #lyricsControls .lyricsModeBtn {
+        padding: 8px 13px;
+    }
+}
+
+html.reduce-motion #lyricsControls .lyricsIconBtn:active,
+html.reduce-motion #lyricsControls .lyricsModeBtn:active {
+    transform: none;
+}
+
+/* ---------- Immersive ----------
+
+   The bar goes to white glass, since it sits on the album colours rather
+   than the site theme. */
+
+#lyricsOverlay.isImmersive #lyricsControls .lyricsModes,
+#lyricsOverlay.isImmersive #lyricsControls .lyricsIconBtn {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+#lyricsOverlay.isImmersive #lyricsControls .lyricsModeBtn {
+    color: #fff;
+}
+
+#lyricsOverlay.isImmersive #lyricsControls .lyricsModeBtn:hover,
+#lyricsOverlay.isImmersive #lyricsControls .lyricsIconBtn:hover {
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+#lyricsOverlay.isImmersive #lyricsControls .lyricsModeBtn[aria-pressed="true"],
+#lyricsOverlay.isImmersive #lyricsControls .lyricsModeBtn[aria-pressed="true"]:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: #111;
+}
+
+#lyricsOverlay.isImmersive #lyricsControls button:focus-visible {
+    outline-color: #fff;
+}

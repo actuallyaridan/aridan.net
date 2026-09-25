@@ -116,11 +116,13 @@
             <span class="warn" id="rateLimitGitHub" role="status"><p>You're rate limited on the GitHub API. Showing old values.</p></span>
         </div>
         <hr>
-        <nav class="projectFilter" aria-label="Project status">
-            <ul class="notAList">
-                <li><button type="button" class="noUI" data-status="ongoing" aria-pressed="true">Ongoing</button></li>
-                <li><button type="button" class="noUI" data-status="paused" aria-pressed="false">Paused</button></li>
-            </ul>
+        <nav class="projectFilter pillNav" aria-label="Project status">
+            <div class="pillNavTrack">
+                <ul class="notAList">
+                    <li><button type="button" class="noUI" data-status="ongoing" aria-pressed="true">Ongoing</button></li>
+                    <li><button type="button" class="noUI" data-status="paused" aria-pressed="false">Paused</button></li>
+                </ul>
+            </div>
         </nav>
         <div class="section" data-status="ongoing">
             <div>
@@ -150,8 +152,8 @@
         <div class="section" data-status="paused">
             <div>
                 <h2 class="section-title">NeoFreeBird</h2>
-                <p class="section-content">The latest version of the X app for iOS, with reverted branding to Twitter
-                    and other tweaks so you can gain access to paid Twitter features for free.</p>
+                <p class="section-content">A tweak for the X app on iOS that brings back Twitter's original name and
+                    look, along with other interface and quality-of-life changes.</p>
                 <ul class="specs">
                     <li><i class="fa-solid fa-code-fork" aria-hidden="true"></i>Forked from nyathea/FreeBird and BandarHL/BHTiwtter</li>
                     <li><i class="fa-solid fa-code" aria-hidden="true"></i>Objective-C</li>
@@ -251,8 +253,9 @@
         <p class="footerNote">
             <span>&copy; <span id="footerYear">2026</span> Adnan Bukvic <span class="rightsNote">unless stated otherwise</span></span>
             <a class="inline" href="https://github.com/actuallyaridan/aridan.net" title="Source on GitHub" target="_blank" rel="noopener">Source on GitHub</a>
+            <a class="inline" href="/privacy/" title="Privacy">Privacy</a>
         </p>
-        <p class="footerNote embedNote">This website embeds content from other websites and services.</p>
+        <p class="footerNote embedNote">This website embeds content from other websites and services. Lyrics, album art, logos and trademarks belong to their respective owners.</p>
     </footer>
 </body>
 

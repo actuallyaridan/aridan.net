@@ -338,10 +338,24 @@
         </div>
 
     </main>
-    <div id="lyricsOverlay" class="hide" role="dialog" aria-modal="true" aria-label="Lyrics">
-        <button type="button" id="lyricsCloseBtn" aria-label="Close">
-            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
+    <div id="lyricsOverlay" class="hide" role="dialog" aria-modal="true" aria-label="Lyrics" tabindex="-1">
+        <canvas id="lyricsBackdrop" width="128" height="128" aria-hidden="true"></canvas>
+        <div id="lyricsControls">
+            <button type="button" id="lyricsFullscreenBtn" class="button lyricsIconBtn" aria-label="Full screen" title="Full screen" hidden>
+                <i class="fa-solid fa-expand" aria-hidden="true"></i>
+            </button>
+            <nav class="pillNav lyricsModes" aria-label="Lyrics style">
+                <div class="pillNavTrack">
+                    <ul class="notAList">
+                        <li><button type="button" class="noUI lyricsModeBtn" data-mode="synced" aria-pressed="false"><i class="fa-solid fa-clock" aria-hidden="true"></i><span data-label="Time-synced">Time-synced</span></button></li>
+                        <li><button type="button" class="noUI lyricsModeBtn" data-mode="immersive" aria-pressed="false"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><span data-label="Immersive">Immersive</span></button></li>
+                    </ul>
+                </div>
+            </nav>
+            <button type="button" id="lyricsCloseBtn" class="button lyricsIconBtn" aria-label="Close" title="Close">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
         <div id="lyricsStage"></div>
         <p id="lyricsStatus" class="hide" role="status" aria-live="polite"></p>
         <p id="lyricsCaption"></p>
@@ -357,10 +371,11 @@
         <p class="footerNote">
             <span>&copy; <span id="footerYear">2026</span> Adnan Bukvic <span class="rightsNote">unless stated otherwise</span></span>
             <a class="inline" href="https://github.com/actuallyaridan/aridan.net" title="Source on GitHub" target="_blank" rel="noopener">Source on GitHub</a>
+            <a class="inline" href="/privacy/" title="Privacy">Privacy</a>
         </p>
-        <p class="footerNote embedNote">This website embeds content from other websites and services.</p>
+        <p class="footerNote embedNote">This website embeds content from other websites and services. Lyrics, album art, logos and trademarks belong to their respective owners.</p>
         <p class="footerNote lyricsNote">
-            <span class="lyricsCredit">Lyrics provided and hosted by</span>
+            <span class="lyricsCredit">Lyrics from</span>
             <a class="inline" href="https://lrclib.net" title="LRCLIB" target="_blank" rel="noopener">LRCLIB</a>
         </p>
     </footer>

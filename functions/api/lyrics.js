@@ -1,18 +1,20 @@
 // Lyrics come from LRCLIB (https://lrclib.net), a free, key-less community
 // database of synced lyrics. Proxying it instead of calling it from the page
-// buys three things: the descriptive User-Agent they ask callers to send, an
-// edge cache so a track is fetched from them once per colo rather than once per
-// visitor, and a same-origin request that needs no connect-src entry in
-// _headers.
+// buys the descriptive User-Agent they ask callers to send, a same-origin
+// request that needs no connect-src entry in _headers, and - most importantly -
+// a place to check the request against my presence.
+//
+// Lyrics are copyrighted by their publishers, and LRCLIB holds no licence for
+// them. So this only ever answers for the song I am playing right now, never
+// for whatever a caller asks about, and nothing is kept at the edge: an open,
+// cached lyrics API on this domain would be a lyrics site in its own right.
 
 const LRCLIB = "https://lrclib.net/api";
 const UA = "aridan.net/1.0 (+https://github.com/actuallyaridan/aridan.net)";
 
-// Lyrics for a given recording do not change, so a hit can sit at the edge for
-// a long time. A miss expires far sooner: the database is crowd-sourced, and a
-// track nobody has contributed today may well be there next week.
-const HIT_TTL = 60 * 60 * 24 * 30;
-const MISS_TTL = 60 * 60 * 6;
+// Mirrors USER_ID and APPLE_APP_ID in src/js/lanyardClient.js.
+const LANYARD = "https://api.lanyard.rest/v1/users/701403809129168978";
+const APPLE_APP_ID = "773825528921849856";
 
 const UPSTREAM_TIMEOUT_MS = 6000;
 const MAX_FIELD = 200;
@@ -25,50 +27,98 @@ const RETRY_DELAY_MS = 400;
 // recording - a live take, an extended mix - not the song we asked for.
 const MAX_DURATION_DRIFT = 15;
 
+// no-store on every answer, hits included - see the note at the top.
 const jsonHeaders = {
   "content-type": "application/json; charset=utf-8",
+  "cache-control": "no-store",
 };
 
-export async function onRequestGet(context) {
-  const { request } = context;
+export async function onRequestGet({ request }) {
   const url = new URL(request.url);
 
   const artist = field(url.searchParams.get("artist"));
   const track = field(url.searchParams.get("track"));
-  const album = field(url.searchParams.get("album"));
-  const duration = durationOf(url.searchParams.get("duration"));
 
   if (!artist || !track) {
     return json({ error: "artist and track are required" }, 400);
   }
 
-  const cache = caches.default;
-  const key = cacheKey(url.origin, artist, track, album, duration);
-
-  const cached = await cache.match(key);
-  if (cached) return cached;
-
-  let payload;
-  let status;
+  let playing;
   try {
-    const hit = await lookup(artist, track, album, duration);
-    payload = hit ? shape(hit) : { found: false, reason: "no_match" };
-    status = hit ? 200 : 404;
+    playing = await nowPlaying();
   } catch (err) {
-    // LRCLIB being down or overloaded is a transient condition, so it is
-    // answered with a bare 502 and never written to the cache - otherwise one
-    // bad minute would suppress a track for the whole MISS_TTL.
-    return json({ found: false, reason: "upstream", detail: String(err?.message || err) }, 502, {
-      "cache-control": "no-store",
-    });
+    return json({ found: false, reason: "upstream", detail: String(err?.message || err) }, 502);
   }
 
-  const response = json(payload, status, {
-    "cache-control": `public, max-age=${status === 200 ? HIT_TTL : MISS_TTL}`,
+  // A 409 rather than a 404 on purpose: the page treats a 404 as a final
+  // answer and remembers it, and a mismatch is usually just the song changing
+  // between the page asking and this check - worth trying again, not
+  // remembering.
+  if (!playing || !samePlay(playing, artist, track)) {
+    return json({ found: false, reason: "not_playing" }, 409);
+  }
+
+  let hit;
+  try {
+    // Album and duration come from the presence, not the query string, so the
+    // only thing a caller controls is which song to ask about - and that has
+    // to be the one playing.
+    hit = await lookup(playing.artist, playing.track, playing.album, playing.duration);
+  } catch (err) {
+    return json({ found: false, reason: "upstream", detail: String(err?.message || err) }, 502);
+  }
+
+  if (!hit) return json({ found: false, reason: "no_match" }, 404);
+  return json(shape(hit), 200);
+}
+
+// The Apple Music activity from my presence, read the same way lyrics.js reads
+// it, or null when nothing is playing.
+async function nowPlaying() {
+  const res = await fetch(LANYARD, {
+    headers: { "user-agent": UA, accept: "application/json" },
+    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
   });
 
-  context.waitUntil(cache.put(key, response.clone()).catch(() => {}));
-  return response;
+  if (!res.ok) throw new Error(`lanyard responded ${res.status}`);
+
+  const body = await res.json();
+  const activities = body?.data?.activities || [];
+
+  const activity = activities.find((a) => {
+    if (a.name === "Apple Music") return true;
+    return a.application_id === APPLE_APP_ID;
+  });
+  if (!activity) return null;
+
+  const track = field(activity.details);
+  const artist = field(artistOf(activity.state));
+  if (!track || !artist) return null;
+
+  const start = activity.timestamps?.start || 0;
+  const end = activity.timestamps?.end || 0;
+
+  let duration = 0;
+  if (start && end) duration = durationOf((end - start) / 1000);
+
+  return {
+    artist: artist,
+    track: track,
+    album: field(activity.assets?.large_text),
+    duration: duration,
+  };
+}
+
+// Anchored: an artist can have "by" inside their name - "Bobby Womack" - and
+// only a leading one is Cider's prefix. Mirrors artistOf() in lyrics.js.
+function artistOf(state) {
+  return String(state || "").trim().replace(/^by\s+/i, "");
+}
+
+function samePlay(playing, artist, track) {
+  if (playing.artist.toLowerCase() !== artist.toLowerCase()) return false;
+  if (playing.track.toLowerCase() !== track.toLowerCase()) return false;
+  return true;
 }
 
 // Three widening attempts, stopping at the first that answers.
@@ -83,14 +133,14 @@ async function lookup(artist, track, album, duration) {
       album_name: album,
       duration,
     });
-    if (exact) return exact;
+    if (usable(exact)) return exact;
   }
 
   // Duration is deliberately dropped here rather than kept as the last filter:
   // LRCLIB hard-404s when it disagrees by more than a second or two, and a
   // presence timestamp drifts by about that much on its own.
   const loose = await lrclib("/get", { artist_name: artist, track_name: track });
-  if (loose) return loose;
+  if (usable(loose)) return loose;
 
   // Search returns every recording of the title, including other artists'
   // covers, so the choice of which one is ours is made below rather than by
@@ -99,29 +149,31 @@ async function lookup(artist, track, album, duration) {
   return best(Array.isArray(results) ? results : [], duration);
 }
 
-// Synced lyrics beat plain ones, then the length closest to the track we asked
-// about wins.
+// Only time-synced lyrics are ever shown, one line at a time as they are sung,
+// so a plain-text-only row is no answer at all. Instrumentals pass: they carry
+// no lyrics, and the page says so instead of "not found".
+function usable(hit) {
+  if (!hit) return false;
+  if (hit.instrumental) return true;
+  return !!hit.syncedLyrics;
+}
+
+// The length closest to the track we asked about wins.
 function best(results, duration) {
-  if (!results.length) return null;
+  const candidates = results.filter(usable);
+  if (!candidates.length) return null;
 
-  const ranked = results.map((r) => {
-    let unsynced = 1;
-    if (r.syncedLyrics) unsynced = 0;
-
+  const ranked = candidates.map((r) => {
     // Unknown lengths sort last.
     let drift = Infinity;
     if (duration && r.duration) {
       drift = Math.abs(r.duration - duration);
     }
 
-    return { row: r, unsynced: unsynced, drift: drift };
+    return { row: r, drift: drift };
   });
 
-  ranked.sort((a, b) => {
-    // Drift is only consulted when the synced flags tie.
-    if (a.unsynced !== b.unsynced) return a.unsynced - b.unsynced;
-    return a.drift - b.drift;
-  });
+  ranked.sort((a, b) => a.drift - b.drift);
 
   const top = ranked[0];
 
@@ -167,6 +219,8 @@ async function lrclib(path, params) {
   return res.json();
 }
 
+// plainLyrics is deliberately left out: the page has no use for a block of
+// text, and it is the whole song in one piece.
 function shape(hit) {
   const lines = parseLrc(hit.syncedLyrics || "");
   return {
@@ -178,7 +232,6 @@ function shape(hit) {
     duration: Number(hit.duration) || 0,
     instrumental: !!hit.instrumental,
     lines,
-    plain: hit.plainLyrics || "",
   };
 }
 
@@ -225,18 +278,6 @@ function parseLrc(lrc) {
 
   out.sort((a, b) => a.t - b.t);
   return out;
-}
-
-function cacheKey(origin, artist, track, album, duration) {
-  // Built rather than reusing the incoming URL so that differences that do not
-  // change the answer - casing, parameter order, a stray empty album - all land
-  // on one entry.
-  const p = new URLSearchParams();
-  p.set("artist", artist.toLowerCase());
-  p.set("track", track.toLowerCase());
-  if (album) p.set("album", album.toLowerCase());
-  if (duration) p.set("duration", String(duration));
-  return new Request(`${origin}/api/lyrics?${p}`, { method: "GET" });
 }
 
 function field(v) {

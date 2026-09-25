@@ -10,7 +10,8 @@ const PAGES = [
     { path: "/articles/", priority: "0.8", changefreq: "weekly" },
     { path: "/pihole/", priority: "0.6", changefreq: "daily" },
     { path: "/contact/", priority: "0.6", changefreq: "monthly" },
-    { path: "/settings/", priority: "0.3", changefreq: "yearly" }
+    { path: "/settings/", priority: "0.3", changefreq: "yearly" },
+    { path: "/privacy/", priority: "0.2", changefreq: "yearly" }
 ];
 
 function urlEntry({ loc, lastmod, changefreq, priority }) {

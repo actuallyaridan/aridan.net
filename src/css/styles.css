@@ -292,13 +292,13 @@ html.reduce-motion .nav-pill {
 }
 
 html.reduce-motion.style-liquid-glass #desktop-header .notAList>li>a,
-html.reduce-motion.style-liquid-glass .projectFilter>ul.notAList>li>button {
+html.reduce-motion.style-liquid-glass .pillNav ul.notAList>li>button {
     background-color: transparent;
     border-radius: min(43.25rem, 4.65rem + 36.5vw);
 }
 
 html.reduce-motion.style-liquid-glass #desktop-header .notAList>li>a:hover,
-html.reduce-motion.style-liquid-glass .projectFilter>ul.notAList>li>button:hover {
+html.reduce-motion.style-liquid-glass .pillNav ul.notAList>li>button:hover {
     background-color: var(--liquid-glass-button-background);
     outline: 1px solid var(--liquid-glass-button-border);
     outline-offset: -1px;
@@ -306,7 +306,7 @@ html.reduce-motion.style-liquid-glass .projectFilter>ul.notAList>li>button:hover
 }
 
 html.reduce-motion.style-liquid-glass #desktop-header .notAList>li.active>a,
-html.reduce-motion.style-liquid-glass .projectFilter>ul.notAList>li.active>button {
+html.reduce-motion.style-liquid-glass .pillNav ul.notAList>li.active>button {
     background-color: var(--liquid-glass-button-slected);
     outline: 1px solid var(--liquid-glass-button-border);
     outline-offset: -1px;
@@ -395,9 +395,15 @@ html.reduce-motion .skipLink {
     transition: none;
 }
 
+/* Jost.ttf is a variable font with every weight from 100 to 900 in it, and
+   the range has to be declared. Without it the face counts as regular (400)
+   only, and Safari fakes anything bolder by drawing the text twice, slightly
+   offset - which on big text, like the immersive lyrics, shows as a second
+   copy stacked on the first. Chrome happened to pick the real weights anyway. */
 @font-face {
     font-family: Jost;
     font-display: swap;
+    font-weight: 100 900;
     src: url(/src/fonts/Jost.ttf);
 }
 
@@ -718,29 +724,86 @@ div.section>div {
     flex: 1;
 }
 
+/* Centred by its own width rather than by being a full-width flex row, since
+   the <nav> is now the visible box and would otherwise span the page. */
 .projectFilter {
+    width: fit-content;
+    margin-inline: auto;
+}
+
+/* The header's navigator, as a standalone control: the project filter and
+   the lyrics overlay's style switcher. Built exactly like the header so it
+   looks and behaves the same, in both styles:
+
+     .pillNav          the visible box              (header>div)
+     .pillNavTrack     what the pill is sized from  (#desktop-header nav)
+     ul.notAList       the items, above the pill    (#desktop-header ul)
+
+   The pill general.js inserts takes its height as a share of the track, and
+   the track is only as tall as the list's 20px top and bottom padding makes
+   it - taller than the box it sits in, as in the header. That is what makes
+   the pill clear the text by the same amount here as it does up there.
+   isolation keeps the pill's z-index:-1 inside the box instead of letting it
+   drop behind the page. */
+.pillNav {
     display: flex;
-    justify-content: center;
-}
-
-.projectFilter>ul.notAList {
-    background-color: var(--card-background-color);
-    padding: 12px 24px;
+    align-items: center;
+    width: fit-content;
+    height: 4em;
+    padding: 12px;
     border-radius: 10px;
+    isolation: isolate;
+    background-color: var(--header-background-color);
+    -webkit-backdrop-filter: blur(var(--blur-regular));
+    backdrop-filter: blur(var(--blur-regular));
 }
 
-.style-liquid-glass .projectFilter>ul.notAList {
+.style-liquid-glass .pillNav {
+    height: 3.2em;
+    padding: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 42px;
+    -webkit-backdrop-filter: blur(var(--blur-subtle));
+    backdrop-filter: blur(var(--blur-subtle));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Buttons, unlike the header's links. .noUI's `all: inherit` would make
+   each one a list-item block after its <li>, so the display is set outright. */
+.pillNav ul.notAList>li>button.noUI {
+    display: inline-block;
+}
+
+/* The pill is as wide as the item it sits on but its height is fixed, so an
+   item with no label - the lyrics modes on a phone are only an icon - would
+   get a pill taller than it is wide. At least as wide as the pill is tall on
+   hover (72% of the 63px track, about 45px) keeps it a circle at worst. The
+   label, if any, stays centred in the extra width. */
+.style-liquid-glass .pillNav ul.notAList>li>button.noUI {
+    min-width: 2.85em;
+    text-align: center;
+}
+
+/* Two differences from the header's list, both so the pill comes out the
+   same:
+
+   - A button is never truly inline - browsers treat it as inline-block - so
+     its full 41px, padding and all, counts towards the line. The header's
+     links are inline, so only their 23px of text does, and 20px above and
+     below makes a 63px track. 11px above and below a 41px button makes the
+     same 63px, which sizes the pill the same: 38px, 45px on hover.
+
+   - The header's list has no padding on the left in Liquid Glass but keeps
+     20px on the right, which its full-width bar never shows. A box that is
+     only as wide as its items would, so the right matches the left. */
+.style-liquid-glass .pillNav ul.notAList {
     position: relative;
     z-index: 1;
-    background-color: var(--liquid-glass-button-background);
-    -webkit-backdrop-filter: blur(var(--blur-heavy));
-    backdrop-filter: blur(var(--blur-heavy));
-    border: 1px solid var(--liquid-glass-button-border);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        0 4px 16px rgba(0, 0, 0, 0.2);
-    padding: 6px 12px;
-    border-radius: 42px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    padding-right: 0;
 }
 
 div.section.hide,
@@ -786,7 +849,11 @@ footer ul.footerSocial {
     gap: 4px 20px;
 }
 
+/* Capped at the width of the text in <main> (.container's 600px), so a long
+   note never runs wider than the page above it. The mobile block narrows
+   this in step with main's padding there. */
 footer>.footerNote {
+    max-width: 600px;
     color: var(--footer-text-color);
     font-size: .9em;
     margin: 10px 0 0;
@@ -1554,6 +1621,11 @@ span.token{
         padding-bottom: 0;
     }
 
+    /* main is at most 600px wide here too, less 10vw of padding each side. */
+    footer>.footerNote {
+        max-width: calc(min(600px, 100vw) - 20vw);
+    }
+
     section {
         height: fit-content;
         padding-top: 10vw;
@@ -1642,6 +1714,13 @@ hr.onMobile {
 
 .article-content li {
     margin-bottom: 4px;
+}
+
+/* An icon list, like the landing page's, rather than a bulleted one - so it
+   sits flush with the text instead of indented for markers it doesn't have. */
+.article-content ul.specs {
+    margin-left: 0;
+    gap: 10px;
 }
 
 .article-content li:has(> input[type="checkbox"]) {

@@ -227,13 +227,11 @@ function init() {
     const year = document.getElementById("footerYear");
     if (year) year.textContent = new Date().getFullYear();
 
-    const pillLists = [
-        document.querySelector("#desktop-header nav .notAList"),
-        document.querySelector("main .projectFilter ul")
-    ];
+    const header = document.querySelector("#desktop-header nav .notAList");
+    if (header) attachPill(header);
 
-    for (const list of pillLists) {
-        if (list) attachPill(list);
+    for (const list of document.querySelectorAll(".pillNav ul.notAList")) {
+        attachPill(list);
     }
 }
 

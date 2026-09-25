@@ -29,6 +29,8 @@
         "main .description.white > span",
         "main p.section-content",
         "main ul.specs > li",
+        "main .legal .article-content > h2",
+        "main .legal .article-content > p",
         "main .section > p",
         "main a.button",
         "main .pi-label",

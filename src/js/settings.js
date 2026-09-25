@@ -5,7 +5,12 @@
 
 const THEME_COLORS = { light: '#f1f1f1', dark: '#121212' };
 
-const DEFAULTS = { theme: 'auto', accentColor: 'blue', style: 'liquid-glass' };
+const DEFAULTS = {
+    theme: 'auto',
+    accentColor: 'blue',
+    style: 'liquid-glass',
+    lyricsMode: 'synced'
+};
 
 // The one list of languages: settingsPanel.js and i18n.js both read it.
 const LANGUAGES = {
@@ -21,6 +26,13 @@ const PREF_DEFAULT = {
     upgradeArtwork: () => true,
     reduceMotion: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
     reduceTransparency: () => matchMedia('(prefers-reduced-transparency: reduce)').matches
+};
+
+// Which radio group in the settings panel holds which setting.
+const RADIO_SETTINGS = {
+    'theme-color': 'theme',
+    'accent-color': 'accentColor',
+    'style': 'style'
 };
 
 function prefEnabled(key) {
@@ -162,6 +174,25 @@ function announceChange(key, value) {
     window.dispatchEvent(event);
 }
 
+// For changing a setting from outside the settings panel - the lyrics overlay's
+// own style buttons, say. Goes through the same steps a radio click would, and
+// ticks the matching radio, if the setting has one, so an open settings dialog
+// does not show the old value.
+function saveSetting(key, value) {
+    localStorage.setItem(key, value);
+    applyRootSettings();
+
+    for (const [name, settingKey] of Object.entries(RADIO_SETTINGS)) {
+        if (settingKey !== key) continue;
+
+        const selector = 'input[name="' + name + '"][value="' + value + '"]';
+        const radio = document.querySelector(selector);
+        if (radio) radio.checked = true;
+    }
+
+    announceChange(key, value);
+}
+
 // A deferred script would miss "settings:panelready", so the DOM is the source
 // of truth and the event is only how earlier scripts get told.
 function onSettingsPanel(fn) {
@@ -176,11 +207,7 @@ onSettingsPanel(function wirePanel() {
         if (box.id in PREF_DEFAULT) toggles.push(box);
     }
 
-    const radios = {
-        'theme-color': 'theme',
-        'accent-color': 'accentColor',
-        'style': 'style'
-    };
+    const radios = RADIO_SETTINGS;
 
     function syncControls() {
         for (const toggle of toggles) {
@@ -208,6 +235,7 @@ onSettingsPanel(function wirePanel() {
             radio.addEventListener('change', function () {
                 localStorage.setItem(key, radio.value);
                 applyRootSettings();
+                announceChange(key, radio.value);
             });
         }
     }
@@ -233,6 +261,9 @@ onSettingsPanel(function wirePanel() {
 
             for (const key of Object.keys(PREF_DEFAULT)) {
                 announceChange(key, prefEnabled(key));
+            }
+            for (const key of Object.keys(DEFAULTS)) {
+                announceChange(key, setting(key));
             }
         });
     }

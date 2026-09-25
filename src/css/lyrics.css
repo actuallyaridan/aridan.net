@@ -39,36 +39,129 @@ footer>.footerNote.lyricsNote {
     animation: lyricsFadeOut 0.25s ease forwards;
 }
 
-#lyricsCloseBtn {
-    position: absolute;
-    top: max(20px, env(safe-area-inset-top));
-    right: max(20px, env(safe-area-inset-right));
-    z-index: 1;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--border-color);
-    background: var(--card-background-color);
-    color: var(--text-color);
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background-color .2s ease, border-color .2s ease, transform .12s ease;
+/* The dialog itself takes focus when the control bar hides with a button
+   focused, and there is nothing to outline when that happens. */
+#lyricsOverlay:focus {
+    outline: none;
 }
 
-#lyricsCloseBtn>i {
+/* ---------- Control bar ----------
+
+   Sits across the top like a video player's controls. lyrics.js adds
+   .controlsShown on any sign of activity and takes it away a few seconds
+   later. visibility is switched after the fade on the way out, but at once on
+   the way in, so a Tab that brings the bar up can focus a button in it
+   straight away.
+
+   The buttons are the site's own .button, so they follow the Flat / Liquid
+   Glass choice like every other button. Only size and spacing are set here.
+   The earlier always-glass look is kept in lyricsGlassControls.css. */
+#lyricsControls {
+    position: absolute;
+    top: max(16px, env(safe-area-inset-top));
+    left: max(16px, env(safe-area-inset-left));
+    right: max(16px, env(safe-area-inset-right));
+    z-index: 3;
+    /* Full screen, the style switcher, close - in that order, with the
+       switcher in the middle of the screen and the two buttons either side of
+       it, so everything is in one place. Three columns rather than a centred
+       row: the outer two share what is left equally, so the switcher stays in
+       the middle whether or not full screen is showing - it is hidden outside
+       immersive mode. */
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition:
+        opacity .25s ease,
+        transform .25s ease,
+        visibility 0s linear .25s;
+}
+
+#lyricsOverlay.controlsShown #lyricsControls {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    transition:
+        opacity .25s ease,
+        transform .25s ease,
+        visibility 0s;
+}
+
+#lyricsFullscreenBtn {
+    grid-column: 1;
+    justify-self: end;
+}
+
+.lyricsModes {
+    grid-column: 2;
+}
+
+#lyricsCloseBtn {
+    grid-column: 3;
+    justify-self: start;
+}
+
+/* The style switcher is the header's navigator (.pillNav in styles.css);
+   only the icon-and-label spacing inside each item is its own. The header
+   zeroes the margin on icons in its items, so the label is spaced off the
+   icon instead. */
+.lyricsModeBtn {
+    white-space: nowrap;
+}
+
+.lyricsModeBtn>span {
+    margin-left: 8px;
+}
+
+/* The header colours the current item with the accent. Over album art that
+   accent is often the same colour as the art itself - it was taken from it -
+   so in immersive the current mode stays white and the pill (or, in Flat,
+   the underline) is what marks it. */
+#lyricsOverlay.isImmersive .lyricsModes li.active>.lyricsModeBtn {
+    color: var(--text-color);
+}
+
+/* Round, icon-only buttons: same .button, just square with the padding
+   taken out so the icon sits in the middle. */
+.lyricsIconBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    flex: 0 0 auto;
+}
+
+.lyricsIconBtn[hidden] {
+    display: none;
+}
+
+.lyricsIconBtn>i {
     margin: 0;
 }
 
-#lyricsCloseBtn:hover {
-    background: var(--button-hover-background-color);
-    border-color: var(--secondary-title-color);
+/* A phone has no room for the words, so the modes are icons alone - the
+   buttons keep their names for screen readers through the hidden text. */
+@media (max-width: 560px) {
+    .lyricsModeBtn>span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
 }
 
-#lyricsCloseBtn:active {
-    transform: scale(0.9);
-}
-
-html.reduce-motion #lyricsCloseBtn:active {
+html.reduce-motion #lyricsControls,
+html.reduce-motion #lyricsOverlay.controlsShown #lyricsControls {
     transform: none;
 }
 
@@ -203,19 +296,11 @@ html.reduce-motion #lyricsCloseBtn:active {
    lyrics came back without timings at all, or because they have timings and the
    presence carried no start timestamp to measure them against. Without this the
    second case left every line at the dimmed 0.45 with nothing ever lit. */
-.lyricsRow.isStatic,
 #lyricsStage.isUnsynced .lyricsRow {
     opacity: 1;
     color: var(--title-color);
     font-size: clamp(1.1em, 3.4vw, 1.6em);
     font-weight: 600;
-}
-
-.lyricsPlain {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.35em;
 }
 
 #lyricsStatus {
@@ -284,5 +369,279 @@ html.reduce-motion .lyricsRow.lyricsDots.isActive {
 
 html.reduce-motion #lyricsOverlay.lyricsOpening,
 html.reduce-motion #lyricsOverlay.lyricsClosing {
+    animation: none;
+}
+
+/* ---------- Immersive ----------
+
+   Everything below only applies while the overlay has .isImmersive: the album
+   art turned into a slowly moving blur behind everything, and the line being
+   sung thrown onto the screen a word at a time. It is always dark, whatever the
+   site theme, because the colours come from the album and white text is the
+   only thing that reads over all of them. */
+
+#lyricsOverlay.isImmersive {
+    background-color: #101010;
+    color-scheme: dark;
+}
+
+/* Drawn at 64px by lyrics.js and stretched to the screen here. Scaled past the
+   edges because the outermost pixels of the blur are the least blended, and
+   a hard line of colour would show along the border. */
+#lyricsBackdrop {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    transform: scale(1.2);
+}
+
+#lyricsOverlay.isImmersive #lyricsBackdrop {
+    display: block;
+}
+
+/* Darkens the art just enough for white text to hold up on a bright cover,
+   more at the edges than the middle so the colour still comes through. */
+#lyricsOverlay.isImmersive::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.5));
+}
+
+/* Everything that has to sit above the backdrop and its shade. */
+#lyricsOverlay.isImmersive #lyricsStage,
+#lyricsOverlay.isImmersive #lyricsCaption {
+    position: relative;
+    z-index: 1;
+}
+
+#lyricsOverlay.isImmersive #lyricsStatus {
+    z-index: 1;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+#lyricsOverlay.isImmersive #lyricsCaption {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Like a video, the pointer gets out of the picture along with the controls. */
+#lyricsOverlay.isImmersive:not(.controlsShown) {
+    cursor: none;
+}
+
+/* Immersive is always dark, including the time-synced list it falls back to
+   when there is no start timestamp to animate with. */
+#lyricsOverlay.isImmersive #lyricsStage .lyricsRow {
+    color: #fff;
+}
+
+/* The stage stops being a scrolling list and becomes a fixed canvas the
+   scenes are positioned on. */
+#lyricsStage.isImmersive {
+    display: block;
+    max-width: none;
+    padding: 0;
+    overflow: hidden;
+    mask-image: none;
+}
+
+#lyricsStage.isImmersive::before,
+#lyricsStage.isImmersive::after {
+    content: none;
+}
+
+/* One line of the song. --y, --tilt and --scale are picked per line by
+   lyrics.js from its list of layouts. */
+.immersiveScene {
+    position: absolute;
+    left: max(6vw, 20px);
+    right: max(6vw, 20px);
+    top: var(--y, 50%);
+    transform: translateY(-50%) rotate(var(--tilt, 0deg));
+}
+
+.immersiveScene[data-align="start"] {
+    text-align: left;
+}
+
+.immersiveScene[data-align="center"] {
+    text-align: center;
+}
+
+.immersiveScene[data-align="end"] {
+    text-align: right;
+}
+
+/* Rows zig-zag from one side to the other. */
+.immersiveScene[data-align="stagger"] .immersiveRow:nth-child(odd) {
+    text-align: left;
+}
+
+.immersiveScene[data-align="stagger"] .immersiveRow:nth-child(even) {
+    text-align: right;
+}
+
+/* A slow push-in for as long as the line is up, like a camera move. Kept on
+   its own element so it does not fight the scene's positioning transform. */
+.immersiveInner {
+    transform-origin: center;
+    animation: immersivePush 12s cubic-bezier(.2, .6, .3, 1) both;
+}
+
+@keyframes immersivePush {
+    from {
+        transform: scale(calc(var(--scale, 1) * 0.94));
+    }
+
+    to {
+        transform: scale(calc(var(--scale, 1) * 1.04));
+    }
+}
+
+/* Sized by lyrics.js through --fit so each row fills about the same width,
+   then capped twice by the height: 15vh so a short word on a wide screen does
+   not go taller than the screen can hold, and 60vh shared between all the
+   rows (--rows) so a long line broken into many rows on a phone still fits
+   on the screen as a whole, clear of the control bar and the caption. */
+.immersiveRow {
+    font-family: Jost, sans-serif;
+    font-weight: 700;
+    font-size: min(calc(var(--fit, 10) * 1vw), 15vh, calc(60vh / var(--rows, 1)));
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: #fff;
+    margin: 0;
+}
+
+/* A word waits out of sight until its moment, then arrives from whichever
+   direction the scene was given. */
+.immersiveWord {
+    display: inline-block;
+    /* Room for everything that reaches outside the word's box: the tails of
+       g, j, p and y below (the rows' line-height is tight), accents above,
+       and the blur itself on every side. Safari puts an element on its own
+       layer while it animates a filter and cuts that layer to the element's
+       box, so without this a word arrived with its tails missing and they
+       only appeared once the blur had finished.
+
+       Jost's glyphs reach about 0.2em above and below the tight line box.
+       On top of that goes twice the strongest blur used below (0.14em), since
+       a blur visibly spreads about twice its radius. Both are in em so they
+       grow and shrink with the word - a blur in px would outgrow the padding
+       on a phone, where the words are small. The negative margin takes the
+       same amount back, so the words sit exactly where they did. */
+    padding: 0.5em 0.3em;
+    margin: -0.5em -0.3em;
+    opacity: 0;
+    filter: blur(0.1em);
+    transform: var(--from);
+    transition:
+        opacity .45s ease,
+        filter .6s ease,
+        transform .8s cubic-bezier(.16, 1, .3, 1);
+}
+
+.immersiveScene[data-enter="rise"] {
+    --from: translateY(0.45em);
+}
+
+.immersiveScene[data-enter="drop"] {
+    --from: translateY(-0.45em) rotate(-4deg);
+}
+
+.immersiveScene[data-enter="zoom"] {
+    --from: scale(1.6);
+}
+
+.immersiveScene[data-enter="slide"] {
+    --from: translateX(-0.5em);
+}
+
+/* No text-shadow on the words, deliberately: older Safari (iPadOS 17) drops
+   the shadow's blur inside a filtered, scaled layer like this one and draws
+   it as a sharp second copy of each word a few pixels lower. The shade over
+   the backdrop gives the white text its contrast instead.
+
+   filter: none rather than blur(0) once a word has landed, so Safari takes
+   it back off the separate layer a running filter keeps it on. The
+   transition still runs: a blur animates to none as it would to blur(0). */
+.immersiveWord.isSung {
+    opacity: 1;
+    filter: none;
+    transform: none;
+}
+
+/* On the way out the words blur away one after another, starting from the
+   first, while the next line is already coming in. */
+.immersiveScene.isLeaving .immersiveWord {
+    opacity: 0;
+    filter: blur(0.14em);
+    transform: translateY(-0.25em) scale(1.08);
+    transition-duration: .7s;
+    transition-delay: calc(var(--i, 0) * 25ms);
+}
+
+/* The instrumental break: three dots breathing in the middle of the screen. */
+.immersiveBreak {
+    display: flex;
+    justify-content: center;
+    gap: 3vh;
+    font-size: 5vh;
+    animation: lyricsDotsIn 0.4s ease both;
+}
+
+.immersiveBreak.isLeaving {
+    animation: lyricsFadeOut 0.4s ease forwards;
+}
+
+.immersiveDot {
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 50%;
+    background-color: #fff;
+    animation: immersiveBreathe 1.6s ease-in-out infinite;
+}
+
+.immersiveDot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.immersiveDot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes immersiveBreathe {
+    0%,
+    100% {
+        opacity: 0.35;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* With motion reduced the words still appear in time with the song, they just
+   appear outright - no blur, no travel, no push-in, no breathing. */
+html.reduce-motion .immersiveWord {
+    filter: none;
+    transform: none;
+    transition: none;
+}
+
+html.reduce-motion .immersiveInner {
+    animation: none;
+    transform: scale(var(--scale, 1));
+}
+
+html.reduce-motion .immersiveBreak,
+html.reduce-motion .immersiveDot {
     animation: none;
 }
