@@ -71,7 +71,7 @@
 
     // Phrases sharing a text node with markup, replaced inside it.
     const PARTIAL = [
-        ["main .description.white", "a swedish"],
+        ["main .description.white", "a Swedish"],
         ["#statusWrapperConnecting", "Connecting"]
     ];
 

@@ -14,6 +14,8 @@
         var shownDate = AF.escapeHtml(AF.formatDate(article.meta.date));
         var preview = AF.escapeHtml(article.meta.preview || "");
         var href = AF.escapeHtml(articleUrl(article.slug));
+        // Every card's link says "Read more", so screen readers get the title too.
+        var slugId = AF.escapeHtml(article.slug);
 
         var el = document.createElement("div");
         el.className = "section articlePreview";
@@ -22,7 +24,7 @@
         el.innerHTML = `
             <div class="preview">
                 <span class="titleContainer">
-                    <h2 class="section-title">${title}</h2>
+                    <h2 class="section-title" id="articleTitle-${slugId}">${title}</h2>
                     <p class="date section-content">
                         <time datetime="${rawDate}">${shownDate}</time>
                     </p>
@@ -32,6 +34,7 @@
             <div class="readMore">
                 <div>
                     <a href="${href}" title="Read more" aria-label="Read more"
+                       data-title-id="articleTitle-${slugId}"
                        class="button backButton">
                         <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                     </a>
@@ -114,6 +117,7 @@
                 // These cards land long after the one-off emoji pass on load.
                 if (window.parseEmoji) window.parseEmoji(frag);
                 container.appendChild(frag);
+                labelReadMore();
                 document.dispatchEvent(new CustomEvent("articles:rendered"));
             })
             .catch(function (err) {
@@ -124,6 +128,19 @@
                 if (spinner) spinner.style.display = "none";
             });
     }
+
+    // i18n's pass over the page has usually run before the cards arrive, so the
+    // links are labelled here, and again whenever the language changes.
+    function labelReadMore() {
+        var label = window.i18n ? window.i18n.t("Read more") : "Read more";
+        document.querySelectorAll(".readMore a[data-title-id]").forEach(function (link) {
+            var heading = document.getElementById(link.dataset.titleId);
+            link.title = label;
+            link.setAttribute("aria-label", heading ? label + ": " + heading.textContent : label);
+        });
+    }
+
+    if (window.i18n) window.i18n.onChange(labelReadMore);
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", render);

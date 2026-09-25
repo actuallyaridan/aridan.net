@@ -234,6 +234,15 @@ onSettingsPanel(function wirePanel() {
         for (const radio of document.querySelectorAll('input[name="' + name + '"]')) {
             radio.addEventListener('change', function () {
                 localStorage.setItem(key, radio.value);
+
+                // The album's colour paints over the chosen one, so picking a
+                // colour while matching is on would look like it did nothing.
+                if (key === 'accentColor' && prefEnabled('albumAccent')) {
+                    localStorage.setItem('albumAccent', 'false');
+                    syncControls();
+                    announceChange('albumAccent', false);
+                }
+
                 applyRootSettings();
                 announceChange(key, radio.value);
             });

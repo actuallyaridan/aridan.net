@@ -110,7 +110,7 @@
                 <h1 class="name">Pi-hole</h1>
                 <p class="description titleColor">Live stats from look-what-you-made-me-do, the
                     Raspberry&nbsp;Pi&nbsp;5 that runs DNS-level ad&nbsp;and tracker blocking for my whole home network.
-                    These numbers update in real time.</p>
+                    These numbers update automatically.</p>
             </div>
         </div>
         <hr>
@@ -239,8 +239,8 @@
                 <h2 class="section-title">How it works</h2>
                 <p class="section-content">The Pi-hole runs on a Raspberry&nbsp;Pi&nbsp;5 that sits on my home network
                     and acts as the DNS server for every device in the house - phones, laptops, TVs, consoles,
-                    everything. When something looks up a domain, the Pi checks it against a blocklist of nearly
-                    two&nbsp;million known ad, tracker, and malware domains. If it's on the list, the Pi
+                    everything. When something looks up a domain, the Pi checks it against a blocklist of over
+                    three&nbsp;million known ad, tracker, and malware domains. If it's on the list, the Pi
                     answers with nothing and the connection quietly goes nowhere; if it's a normal site, the lookup is
                     passed through as usual. Because it works at the DNS level, it blocks ads and tracking in every
                     app, not just in a browser with an extension.</p>
@@ -259,7 +259,7 @@
                     fails, it's written to a log instead of failing silently.</p>
                 <ul class="specs">
                     <li><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>Updates its own Pi-hole software every Sunday</li>
-                    <li><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Refreshes the ~2&nbsp;million-domain blocklists weekly</li>
+                    <li><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Refreshes the ~3&nbsp;million-domain blocklists weekly</li>
                     <li><i class="fa-solid fa-box-open" aria-hidden="true"></i>Installs OS &amp; security updates, auto-rebooting only when required</li>
                     <li><i class="fa-solid fa-lock" aria-hidden="true"></i>Validates DNSSEC and resolves through Quad9</li>
                     <li><i class="fa-solid fa-file-lines" aria-hidden="true"></i>Logs every automated run so nothing breaks unnoticed</li>
@@ -271,7 +271,7 @@
             <div>
                 <h2 class="section-title">How these numbers reach this page</h2>
                 <p class="section-content">The Pi-hole lives entirely inside my home network and is never exposed to the
-                    internet. Instead of this website reaching in to it, the Pi reaches out: a small
+                    internet. Instead of this website reaching into it, the Pi reaches out: a small
                     script runs every fifteen minutes, reads its own stats, and sends just these aggregate totals to a tiny
                     Cloudflare function that stores them. This page then reads them straight back.</p>
                 <p class="section-content">Only the summary numbers you see above ever leave my network - never which
