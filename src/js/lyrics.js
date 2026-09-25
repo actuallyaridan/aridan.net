@@ -74,10 +74,10 @@
     let saved = "";
     if (typeof setting === "function") saved = setting("lyricsMode");
 
-    // Anything else - including "plain", saved before that mode was removed -
-    // lands on time-synced.
-    if (saved === "immersive") return "immersive";
-    return "synced";
+    // "plain", saved before that mode was removed, lands on time-synced;
+    // anything else - including nothing saved yet - is immersive.
+    if (saved === "synced" || saved === "plain") return "synced";
+    return "immersive";
   }
 
   function t(text) {

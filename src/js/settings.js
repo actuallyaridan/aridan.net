@@ -9,7 +9,7 @@ const DEFAULTS = {
     theme: 'auto',
     accentColor: 'blue',
     style: 'liquid-glass',
-    lyricsMode: 'synced'
+    lyricsMode: 'immersive'
 };
 
 // The one list of languages: settingsPanel.js and i18n.js both read it.
