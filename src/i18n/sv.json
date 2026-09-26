@@ -296,5 +296,10 @@
   "Your rights": "Dina rättigheter",
   "Under the GDPR you can ask what data I have about you, have it corrected or deleted, restrict or object to how it is used, and get a copy of it. Unless you've emailed me, I don't hold anything about you, but just ask at the address above.": "Enligt GDPR kan du fråga vilka uppgifter jag har om dig, få dem rättade eller raderade, begränsa eller invända mot hur de används och få en kopia av dem. Om du inte har mejlat mig har jag ingenting om dig, men fråga gärna på adressen ovan.",
   "If you think I have handled your data wrongly, you can complain to Integritetsskyddsmyndigheten (IMY), the Swedish Authority for Privacy Protection, at imy.se.": "Om du tycker att jag har hanterat dina uppgifter fel kan du klaga hos Integritetsskyddsmyndigheten (IMY) på <a class=\"inline\" href=\"https://www.imy.se/\" target=\"_blank\" rel=\"noopener\">imy.se</a>.",
-  "Last updated 25 September 2026.": "Senast uppdaterad <time datetime=\"2026-09-25\">25 september 2026</time>."
+  "Last updated 25 September 2026.": "Senast uppdaterad <time datetime=\"2026-09-25\">25 september 2026</time>.",
+  "Open it in your mail app, or copy the address and send it from wherever you like.": "Öppna den i din e-postapp, eller kopiera adressen och skicka därifrån du vill.",
+  "Open mail app": "Öppna e-postappen",
+  "Copy address": "Kopiera adress",
+  "Copied to clipboard": "Kopierad till urklipp",
+  "Couldn't copy - select the address instead": "Kunde inte kopiera - markera adressen i stället"
 }

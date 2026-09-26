@@ -1305,12 +1305,136 @@ border: 1px solid var(--liquid-glass-button-border);
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-    flex-grow: 1;
 }
 
+/* A zero basis splits every row evenly, whatever the labels' lengths. */
 .gridButtons>a{
-    flex-grow: 1;
+    flex: 1 1 0;
+    min-width: 0;
     text-align: center;
+}
+
+.emailDialog {
+    background-color: var(--modal-background-color);
+    color: var(--secondary-title-color);
+    border: 1px solid var(--liquid-glass-button-border);
+    border-radius: 20px;
+    padding: 28px 24px 24px;
+    /* The global margin reset would otherwise pin it to the top-left corner. */
+    margin: auto;
+    width: min(420px, calc(100vw - 32px));
+    text-align: center;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+.emailDialog[open] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: emailDialogIn .22s ease-out;
+    /* Centring lands it on a fractional pixel. Without its own layer it gets
+       re-rasterised onto whole pixels once the animation ends, and the
+       contents visibly hop by a pixel. */
+    will-change: transform;
+}
+
+.emailDialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.4);
+    -webkit-backdrop-filter: blur(var(--blur-subtle));
+    backdrop-filter: blur(var(--blur-subtle));
+}
+
+.emailAddress > span{
+    margin-left: 12px;
+  margin-right: 12px;
+}
+
+@keyframes emailDialogIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.97);
+    }
+}
+
+html.reduce-motion .emailDialog[open] {
+    animation: none;
+}
+
+/* Longer translations stack the buttons on a phone rather than wrapping a label. */
+.emailDialog .modalButtons {
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.emailDialog .modalButtons>.button {
+    white-space: nowrap;
+}
+
+.emailDialog h2 {
+    margin: 12px 0 6px;
+}
+
+.emailDialogIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0;
+    border-radius: 25%;
+    font-size: 1.8em;
+    color: var(--icon-color);
+    background-color: var(--liquid-glass-button-background);
+    border: 1px solid var(--liquid-glass-button-border);
+}
+
+.emailDialogIcon>i {
+    margin: 0;
+}
+
+.emailAddress {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 6px 6px 16px;
+    border-radius: 12px;
+    background-color: var(--liquid-glass-button-background);
+    border: 1px solid var(--liquid-glass-button-border);
+    font-size: 1.1em;
+    user-select: all;
+}
+
+.emailCopy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    /* .noUI is all: inherit, which hands it .emailAddress's lopsided padding
+       and its border too. */
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--secondary-title-color);
+    user-select: none;
+}
+
+.emailCopy:hover {
+    background-color: var(--liquid-glass-button-slected);
+}
+
+.emailCopy>i {
+    margin: 0;
+}
+
+.emailCopied {
+    min-height: 1.4em;
+    margin: 6px 0 10px;
+    font-size: 0.9em;
+    color: var(--paragraph-color);
 }
 
 #gridButtonsWrapper {
@@ -1319,7 +1443,6 @@ border: 1px solid var(--liquid-glass-button-border);
     gap: 12px;
     width: 100%;
     justify-content: center;
-    flex-wrap: wrap;
     flex: 1;
     text-align: center;
 }
@@ -1817,4 +1940,11 @@ hr.onMobile {
 
 .invisible-scrollbar::-webkit-scrollbar {
     display: none;
+}
+
+.infoButtons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
 }

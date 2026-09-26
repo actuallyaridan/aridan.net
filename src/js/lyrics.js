@@ -7,6 +7,11 @@
 
   if (!btn || !overlay || !stage) return;
 
+  // Immersive mode is for the eyes only: one line at a time, gone a few
+  // seconds later, a word per element. Screen readers are given the whole
+  // song here instead, as plain lines they can read at their own pace.
+  const transcript = document.getElementById("lyricsTranscript");
+
   const closeBtn = document.getElementById("lyricsCloseBtn");
   const controls = document.getElementById("lyricsControls");
   const fullscreenBtn = document.getElementById("lyricsFullscreenBtn");
@@ -308,6 +313,8 @@
     stage.innerHTML = "";
     stage.classList.remove("isUnsynced");
     stage.classList.remove("isImmersive");
+    stage.removeAttribute("aria-hidden");
+    if (transcript) transcript.innerHTML = "";
     cues = [];
     activeIndex = null;
     resumeScrollAt = 0;
@@ -399,6 +406,7 @@
   function renderImmersive(lines) {
     immersive = true;
     stage.classList.add("isImmersive");
+    fillTranscript(lines);
 
     if (lines[0].t >= GAP_MIN) {
       cues.push({ t: 0, text: "", end: lines[0].t, dots: true });
@@ -418,6 +426,22 @@
 
       cues.push({ t: line.t, text: line.text, end: end, dots: dots });
     }
+  }
+
+  // The stage is hidden from screen readers only once there is a transcript
+  // to read in its place, so they are never left with nothing.
+  function fillTranscript(lines) {
+    if (!transcript) return;
+
+    for (const line of lines) {
+      if (!line.text) continue;
+
+      const el = document.createElement("p");
+      el.textContent = line.text;
+      transcript.appendChild(el);
+    }
+
+    stage.setAttribute("aria-hidden", "true");
   }
 
   function showScene(cue) {
@@ -1334,6 +1358,10 @@
       showControls();
     }
   });
+
+  // A screen reader moving onto a button does not press Tab or move the
+  // mouse, so focus arriving in the bar is its own sign of someone using it.
+  controls?.addEventListener("focusin", showControls);
 
   controls?.addEventListener("pointerenter", () => {
     pointerOnControls = true;

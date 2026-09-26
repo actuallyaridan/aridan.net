@@ -49,9 +49,10 @@ footer>.footerNote.lyricsNote {
 
    Sits across the top like a video player's controls. lyrics.js adds
    .controlsShown on any sign of activity and takes it away a few seconds
-   later. visibility is switched after the fade on the way out, but at once on
-   the way in, so a Tab that brings the bar up can focus a button in it
-   straight away.
+   later. Hiding it only fades it and stops it taking clicks - it is not
+   visibility:hidden, because that would take the buttons away from screen
+   readers too, and a VoiceOver user on an iPad has no Escape key to fall back
+   on. Focus landing on a button is what brings the bar back for them.
 
    The buttons are the site's own .button, so they follow the Flat / Liquid
    Glass choice like every other button. Only size and spacing are set here.
@@ -73,24 +74,17 @@ footer>.footerNote.lyricsNote {
     align-items: center;
     gap: 10px;
     opacity: 0;
-    visibility: hidden;
     pointer-events: none;
     transform: translateY(-10px);
     transition:
         opacity .25s ease,
-        transform .25s ease,
-        visibility 0s linear .25s;
+        transform .25s ease;
 }
 
 #lyricsOverlay.controlsShown #lyricsControls {
     opacity: 1;
-    visibility: visible;
     pointer-events: auto;
     transform: none;
-    transition:
-        opacity .25s ease,
-        transform .25s ease,
-        visibility 0s;
 }
 
 #lyricsFullscreenBtn {

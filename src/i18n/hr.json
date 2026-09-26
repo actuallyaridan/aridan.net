@@ -296,5 +296,10 @@
   "Your rights": "Tvoja prava",
   "Under the GDPR you can ask what data I have about you, have it corrected or deleted, restrict or object to how it is used, and get a copy of it. Unless you've emailed me, I don't hold anything about you, but just ask at the address above.": "Prema GDPR-u možeš pitati koje podatke imam o tebi, zatražiti da ih ispravim ili obrišem, ograničiti njihovu upotrebu ili joj se usprotiviti te dobiti njihovu kopiju. Ako mi nisi pisao, nemam ništa o tebi, ali slobodno pitaj na adresi iznad.",
   "If you think I have handled your data wrongly, you can complain to Integritetsskyddsmyndigheten (IMY), the Swedish Authority for Privacy Protection, at imy.se.": "Ako smatraš da sam s tvojim podacima postupio pogrešno, možeš podnijeti pritužbu švedskom tijelu za zaštitu privatnosti, Integritetsskyddsmyndigheten (IMY), na <a class=\"inline\" href=\"https://www.imy.se/\" target=\"_blank\" rel=\"noopener\">imy.se</a>.",
-  "Last updated 25 September 2026.": "Posljednje ažurirano <time datetime=\"2026-09-25\">25. rujna 2026.</time>"
+  "Last updated 25 September 2026.": "Posljednje ažurirano <time datetime=\"2026-09-25\">25. rujna 2026.</time>",
+  "Open it in your mail app, or copy the address and send it from wherever you like.": "Otvori je u aplikaciji za e-poštu ili kopiraj adresu i pošalji odakle god želiš.",
+  "Open mail app": "Otvori aplikaciju za e-poštu",
+  "Copy address": "Kopiraj adresu",
+  "Copied to clipboard": "Kopirano u međuspremnik",
+  "Couldn't copy - select the address instead": "Kopiranje nije uspjelo - označi adresu"
 }
