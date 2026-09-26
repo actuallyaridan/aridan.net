@@ -546,6 +546,14 @@ html.reduce-motion #lyricsOverlay.lyricsClosing {
         transform .8s cubic-bezier(.16, 1, .3, 1);
 }
 
+/* A word that names a colour, like "red" or "blue", is shown in that colour.
+   lyrics.js picks the shade and hands it over as --word-color, and wraps
+   only the letters in .immersiveColor so punctuation next to the word, like
+   a comma or a bracket, stays white. */
+.immersiveColor {
+    color: var(--word-color, #fff);
+}
+
 .immersiveScene[data-enter="rise"] {
     --from: translateY(0.45em);
 }

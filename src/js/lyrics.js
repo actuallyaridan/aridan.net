@@ -63,6 +63,87 @@
 
   const ENTRANCES = ["rise", "drop", "zoom", "slide"];
 
+  // A word in immersive mode that names a colour is painted in it. The shades
+  // are the bright end of each colour, since they sit on a dark, shaded
+  // backdrop. Black and white are left out: black would vanish into the
+  // background and every word is already white. Swedish is in here too, since
+  // the site is.
+  const WORD_COLORS = {
+    red: "#ff4d4d",
+    green: "#4dde6a",
+    blue: "#4d9dff",
+    yellow: "#ffe14d",
+    orange: "#ff9a3c",
+    pink: "#ff7ac6",
+    purple: "#b77dff",
+    violet: "#b77dff",
+    brown: "#c48a5a",
+    gold: "#ffcf40",
+    golden: "#ffcf40",
+    silver: "#d0d6de",
+    grey: "#a8adb3",
+    gray: "#a8adb3",
+    cyan: "#4de8f0",
+    turquoise: "#40e0d0",
+    teal: "#2ec4b6",
+    magenta: "#ff4dd8",
+    crimson: "#ff3355",
+    scarlet: "#ff4424",
+    indigo: "#8a7dff",
+    lavender: "#c9b3ff",
+
+    röd: "#ff4d4d",
+    rött: "#ff4d4d",
+    röda: "#ff4d4d",
+    grön: "#4dde6a",
+    grönt: "#4dde6a",
+    gröna: "#4dde6a",
+    blå: "#4d9dff",
+    blått: "#4d9dff",
+    blåa: "#4d9dff",
+    gul: "#ffe14d",
+    gult: "#ffe14d",
+    gula: "#ffe14d",
+    rosa: "#ff7ac6",
+    lila: "#b77dff",
+    brun: "#c48a5a",
+    brunt: "#c48a5a",
+    bruna: "#c48a5a",
+    guld: "#ffcf40",
+    grå: "#a8adb3",
+    grått: "#a8adb3",
+    gråa: "#a8adb3",
+
+    roza: "#ff7ac6",
+  };
+
+  // Croatian and Bosnian change the end of a colour word with gender and case
+  // - crven, crvena, crveno, crvenih, crvenom and so on - so rather than list
+  // every form, these are the part that stays the same, and any of the
+  // ENDINGS below may follow it.
+  const WORD_COLOR_STEMS = {
+    crven: "#ff4d4d",
+    zelen: "#4dde6a",
+    plav: "#4d9dff",
+    žut: "#ffe14d",
+    narančast: "#ff9a3c",
+    narandžast: "#ff9a3c",
+    ružičast: "#ff7ac6",
+    ljubičast: "#b77dff",
+    smeđ: "#c48a5a",
+    zlat: "#ffcf40",
+    zlatn: "#ffcf40",
+    srebrn: "#d0d6de",
+    siv: "#a8adb3",
+  };
+
+  const ENDINGS = [
+    "", "a", "o", "i", "e", "u",
+    "om", "oj", "ih", "im", "ima",
+    "og", "oga", "ome", "omu",
+    "eg", "ega", "em", "emu",
+  ];
+
   // The page has its own Reduce motion setting on top of the system one, and
   // either being on is enough.
   function reduceMotion() {
@@ -467,6 +548,9 @@
         span.textContent = word;
         span.style.setProperty("--i", String(order));
 
+        const color = colorOf(word);
+        if (color) paintColorWord(span, word, color);
+
         rowEl.appendChild(span);
         rowEl.appendChild(document.createTextNode(" "));
 
@@ -481,6 +565,50 @@
     }
 
     return { el: el, words: timed };
+  }
+
+  // The colour a word names, or "" if it names none. The punctuation around
+  // it is ignored, so "red," and "(Blue)" still count.
+  function colorOf(word) {
+    const bare = word.toLowerCase().replace(/[^\p{L}]/gu, "");
+
+    if (Object.hasOwn(WORD_COLORS, bare)) {
+      return WORD_COLORS[bare];
+    }
+
+    // Croatian and Bosnian: the word has to be a stem plus one of the known
+    // endings, so "plava" counts but a longer word like "plavuša" does not.
+    for (const stem in WORD_COLOR_STEMS) {
+      if (!bare.startsWith(stem)) continue;
+
+      const ending = bare.slice(stem.length);
+      if (ENDINGS.includes(ending)) {
+        return WORD_COLOR_STEMS[stem];
+      }
+    }
+
+    return "";
+  }
+
+  // Only the letters are coloured, not the punctuation around them, so in
+  // "(red)," the brackets and the comma stay white. The word is split into
+  // what comes before its first letter, the letters themselves, and what
+  // comes after its last letter, and only the middle part gets the colour.
+  function paintColorWord(span, word, color) {
+    const parts = word.match(/^([^\p{L}]*)(.*?)([^\p{L}]*)$/u);
+    const before = parts[1];
+    const letters = parts[2];
+    const after = parts[3];
+
+    const colored = document.createElement("span");
+    colored.className = "immersiveColor";
+    colored.textContent = letters;
+    colored.style.setProperty("--word-color", color);
+
+    span.textContent = "";
+    span.appendChild(document.createTextNode(before));
+    span.appendChild(colored);
+    span.appendChild(document.createTextNode(after));
   }
 
   function buildBreak() {
