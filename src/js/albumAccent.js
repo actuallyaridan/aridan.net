@@ -38,12 +38,27 @@
     let generation = 0;
     let painted = false;
 
+    // Picking a colour in settings while the album's is showing would look
+    // like it did nothing, so the album's colour steps aside to let the pick
+    // be seen, and comes back when settings is closed. Matching stays on the
+    // whole time - the picked colour is the one used between songs.
+    let previewing = false;
+
     window.Lanyard.subscribe((presence) => onTrack(window.Lanyard.appleMusic(presence)));
     window.addEventListener("settings:change", onSettingsChange);
+    window.addEventListener("reveal:close", endPreview);
     watchTheme();
 
     function onSettingsChange(e) {
+        if (e.detail?.key === "accentColor") {
+            startPreview();
+            return;
+        }
+
         if (e.detail?.key !== "albumAccent") return;
+
+        // Switching matching on or off is its own answer, so any preview ends.
+        previewing = false;
 
         enabled = !!e.detail.value;
         log(`Album accent ${enabled ? "on" : "off"}`);
@@ -287,8 +302,39 @@
         return clamp(l, 0, 1);
     }
 
+    function startPreview() {
+        if (!enabled) return;
+        if (!root.classList.contains("album-accent")) return;
+
+        previewing = true;
+        log("Showing the picked color while settings is open");
+
+        // Faded, the same as a track change. The cached colours are kept, so
+        // the next page still starts in the album's colour.
+        root.classList.add("accent-crossfade");
+        root.classList.remove("album-accent");
+
+        for (const prop of PROPS) {
+            root.style.removeProperty(prop);
+        }
+    }
+
+    function endPreview(e) {
+        if (!previewing) return;
+        if (e.detail?.layer?.id !== "settingsLayer") return;
+
+        previewing = false;
+
+        if (!enabled) return;
+        applyAccent(true);
+    }
+
     function applyAccent(animate) {
         if (!base) return;
+
+        // A new track while a picked colour is on show: its colour is worked
+        // out and kept in `base`, and painted once settings closes.
+        if (previewing) return;
 
         const vars = accentVars(base, root.classList.contains("theme-dark"));
 

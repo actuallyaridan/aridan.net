@@ -30,8 +30,6 @@
   "Blue": "Blå<span class=\"blue\"></span>",
   "Purple": "Lila<span class=\"purple\"></span>",
   "Monochrome": "Monokrom",
-  "Style": "Stil",
-  "Flat": "Platt",
   "General": "Allmänt",
   "Automatically update activities": "Uppdatera aktiviteter automatiskt",
   "Match accent color to album art": "Matcha accentfärgen med skivomslaget",
@@ -301,5 +299,7 @@
   "Open mail app": "Öppna e-postappen",
   "Copy address": "Kopiera adress",
   "Copied to clipboard": "Kopierad till urklipp",
-  "Couldn't copy - select the address instead": "Kunde inte kopiera - markera adressen i stället"
+  "Couldn't copy - select the address instead": "Kunde inte kopiera - markera adressen i stället",
+  "Close menu": "Stäng menyn",
+  "Project status": "Projektstatus"
 }

@@ -26,12 +26,6 @@ body.editorPage main.container {
     font-size: .9em;
 }
 
-.style-flat #editorFolderBar.resolved {
-    background-color: var(--button-background-color);
-    color: var(--paragraph-color);
-    border-color: transparent;
-}
-
 .style-liquid-glass #editorFolderBar.resolved {
     background: var(--liquid-glass-button-background);
     border: 1px solid var(--liquid-glass-button-border);
@@ -41,7 +35,6 @@ body.editorPage main.container {
     box-shadow: none;
 }
 
-.style-flat #editorFolderBar.ok,
 .style-liquid-glass #editorFolderBar.ok {
     background-color: color-mix(in srgb, var(--accent-color) 15%, transparent);
     border-color: color-mix(in srgb, var(--accent-color) 35%, transparent);
@@ -94,11 +87,6 @@ body.editorPage main.container {
 
 .editorField input[type="date"].button {
     cursor: auto;
-}
-
-.style-flat .editorField input.button:hover,
-.style-flat .editorField textarea.button:hover {
-    background-color: var(--button-background-color);
 }
 
 .style-liquid-glass .editorField input.button:hover,
@@ -258,23 +246,6 @@ main > .section > .section-content code {
 #fieldBodyEditor .toastui-editor-contents img {
     max-width: 100%;
     height: auto;
-}
-
-.style-flat #fieldBodyEditor .toastui-editor-defaultUI {
-    border-radius: 10px;
-    border: 1px solid var(--button-background-color);
-    background-color: transparent;
-}
-
-.style-flat #fieldBodyEditor .toastui-editor-defaultUI-toolbar {
-    border-radius: 10px 10px 0 0;
-    background-color: var(--button-background-color);
-    border-bottom-color: var(--button-background-color);
-}
-
-.style-flat #fieldBodyEditor .toastui-editor-mode-switch {
-    border-radius: 0 0 10px 10px;
-    background-color: var(--button-background-color);
 }
 
 .style-liquid-glass #fieldBodyEditor .toastui-editor-defaultUI {

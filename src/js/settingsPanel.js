@@ -1,7 +1,7 @@
 (function (global) {
     "use strict";
 
-    var VERSION = "5.1.4";
+    var VERSION = "6.0";
 
     function toggleMarkup(id, label) {
         return `
@@ -55,18 +55,6 @@
                 <label for="dark" class="dark button theme-label"><i
                         class="fa-solid fa-moon" aria-hidden="true"></i>Dark</label>
             </div>
-        </div>
-        <div>
-            <${h} class="settingsGroupHeading" id="settingsStyleHeading"><i class="fa-solid fa-border-top-left" aria-hidden="true"></i>Style</${h}>
-            <div class="themeOptions options" role="radiogroup" aria-labelledby="settingsStyleHeading">
-                <input type="radio" id="liquid-glass" name="style" value="liquid-glass" class="theme-option" checked>
-                <label for="liquid-glass" class="auto button theme-label"><i class="fa-solid fa-droplet" aria-hidden="true"></i>Liquid Glass</label>
-
-                <input type="radio" id="flat" name="style" value="flat" class="theme-option">
-                <label for="flat" class="light button theme-label"><i
-                        class="fa-solid fa-layer-group" aria-hidden="true"></i>Flat</label>
-            </div>
-            <!---<div id="liquidGlassDisabled"><span class="warn"><p>You need to disable Reduce transparency in order to use Liquid Glass.</p></span></div>--->
         </div>
         <div>
             <${h} class="settingsGroupHeading" id="settingsColorHeading"><i class="fa-solid fa-fill-drip" aria-hidden="true"></i>Color</${h}>

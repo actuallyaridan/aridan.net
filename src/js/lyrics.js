@@ -17,7 +17,20 @@
   const fullscreenBtn = document.getElementById("lyricsFullscreenBtn");
   const modeButtons = overlay.querySelectorAll(".lyricsModeBtn");
   const statusEl = document.getElementById("lyricsStatus");
-  const caption = document.getElementById("lyricsCaption");
+
+  // The song in the control bar, the way a video player shows its title,
+  // with the cover beside it.
+  const nowArt = document.getElementById("lyricsNowArt");
+  const nowTitle = document.getElementById("lyricsNowTitle");
+  const nowArtist = document.getElementById("lyricsNowArtist");
+  const nowBox = document.getElementById("lyricsNowPlaying");
+
+  // The width transition on #lyricsNowPlaying in lyrics.css.
+  const NOW_RESIZE_MS = 350;
+  let nowResizeTimer = 0;
+
+  // The cover being loaded for the box, if any - see setNowPlaying().
+  let pendingArtUrl = "";
   const backdropCanvas = document.getElementById("lyricsBackdrop");
 
   const CLOSE_ANIM_MS = 250;
@@ -298,15 +311,107 @@
     statusEl.classList.toggle("hide", !key);
   }
 
-  function setCaption() {
-    if (!caption) return;
-
-    if (!track) {
-      caption.textContent = "";
+  // The song box is as wide as what is in it, so a new title or cover would
+  // snap it to a new size - and, since it is centred with the switcher, jolt
+  // everything beside it too. This makes the change, then eases the box from
+  // the width it had to the one it has now. A change that comes while it is
+  // still easing starts from wherever it had got to.
+  function resizeNowPlaying(change) {
+    if (!nowBox || !overlayOpen || reduceMotion()) {
+      change();
       return;
     }
 
-    caption.textContent = track.title + " - " + track.artist;
+    const from = nowBox.getBoundingClientRect().width;
+
+    // Its natural width, with the change made and nothing holding it.
+    window.clearTimeout(nowResizeTimer);
+    nowBox.style.transition = "none";
+    nowBox.style.width = "";
+    change();
+    const to = nowBox.getBoundingClientRect().width;
+
+    if (Math.abs(to - from) < 1) {
+      nowBox.style.transition = "";
+      return;
+    }
+
+    // Back to where it was, committed with a layout read before the
+    // transition is turned back on, then off to the new width.
+    nowBox.style.width = from + "px";
+    nowBox.getBoundingClientRect();
+    nowBox.style.transition = "";
+    nowBox.style.width = to + "px";
+
+    // Let go once it is there, so it follows its content again - a
+    // translated label, a window resize.
+    nowResizeTimer = window.setTimeout(function () {
+      nowBox.style.width = "";
+    }, NOW_RESIZE_MS);
+  }
+
+  function setNowPlaying() {
+    let title = "";
+    let artist = "";
+    if (track) {
+      title = track.title;
+      artist = track.artist;
+    }
+
+    resizeNowPlaying(function () {
+      if (nowTitle) nowTitle.textContent = title;
+      if (nowArtist) nowArtist.textContent = artist;
+    });
+
+    if (!nowArt) return;
+
+    let url = "";
+    if (track) url = track.artwork;
+
+    if (!url) {
+      pendingArtUrl = "";
+      resizeNowPlaying(hideNowArt);
+      return;
+    }
+
+    // Same URL, same image - setting it again would only flash it.
+    if (nowArt.getAttribute("src") === url) return;
+    if (pendingArtUrl === url) return;
+
+    // Loaded off to the side first. The old cover stays where it is until
+    // the new one is ready, rather than leaving the box a cover narrower in
+    // between - and a slow or broken one never leaves an empty gap.
+    pendingArtUrl = url;
+
+    const img = new Image();
+    img.decoding = "async";
+
+    img.onload = function () {
+      // Another track may have come on while this one was loading.
+      if (pendingArtUrl !== url) return;
+      pendingArtUrl = "";
+
+      resizeNowPlaying(function () {
+        nowArt.src = url;
+        nowArt.hidden = false;
+      });
+
+      // A new image on a turning cover: see restartSpin() in general.js.
+      if (window.restartSpin) window.restartSpin(nowArt);
+    };
+
+    img.onerror = function () {
+      if (pendingArtUrl !== url) return;
+      pendingArtUrl = "";
+      resizeNowPlaying(hideNowArt);
+    };
+
+    img.src = url;
+  }
+
+  function hideNowArt() {
+    nowArt.hidden = true;
+    nowArt.removeAttribute("src");
   }
 
   function clearStage() {
@@ -376,7 +481,7 @@
 
     shownData = data;
     shownKey = trackKey(track);
-    setCaption();
+    setNowPlaying();
 
     if (!data?.found) return setStatus("No lyrics found for this track.");
     if (data.instrumental) return setStatus("This track is instrumental.");
@@ -948,8 +1053,8 @@
     img.src = url;
   }
 
-  // Immersive is a property of the whole overlay - its background, the close
-  // button, the caption - not only of the lyrics, so it is set even while the
+  // Immersive is a property of the whole overlay - its background, the
+  // control bar - not only of the lyrics, so it is set even while the
   // lyrics are still loading or turned out to be missing.
   function applyMode() {
     const on = lyricsMode() === "immersive";
@@ -1095,6 +1200,11 @@
     if (document.webkitExitFullscreen) document.webkitExitFullscreen();
   }
 
+  // The F key does the same as the button, so only where the button is offered.
+  function fullscreenOffered() {
+    return canFullscreen && lyricsMode() === "immersive";
+  }
+
   function toggleFullscreen() {
     if (fullscreenElement()) {
       exitFullscreen();
@@ -1106,8 +1216,7 @@
   function syncFullscreenButton() {
     if (!fullscreenBtn) return;
 
-    const offered = canFullscreen && lyricsMode() === "immersive";
-    fullscreenBtn.hidden = !offered;
+    fullscreenBtn.hidden = !fullscreenOffered();
 
     const isFull = !!fullscreenElement();
 
@@ -1115,7 +1224,11 @@
     if (isFull) label = t("Exit full screen");
 
     fullscreenBtn.setAttribute("aria-label", label);
-    fullscreenBtn.title = label;
+    fullscreenBtn.setAttribute("aria-keyshortcuts", "F");
+
+    // The tooltip names the key, like a video player's does. The spoken label
+    // leaves it out - aria-keyshortcuts is how a screen reader hears of it.
+    fullscreenBtn.title = label + " (F)";
 
     const icon = fullscreenBtn.querySelector("i");
     if (icon) {
@@ -1218,7 +1331,7 @@
     if (shownKey !== requested) {
       clearStage();
       shownData = null;
-      setCaption();
+      setNowPlaying();
       setStatus("Loading lyrics…");
     }
 
@@ -1234,7 +1347,7 @@
       clearStage();
       shownData = null;
       shownKey = "";
-      setCaption();
+      setNowPlaying();
       if (err.noBackend) {
         setStatus("Lyrics are not available in this test environment.");
       } else {
@@ -1309,6 +1422,19 @@
     // and it never reaches the page - so it is the second one that closes.
     if (e.key === "Escape") {
       closeOverlay();
+      return;
+    }
+
+    // F for full screen, as on YouTube and most video players. A held key
+    // repeats, which would flick in and out, and a shortcut with a modifier
+    // - Ctrl+F to search the page - belongs to the browser.
+    if (e.key === "f" || e.key === "F") {
+      if (e.repeat) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (!fullscreenOffered()) return;
+
+      e.preventDefault();
+      toggleFullscreen();
       return;
     }
 
@@ -1419,6 +1545,6 @@
 
     const key = statusEl?.dataset.key;
     if (key) statusEl.textContent = t(key);
-    setCaption();
+    setNowPlaying();
   });
 })();

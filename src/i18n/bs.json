@@ -30,8 +30,6 @@
   "Blue": "Plava<span class=\"blue\"></span>",
   "Purple": "Ljubičasta<span class=\"purple\"></span>",
   "Monochrome": "Monokromatska",
-  "Style": "Stil",
-  "Flat": "Ravni",
   "General": "Općenito",
   "Automatically update activities": "Automatski ažuriraj aktivnosti",
   "Match accent color to album art": "Uskladi naglasnu boju s omotom albuma",
@@ -301,5 +299,7 @@
   "Open mail app": "Otvori aplikaciju za e-mail",
   "Copy address": "Kopiraj adresu",
   "Copied to clipboard": "Kopirano u međuspremnik",
-  "Couldn't copy - select the address instead": "Kopiranje nije uspjelo - označi adresu"
+  "Couldn't copy - select the address instead": "Kopiranje nije uspjelo - označi adresu",
+  "Close menu": "Zatvori meni",
+  "Project status": "Status projekta"
 }

@@ -237,8 +237,6 @@ html.reduce-transparency {
 
     .style-liquid-glass li.active>a,
     .style-liquid-glass li.active>button.noUI,
-    .style-flat li.active>a,
-    .style-flat li.active>button.noUI,
     li.active>a,
     li.active>button.noUI {
         outline: 2px solid LinkText;
@@ -254,14 +252,15 @@ html.reduce-transparency {
         forced-color-adjust: none;
     }
 
-    input[type="radio"]:checked+label.button {
+    input[type="radio"]:checked+label.button,
+    .projectFilter .button[aria-pressed="true"] {
         outline: 2px solid Highlight;
         outline-offset: -2px;
     }
 
     .warn,
     .pi-card,
-    .modal-content,
+    .settingsSheet,
     .settingsPanel,
     .mobileMenu,
     .style-liquid-glass .button {
@@ -278,13 +277,17 @@ html.reduce-transparency {
     }
 }
 
-html.reduce-motion #amActivityLogoLarge {
+html.reduce-motion #amActivityLogoLarge,
+html.reduce-motion #lyricsNowArt {
     animation: none;
 }
 
-html.reduce-motion .mobileMenu,
-html.reduce-motion .showMenu {
-    animation: none;
+/* The page still moves aside - it has to, to show the menu - but in one
+   step instead of sliding. */
+html.reduce-motion #page,
+html.reduce-motion body::before,
+html.reduce-motion .revealLayer {
+    transition: none;
 }
 
 html.reduce-motion .nav-pill {
@@ -325,17 +328,9 @@ html.reduce-motion.style-liquid-glass .button:active:where(:not(:disabled)) {
     border-color: rgba(127, 127, 127, 0.45);
 }
 
-html.reduce-motion.style-flat .button:active:where(:not(:disabled)) {
-    background-color: var(--button-hover-background-color);
-}
-
 html.reduce-motion.style-liquid-glass .destructive:active:where(:not(:disabled)) {
     background: rgba(249, 76, 87, 0.4);
     border-color: rgba(249, 76, 87, 0.6);
-}
-
-html.reduce-motion.style-flat .dangerZone:active:where(:not(:disabled)) {
-    background-color: var(--danger-zone-hover-background-color);
 }
 
 :focus-visible {
@@ -549,22 +544,8 @@ li>a:active, li>button.noUI:active {
     opacity: .55;
 }
 
-.style-flat li>a, .style-flat li>button.noUI {
-   
-}
-
 .style-liquid-glass li>a, .style-liquid-glass li>button.noUI {
     padding: 8px;
-}
-
-.style-flat li>a:hover, .style-flat li>button.noUI:hover {
-    color: var(--header-text-color-hover);
-    border-bottom: 2px solid var(--accent-color-to-active);
-}
-
-.style-flat li.active>a, .style-flat li.active>button.noUI {
-    border-bottom: 2px solid var(--accent-color);
-    color: var(--text-color);
 }
 
 .style-liquid-glass li.active>a, .style-liquid-glass li.active>button.noUI {
@@ -579,10 +560,6 @@ li>a:active, li>button.noUI:active {
 .style-liquid-glass ul.notAList{
     padding-left: 0px;
     white-space: nowrap;
-}
-
-.style-flat .nav-pill {
-    display: none;
 }
 
 .style-liquid-glass .nav-pill {
@@ -722,13 +699,6 @@ div.section {
 
 div.section>div {
     flex: 1;
-}
-
-/* Centred by its own width rather than by being a full-width flex row, since
-   the <nav> is now the visible box and would otherwise span the page. */
-.projectFilter {
-    width: fit-content;
-    margin-inline: auto;
 }
 
 /* The header's navigator, as a standalone control: the project filter and
@@ -909,42 +879,257 @@ hr {
     margin-bottom: 2em;
 }
 
+/* ---------- The page, and the layers under it ----------
+
+   Everything on a page lives in #page, and the mobile menu and settings are
+   layers underneath it. Opening one (openReveal() in general.js) picks the
+   page up - rounded corners, a shadow, a little smaller - and slides it to
+   the left, so the layer looks as if it had been there under the site all
+   along. How far it slides depends on the layer: just clear of its column,
+   which is as wide as what is in it.
+
+   #page has the page background of its own, since it is what hides the
+   layers while closed, and it is laid out the way <body> is. */
+:root {
+    /* How wide each layer's column is, and so how far the page moves aside
+       for it: just far enough to clear what is in it. The menu's fits its
+       longest link. */
+    --menu-width: min(200px, calc(100vw - 88px));
+    --settings-width: min(440px, calc(100vw - 88px));
+}
+
+/* The page is scaled about its centre, which pulls its right edge in by 5vw,
+   so it only has to travel the column's width, less that, plus a gap. */
+html[data-reveal="menu"] {
+    --reveal-shift: calc(5vw - var(--menu-width) - 32px);
+}
+
+html[data-reveal="settings"] {
+    --reveal-shift: calc(5vw - var(--settings-width) - 32px);
+}
+
+#page {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--background-color);
+    /* REVEAL_SLIDE_MS in general.js waits for this before settling the page. */
+    transition:
+        transform .45s cubic-bezier(.2, .8, .2, 1),
+        clip-path .45s ease;
+}
+
+/* While open, and on the way back until the slide has finished: fixed to the
+   screen with a scroll position of its own, so it moves as one screen-sized
+   card. Rounded corners or a transform on the whole scrolled page would land
+   on the top of the document, far above what is on screen. general.js moves
+   the window's scroll position into the page and back again afterwards. */
+html.revealOpen #page,
+html.revealClosing #page {
+    position: fixed;
+    inset: 0;
+    min-height: 0;
+    overflow: hidden;
+    /* Rounded by clip-path rather than border-radius, which also clips
+       anything with a backdrop-filter inside the transformed page. */
+    clip-path: inset(0 round 0);
+}
+
+html.revealOpen #page {
+    transform: translateX(var(--reveal-shift)) scale(.9);
+    clip-path: inset(0 round 28px);
+}
+
+/* Nothing left in the document to scroll while the page is fixed, and it
+   has to stay that way:
+
+   - body always shows its scrollbar, which on a desktop window would sit
+     beside the layer.
+   - body's min-height is 100vh, which on iOS is the height with Safari's
+     toolbars tucked away - taller than the screen while they show. The empty
+     document was left that much taller than the screen, so the whole view,
+     layers and all, could be scrolled by the difference.
+   - iOS scrolls the root, not body, and bounces it past either end even
+     with nothing to scroll. overscroll-behavior stops the bounce; the
+     settings layer still scrolls its own content. */
+html.revealOpen,
+html.revealClosing {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+html.revealOpen body,
+html.revealClosing body {
+    min-height: 0;
+    overflow-y: hidden;
+}
+
+/* The card's shadow. clip-path would cut off a shadow on #page itself, so it
+   is drawn by a copy of the card's outline between the layers and the page,
+   moving with it. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    border-radius: 28px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    opacity: 0;
+    transition:
+        transform .45s cubic-bezier(.2, .8, .2, 1),
+        opacity .45s ease;
+}
+
+html.revealOpen body::before {
+    transform: translateX(var(--reveal-shift)) scale(.9);
+    opacity: 1;
+}
+
+/* What every layer shares: the whole screen, under the page, near-black with
+   a touch of the accent (which follows the album art when that is on), and
+   always in the dark theme's colours whatever the site's theme - the menu
+   gets .theme-dark from general.js, settings has it in its markup. */
+.revealLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-color: color-mix(in srgb, var(--accent-fill) 22%, #0b0b0b);
+    /* Hidden while closed so nothing in it can be tabbed to or read out -
+       but only once the page has slid back over it. */
+    visibility: hidden;
+    transition: visibility 0s linear .45s;
+}
+
+/* A layer being switched away from - the menu, when settings is opened from
+   it - stays up until the page has moved, so it goes underneath the new one. */
+.revealLayer:not(.revealShown) {
+    z-index: -1;
+}
+
+.revealLayer.revealShown {
+    visibility: visible;
+    transition: none;
+}
+
+/* Taken out altogether once the page is back in place. visibility:hidden is
+   not enough on iOS: once settings has been scrolled, Safari gives it a
+   native scroll view, and that keeps catching taps while hidden - over the
+   right-hand side of the screen, where the menu button is, so the menu could
+   not be opened again until a reload. */
+html:not(.revealOpen):not(.revealClosing) .revealLayer {
+    display: none;
+}
+
+/* Focused when it opens, only so focus is inside it. */
+.revealLayer:focus {
+    outline: none;
+}
+
+/* The mobile menu's links sit on the right, in the part of the screen the
+   page leaves free. Only shown on narrow screens - see the max-width: 966px
+   query. */
 .mobileMenu {
     display: none;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 28px;
+    padding:
+        max(20px, env(safe-area-inset-top))
+        max(24px, env(safe-area-inset-right))
+        max(20px, env(safe-area-inset-bottom))
+        0;
+}
+
+/* Settings: the panel in a column down the right, scrolling on its own when
+   it is taller than the screen. */
+.settingsLayer {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.settingsSheet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: var(--settings-width);
+    min-height: 100%;
+    margin-left: auto;
+    padding:
+        max(28px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(28px, env(safe-area-inset-bottom))
+        0;
+    color: var(--text-color);
+}
+
+.settingsSheet .modalSettings {
+    width: 100%;
+    padding: 12px 0;
+    margin: 0;
+}
+
+.mobileMenu>ul.notAList {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 0;
+}
+
+.mobileMenu>ul.notAList>li>a {
+    font-size: 1.6em;
+    padding: 4px 18px;
+    color: var(--header-text-color-hover);
+}
+
+/* Settings and the social links, in a row under the page links. The
+   settings button is a .noUI button and the others are links, so each is made
+   the same box - otherwise the button sits a few pixels higher. */
+.mobileMenu>ul.notAList+ul.notAList {
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 0 !important;
-    padding-inline-start: 0 !important;
-    background-color: var(--header-background-color);
-    -webkit-backdrop-filter: blur(var(--blur-regular));
-    backdrop-filter: blur(var(--blur-regular));
-    width: 90vw;
+    gap: 8px;
+}
+
+.mobileMenu>ul.notAList+ul.notAList>li>a,
+.mobileMenu>ul.notAList+ul.notAList>li>button.noUI {
+    display: inline-block;
+    top: 0;
+    font-size: 1.2em;
+    line-height: 1;
+    padding: 10px;
+    color: var(--header-text-color-hover);
+}
+
+.mobileMenu>ul.notAList+ul.notAList i {
+    margin: 0;
+}
+
+/* In the corner where the menu button was, which the page has taken away.
+   Not a .noUI button: that inherits everything from its parent, which here
+   would make it as big as the whole menu and paint it over the links. */
+.mobileMenuClose {
     position: absolute;
-    top: 5.5em;
-    left: 50%;
-    transform: translateX(-50%) translateY(-10px);
-    border-radius: 10px;
-    z-index: 1000;
-    animation: fadeOut .2s;
+    top: max(24px, env(safe-area-inset-top));
+    right: max(24px, env(safe-area-inset-right));
+    padding: 10px;
+    border: none;
+    background: none;
+    font-size: 1.3em;
+    line-height: 1;
+    color: var(--header-text-color-hover);
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
-.style-liquid-glass .mobileMenu {
-    -webkit-backdrop-filter: blur(var(--blur-subtle));
-    backdrop-filter: blur(var(--blur-subtle));
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 28px;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.mobileMenu>ul{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
+.mobileMenuClose>i {
+    margin: 0;
 }
 
 .style-liquid-glass #mobile-header>div>ul.notAList {
@@ -984,12 +1169,17 @@ hr {
     border-radius: min(43.25rem, 4.65rem + 36.5vw);
         -webkit-tap-highlight-color: transparent;
     tap-highlight-color: transparent;
-     
+
 }
 
-.showMenu {
-    display: flex;
-    animation: fadeIn .2s;
+/* The menu is always dark (general.js), but an album accent is worked out
+   for the page's own theme and set on <html>, so in the light theme it is a
+   dark shade that all but disappears on the menu. The current page is
+   marked by its pill instead, and its name stays white - the same call the
+   lyrics bar makes over album art. */
+.style-liquid-glass .mobileMenu>ul>li.active>a,
+.style-liquid-glass .mobileMenu>ul>li.active>button.noUI {
+    color: var(--text-color);
 }
 
 ul.specs {
@@ -1004,19 +1194,6 @@ ul.specs {
 
 .hide {
     display: none;
-}
-
-.style-flat .button {
-    background-color: var(--button-background-color);
-    color: var(--secondary-title-color);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-size: 1em;
-    font-weight: 550;
-    cursor: pointer;
-    transition: background-color .2s ease, color .2s ease, transform .12s ease;
-    text-decoration: none;
 }
 
 .style-liquid-glass .button {
@@ -1039,10 +1216,6 @@ ul.specs {
         0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-.style-flat .button:hover:where(:not(:disabled)) {
-    background-color: var(--button-hover-background-color);
-}
-
 .style-liquid-glass .button:hover:where(:not(:disabled)) {
     background: rgba(127, 127, 127, 0.18);
     border-color: rgba(127, 127, 127, 0.3);
@@ -1051,7 +1224,6 @@ ul.specs {
         0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
-.style-flat .button:active:where(:not(:disabled)),
 .style-liquid-glass .button:active:where(:not(:disabled)) {
     transform: scale(0.95);
 }
@@ -1085,21 +1257,6 @@ button>.fa-solid {
     margin: auto;
 }
 
-.style-flat .icon-background {
-    background-color: var(--icon-background-color);
-    padding: 10px;
-    border-radius: 25%;
-    margin: auto;
-    height: 128px;
-    width: 128px;
-    color: var(--icon-color);
-    display: flex;
-    align-items: center;
-    justify-self: center;
-    justify-content: center;
-    font-size: 4em;
-}
-
 .style-liquid-glass .icon-background {
     background-color: var(--liquid-glass-button-background);
     padding: 10px;
@@ -1127,16 +1284,6 @@ border: 1px solid var(--liquid-glass-button-border);
         box-shadow .2s ease,
         color .2s ease,
         transform .12s ease;
-}
-
-.style-flat .options {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: left;
-    gap: 10px;
 }
 
 label.button,
@@ -1666,8 +1813,12 @@ span.token{
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
+/* Sits as far below the hero buttons as the Chromium warning on Articles,
+   which has the admin bar's empty status line (.articleAdminNotice, 1.4em
+   tall) between it and the New article button. */
 #rateLimitGitHub{
     display: none;
+    margin-top: calc(10px + 1.4em);
 }
 
 .warn>i {
@@ -1769,6 +1920,10 @@ span.token{
     }
 
     #mobile-header {
+        display: flex;
+    }
+
+    .mobileMenu {
         display: flex;
     }
 hr.onMobile {
@@ -1947,4 +2102,50 @@ hr.onMobile {
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
+}
+
+/* The project filter: two toggle buttons in the hero, joined into one
+   segmented control so they read as a single choice rather than two separate
+   actions. .infoButtons' gap is dropped and the inner corners squared off, so
+   only the outer ends keep the button's rounding. */
+.projectFilter {
+    gap: 0;
+}
+
+.projectFilter .button:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.projectFilter .button:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Liquid Glass buttons have a 1px border each, so side by side they would
+   make a 2px seam. Overlapping them by 1px keeps it a hairline. */
+.style-liquid-glass .projectFilter .button + .button {
+    margin-left: -1px;
+}
+
+/* The press-in scale would pull each half away from the other and open a
+   gap in the middle of the control. */
+.style-liquid-glass .projectFilter .button:active:where(:not(:disabled)) {
+    transform: none;
+}
+
+/* The pressed half takes the accent fill, like .primary, so which projects
+   are showing is obvious at a glance. It sits above its neighbour so its
+   border and shadow are not covered by the overlap. */
+.projectFilter .button[aria-pressed="true"] {
+    position: relative;
+    z-index: 1;
+}
+
+.style-liquid-glass .projectFilter .button[aria-pressed="true"],
+.style-liquid-glass .projectFilter .button[aria-pressed="true"]:hover {
+    background: var(--accent-fill);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }

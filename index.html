@@ -92,258 +92,287 @@
 <body>
     <a class="skipLink" href="#mainContent">Skip to content</a>
 
-    <header id="desktop-header">
-        <div>
-            <nav aria-label="Main">
+    <nav class="mobileMenu revealLayer" id="mobileMenuID" data-reveal="menu" aria-label="Main" tabindex="-1">
+        <button type="button" class="mobileMenuClose" title="Close menu" aria-label="Close menu" data-action="menu"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <ul class="notAList">
+            <li><a href="/experience/">Experience</a></li>
+            <li><a href="/projects/">Projects</a></li>
+            <li><a href="/articles/">Articles</a></li>
+            <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+            <li><a href="/pihole/">Pi-hole</a></li>
+            <li><a href="/contact/">Contact</a></li>
+        </ul>
+        <ul class="notAList">
+            <li><button type="button" class="noUI" title="Settings" aria-label="Settings" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+            <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+            <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+        </ul>
+    </nav>
+    <div id="page">
+        <header id="desktop-header">
+            <div>
+                <nav aria-label="Main">
+                    <ul class="notAList">
+                        <li class="active"><a href="/" aria-current="page">aridan.net</a></li>
+                        <li><a href="/experience/">Experience</a></li>
+                        <li><a href="/projects/">Projects</a></li>
+                        <li><a href="/articles/">Articles</a></li>
+                        <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+                        <li><a href="/pihole/">Pi-hole</a></li>
+                        <li><a href="/contact/">Contact</a></li>
+                    </ul>
+                </nav>
+                <ul class="notAList">
+                    <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                    <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                    <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                </ul>
+            </div>
+        </header>
+
+        <header id="mobile-header">
+            <div>
                 <ul class="notAList">
                     <li class="active"><a href="/" aria-current="page">aridan.net</a></li>
-                    <li><a href="/experience/">Experience</a></li>
-                    <li><a href="/projects/">Projects</a></li>
-                    <li><a href="/articles/">Articles</a></li>
-                    <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                    <li><a href="/pihole/">Pi-hole</a></li>
-                    <li><a href="/contact/">Contact</a></li>
                 </ul>
-            </nav>
-            <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
-            </ul>
-        </div>
-    </header>
-
-    <header id="mobile-header">
-        <div>
-            <ul class="notAList">
-                <li class="active"><a href="/" aria-current="page">aridan.net</a></li>
-            </ul>
-            <ul class="notAList">
-                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" data-action="menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
-            </ul>
-        </div>
-        <nav class="mobileMenu" id="mobileMenuID" aria-label="Main">
-            <ul class="notAList">
-                <li><a href="/experience/">Experience</a></li>
-                <li><a href="/projects/">Projects</a></li>
-                <li><a href="/articles/">Articles</a></li>
-                <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                <li><a href="/pihole/">Pi-hole</a></li>
-                <li><a href="/contact/">Contact</a></li>
-            </ul>
-            <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
-            </ul>
-        </nav>
-    </header>
-    <main class="container" id="mainContent" tabindex="-1">
-        <div class="info withBanner">
-            <img src="/assets/uploads/images/image.webp" alt="A selfie where I'm in a bus in a grey t-shirt."
-                class="icon" fetchpriority="high">
-            <div>
-                <h1 class="name">Adnan Bukvic</h1>
-                <p class="description white">a Swedish <span id="techEnthu" style="display: none;">tech
-                        enthusiast</span><span id="frontEndWebDev" style="display: none;">front-end web developer</span><span
-                        id="backEndWebDev" style="display: none;">back-end web developer</span><span id="itTech" style="display: none;">IT technician</span></p>
-                <div id="statusWrapperConnecting" class="dcloading statusWrapper">
-                <div class="lds-ring smallLoader lanyardConnecting">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                </div>Connecting</div>
-                <p id="statusWrapperOnline" class="online hide statusWrapper"><i class="fa-solid fa-message" aria-hidden="true"></i>Available
-                    right now</p>
-                <p id="statusWrapperOffline" class="offline hide statusWrapper"><i id="statusOfflineIcon"
-                        class="fa-solid fa-clock" aria-hidden="true"></i><span id="statusLocalTime">--:--</span> <span
-                        id="statusOfflineHint">in Sweden</span></p>
-                <p id="statusWrapperDnd" class="dnd hide statusWrapper"><i class="fa-solid fa-bell-slash" aria-hidden="true"></i>Do Not Disturb</p>
-                <p id="statusWrapperIdle" class="idle hide statusWrapper"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i>Away from keyboard</p>
-                <p id="statusWrapperError" class="error hide statusWrapper"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>Can't connect</p>
+                <ul class="notAList">
+                    <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" data-action="menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
+                </ul>
             </div>
-        </div>
-
-        <div class="section">
-            <section class="discordWrapper invisible-scrollbar" id="currentdiscord"
-                aria-labelledby="currentdiscordHeading">
-                <h2 id="currentdiscordHeading" class="visuallyHidden">What I'm doing right now</h2>
-                <div id="lanyardDiscord">
-                    <div id="loading">
-                    </div>
-                    <div id="errorMessage" role="alert">
-                        <p class="errorMessage" id="errorMessageText">Something went wrong.<br>Try again later.</p>
-                    </div>
-                    <div id="loadedLanyard">
-                        <!-- Single child so #loadedLanyard can collapse as one 0fr/1fr grid row. -->
-                        <div id="loadedLanyardInner">
-                        <div id="discordScroller">
-                        <button type="button" id="discordScrollPrev" class="button activityNav hide"
-                            title="Previous activity" aria-label="Previous activity"
-                            aria-controls="discord">
-                            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
-                        </button>
-                        <button type="button" id="discordScrollNext" class="button activityNav hide"
-                            title="Next activity" aria-label="Next activity"
-                            aria-controls="discord">
-                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
-                        </button>
-                        <div id="discord" role="group" aria-label="Activities">
-                            <div id="amLanyardDiscord">
-                                <span class="titleActivity">
-                                    <span class="activityHeading">
-                                        <i class="fa-brands fa-itunes-note" aria-hidden="true"></i><h3 id="amActivityName">Apple Music</h3>
-                                    </span>
-                                    <div class="lds-ring smallLoader">
-                                        <div></div>
-                                        <div></div>
-                                        <div></div>
-                                        <div></div>
-                                    </div>
-                                </span>
-                                <div id="amDiscordActivityImages">
-                                    <img id="amActivityLogoLarge" draggable="false" width="96" height="96" alt=""
-                                        src="/assets/media/icons/spinner.gif" class="albumArt">
-                                </div>
-                                <div id="amDiscordActivityInfo">
-                                    <p id="amActivityDetails" class="titleColor">Loading</p>
-                                    <p id="amActivityState" class="subtitleColor">Loading</p>
-                                    <div class="progress-bar-container" id="amProgressTrack"
-                                        role="progressbar" aria-label="Track progress"
-                                        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="--:-- / --:--">
-                                        <div class="progress-bar" id="amProgressBar"></div>
-                                    </div>
-
-                                    <!--<div id="amTimeremaning">
-                                        <p id="amActivityTime" class="subTitle">-:-</p>
-                                        <p id="amRemaining" class="hide subTitle"> remaining</p>
-                                        <p id="amElapsed" class="hide subTitle"> elapsed</p>
-                                    </div>-->
-                                </div>
-                                <a id="apple-link" target="_blank" rel="noopener" title="Listen on Apple Music">
-                                    <img src="/assets/media/icons/listenOnAppleMusic.svg"
-                                        alt="A black button with the Apple Music logo and text that says 'Listen on Apple Music'."
-                                        class="h-8 mt-2 pointer-events-auto" />
-                                </a>
-                            </div>
-                            <div id="discordActivity">
-                                <span class="titleActivity">
-                                    <span class="activityHeading">
-                                        <i class="fa-regular fa-window-maximize" aria-hidden="true"></i><h3 id="activityName">Loading</h3>
-                                    </span>
-                                    <div class="lds-ring smallLoader">
-                                        <div></div>
-                                        <div></div>
-                                        <div></div>
-                                        <div></div>
-                                    </div>
-                                </span>
-                                <div id="discordActivityImages">
-                                    <img id="activityLogoLarge" draggable="false" width="96" height="96" alt=""
-                                        src="/assets/media/icons/spinner.gif">
-                                </div>
-                                <div id="discordActivityInfo">
-                                    <p id="activityDetails" class="titleColor">Loading</p>
-                                    <p id="activityState" class="subtitleColor">Loading</p>
-                                    <div class="progress-bar-container hide" id="ProgressTrack"
-                                        role="progressbar" aria-label="Activity progress"
-                                        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                                        <div class="progress-bar" id="ProgressBar"></div>
-                                    </div>
-                                    <div class="progress-bar-container activitySeparator"
-                                        id="ProgressSeparator" aria-hidden="true"></div>
-                                    <div id="Timeremaning">
-                                        <p id="ActivityTime" class="subTitle">-:-</p>
-                                        <p id="Remaining" class="hide subTitle">remaining</p>
-                                        <p id="Elapsed" class="hide subTitle">elapsed</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                        </div>
-                    </div>
+        </header>
+        <main class="container" id="mainContent" tabindex="-1">
+            <div class="info withBanner">
+                <img src="/assets/uploads/images/image.webp" alt="A selfie where I'm in a bus in a grey t-shirt."
+                    class="icon" fetchpriority="high">
+                <div>
+                    <h1 class="name">Adnan Bukvic</h1>
+                    <p class="description white">a Swedish <span id="techEnthu" style="display: none;">tech
+                            enthusiast</span><span id="frontEndWebDev" style="display: none;">front-end web developer</span><span
+                            id="backEndWebDev" style="display: none;">back-end web developer</span><span id="itTech" style="display: none;">IT technician</span></p>
+                    <div id="statusWrapperConnecting" class="dcloading statusWrapper">
+                    <div class="lds-ring smallLoader lanyardConnecting">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>Connecting</div>
+                    <p id="statusWrapperOnline" class="online hide statusWrapper"><i class="fa-solid fa-message" aria-hidden="true"></i>Available
+                        right now</p>
+                    <p id="statusWrapperOffline" class="offline hide statusWrapper"><i id="statusOfflineIcon"
+                            class="fa-solid fa-clock" aria-hidden="true"></i><span id="statusLocalTime">--:--</span> <span
+                            id="statusOfflineHint">in Sweden</span></p>
+                    <p id="statusWrapperDnd" class="dnd hide statusWrapper"><i class="fa-solid fa-bell-slash" aria-hidden="true"></i>Do Not Disturb</p>
+                    <p id="statusWrapperIdle" class="idle hide statusWrapper"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i>Away from keyboard</p>
+                    <p id="statusWrapperError" class="error hide statusWrapper"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>Can't connect</p>
                 </div>
-                <button type="button" id="lyricsBtn" class="button hide">
-                    <i class="fa-solid fa-closed-captioning" aria-hidden="true"></i>Lyrics
-                </button>
-                <button type="button" id="lanyardRefresh" class="button hide">
-                    <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>Refresh
-                </button>
-            </section>
-        </div>
-
-        <hr>
-        <div class="section">
-            <div>
-                <p class="section-content">I'm Adnan. I'm a creative guy
-                    that loves making new solutions to old things. I love learning new things and I've liked computers,
-                    phones and networking ever since I was a child. I'm always up-to-date about their software and
-                    hardware. I even like modifying electronics to do new things like replacing the hard drive in iPods
-                    with an SD card! I also speak four languages: Swedish, English, Croatian and Bosnian!</p>
-            </div>
-            <div class="photo-container">
-                <img class="photo" alt="Another selfie of me in a bus." src="/assets/uploads/images/on-bus.webp" loading="lazy" decoding="async">
-            </div>
-        </div>
-        <div class="info">
-            <h2 class="name">Hobbies</h2>
-        </div>
-
-        <div class="section">
-            <div>
-                <p class="section-content">I have a computer that runs both Windows and macOS - it's a hackintosh. It
-                    runs the latest version of macOS great, with graphic acceleration, WiFi and Bluetooth. It works
-                    great, however, due to my graphics card being incompatible with macOS, DRM content, like Netflix,
-                    doesn't play in Safari, but does work properly in other browsers. <br>Here are the specs of it if
-                    you'd like to build something similar:</p>
-                <ul class="specs">
-                    <li><i class="fa-solid fa-microchip" aria-hidden="true"></i>AMD Ryzen 5 3600</li>
-                    <li><i class="fa-solid fa-gamepad" aria-hidden="true"></i>Radeon RX 6700 XT</li>
-                    <li><i class="fa-solid fa-memory" aria-hidden="true"></i>16GB 3200MHz DDR4 RAM in dual channel</li>
-                    <li><i class="fa-solid fa-hard-drive" aria-hidden="true"></i>about 2TB of SSD storage</li>
-                    <li><i class="fa-solid fa-wifi" aria-hidden="true"></i>Fenvi T919 WiFi/Bluetooth</li>
-                    <li><i class="fa-brands fa-microsoft" aria-hidden="true"></i><i class="fa-brands fa-apple" aria-hidden="true"></i><i class="fa-brands fa-linux" aria-hidden="true"></i>Windows 11, macOS
-                        Sequoia, and CachyOS Linux</li>
-                </ul>
             </div>
 
-             <!--<div class="photo-container">
-                <img class="photo" alt="Me next to my desktop computer." src="/assets/uploads/images/with-pc.webp" loading="lazy" decoding="async">
-            </div>-->
-        </div>
+            <div class="section">
+                <section class="discordWrapper invisible-scrollbar" id="currentdiscord"
+                    aria-labelledby="currentdiscordHeading">
+                    <h2 id="currentdiscordHeading" class="visuallyHidden">What I'm doing right now</h2>
+                    <div id="lanyardDiscord">
+                        <div id="loading">
+                        </div>
+                        <div id="errorMessage" role="alert">
+                            <p class="errorMessage" id="errorMessageText">Something went wrong.<br>Try again later.</p>
+                        </div>
+                        <div id="loadedLanyard">
+                            <!-- Single child so #loadedLanyard can collapse as one 0fr/1fr grid row. -->
+                            <div id="loadedLanyardInner">
+                            <div id="discordScroller">
+                            <button type="button" id="discordScrollPrev" class="button activityNav hide"
+                                title="Previous activity" aria-label="Previous activity"
+                                aria-controls="discord">
+                                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" id="discordScrollNext" class="button activityNav hide"
+                                title="Next activity" aria-label="Next activity"
+                                aria-controls="discord">
+                                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                            </button>
+                            <div id="discord" role="group" aria-label="Activities">
+                                <div id="amLanyardDiscord">
+                                    <span class="titleActivity">
+                                        <span class="activityHeading">
+                                            <i class="fa-brands fa-itunes-note" aria-hidden="true"></i><h3 id="amActivityName">Apple Music</h3>
+                                        </span>
+                                        <div class="lds-ring smallLoader">
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                        </div>
+                                    </span>
+                                    <div id="amDiscordActivityImages">
+                                        <img id="amActivityLogoLarge" draggable="false" width="96" height="96" alt=""
+                                            src="/assets/media/icons/spinner.gif" class="albumArt">
+                                    </div>
+                                    <div id="amDiscordActivityInfo">
+                                        <p id="amActivityDetails" class="titleColor">Loading</p>
+                                        <p id="amActivityState" class="subtitleColor">Loading</p>
+                                        <div class="progress-bar-container" id="amProgressTrack"
+                                            role="progressbar" aria-label="Track progress"
+                                            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="--:-- / --:--">
+                                            <div class="progress-bar" id="amProgressBar"></div>
+                                        </div>
 
-        <div class="section">
-            <div>
-                <p class="section-content">I enjoy collecting, repairing, and modifying vintage Apple products, like
-                    iPods. I open them, repair them if needed and then modify them with larger batteries, replace the
-                    internal spinning hard drive with an SD card and also flash custom firmware on them! It's a really
-                    fun hobby and being able to tinker with them is really calming.</p>
-                <p class="section-content">I currently have a...</p>
-                <ul class="specs">
-                    <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 5.5th Generation iPod Video with a 5000mAh
-                        battery and 128GB SD card storage, along with a transparent click wheel and top case</li>
-                    <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 2nd Generation iPod Mini with a new battery
-                        and 64GB of Compact Flash storage</li>
-                    <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 1st Generation iPod Touch</li>
-                    <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 3rd Generation iPod Touch</li>
-                </ul>
+                                        <!--<div id="amTimeremaning">
+                                            <p id="amActivityTime" class="subTitle">-:-</p>
+                                            <p id="amRemaining" class="hide subTitle"> remaining</p>
+                                            <p id="amElapsed" class="hide subTitle"> elapsed</p>
+                                        </div>-->
+                                    </div>
+                                    <a id="apple-link" target="_blank" rel="noopener" title="Listen on Apple Music">
+                                        <img src="/assets/media/icons/listenOnAppleMusic.svg"
+                                            alt="A black button with the Apple Music logo and text that says 'Listen on Apple Music'."
+                                            class="h-8 mt-2 pointer-events-auto" />
+                                    </a>
+                                </div>
+                                <div id="discordActivity">
+                                    <span class="titleActivity">
+                                        <span class="activityHeading">
+                                            <i class="fa-regular fa-window-maximize" aria-hidden="true"></i><h3 id="activityName">Loading</h3>
+                                        </span>
+                                        <div class="lds-ring smallLoader">
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                        </div>
+                                    </span>
+                                    <div id="discordActivityImages">
+                                        <img id="activityLogoLarge" draggable="false" width="96" height="96" alt=""
+                                            src="/assets/media/icons/spinner.gif">
+                                    </div>
+                                    <div id="discordActivityInfo">
+                                        <p id="activityDetails" class="titleColor">Loading</p>
+                                        <p id="activityState" class="subtitleColor">Loading</p>
+                                        <div class="progress-bar-container hide" id="ProgressTrack"
+                                            role="progressbar" aria-label="Activity progress"
+                                            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                            <div class="progress-bar" id="ProgressBar"></div>
+                                        </div>
+                                        <div class="progress-bar-container activitySeparator"
+                                            id="ProgressSeparator" aria-hidden="true"></div>
+                                        <div id="Timeremaning">
+                                            <p id="ActivityTime" class="subTitle">-:-</p>
+                                            <p id="Remaining" class="hide subTitle">remaining</p>
+                                            <p id="Elapsed" class="hide subTitle">elapsed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="lyricsBtn" class="button hide">
+                        <i class="fa-solid fa-closed-captioning" aria-hidden="true"></i>Lyrics
+                    </button>
+                    <button type="button" id="lanyardRefresh" class="button hide">
+                        <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>Refresh
+                    </button>
+                </section>
             </div>
 
-            <div class="photo-container">
-                <img class="photo" alt="A third generation iPod Classic playing music."
-                    src="/assets/uploads/images/ipod.webp" loading="lazy" decoding="async">
+            <hr>
+            <div class="section">
+                <div>
+                    <p class="section-content">I'm Adnan. I'm a creative guy
+                        that loves making new solutions to old things. I love learning new things and I've liked computers,
+                        phones and networking ever since I was a child. I'm always up-to-date about their software and
+                        hardware. I even like modifying electronics to do new things like replacing the hard drive in iPods
+                        with an SD card! I also speak four languages: Swedish, English, Croatian and Bosnian!</p>
+                </div>
+                <div class="photo-container">
+                    <img class="photo" alt="Another selfie of me in a bus." src="/assets/uploads/images/on-bus.webp" loading="lazy" decoding="async">
+                </div>
             </div>
-        </div>
+            <div class="info">
+                <h2 class="name">Hobbies</h2>
+            </div>
 
-    </main>
+            <div class="section">
+                <div>
+                    <p class="section-content">I have a computer that runs both Windows and macOS - it's a hackintosh. It
+                        runs the latest version of macOS great, with graphic acceleration, WiFi and Bluetooth. It works
+                        great, however, due to my graphics card being incompatible with macOS, DRM content, like Netflix,
+                        doesn't play in Safari, but does work properly in other browsers. <br>Here are the specs of it if
+                        you'd like to build something similar:</p>
+                    <ul class="specs">
+                        <li><i class="fa-solid fa-microchip" aria-hidden="true"></i>AMD Ryzen 5 3600</li>
+                        <li><i class="fa-solid fa-gamepad" aria-hidden="true"></i>Radeon RX 6700 XT</li>
+                        <li><i class="fa-solid fa-memory" aria-hidden="true"></i>16GB 3200MHz DDR4 RAM in dual channel</li>
+                        <li><i class="fa-solid fa-hard-drive" aria-hidden="true"></i>about 2TB of SSD storage</li>
+                        <li><i class="fa-solid fa-wifi" aria-hidden="true"></i>Fenvi T919 WiFi/Bluetooth</li>
+                        <li><i class="fa-brands fa-microsoft" aria-hidden="true"></i><i class="fa-brands fa-apple" aria-hidden="true"></i><i class="fa-brands fa-linux" aria-hidden="true"></i>Windows 11, macOS
+                            Sequoia, and CachyOS Linux</li>
+                    </ul>
+                </div>
+
+                 <!--<div class="photo-container">
+                    <img class="photo" alt="Me next to my desktop computer." src="/assets/uploads/images/with-pc.webp" loading="lazy" decoding="async">
+                </div>-->
+            </div>
+
+            <div class="section">
+                <div>
+                    <p class="section-content">I enjoy collecting, repairing, and modifying vintage Apple products, like
+                        iPods. I open them, repair them if needed and then modify them with larger batteries, replace the
+                        internal spinning hard drive with an SD card and also flash custom firmware on them! It's a really
+                        fun hobby and being able to tinker with them is really calming.</p>
+                    <p class="section-content">I currently have a...</p>
+                    <ul class="specs">
+                        <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 5.5th Generation iPod Video with a 5000mAh
+                            battery and 128GB SD card storage, along with a transparent click wheel and top case</li>
+                        <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 2nd Generation iPod Mini with a new battery
+                            and 64GB of Compact Flash storage</li>
+                        <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 1st Generation iPod Touch</li>
+                        <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 3rd Generation iPod Touch</li>
+                    </ul>
+                </div>
+
+                <div class="photo-container">
+                    <img class="photo" alt="A third generation iPod Classic playing music."
+                        src="/assets/uploads/images/ipod.webp" loading="lazy" decoding="async">
+                </div>
+            </div>
+
+        </main>
+        <footer>
+            <ul class="notAList footerSocial">
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a href="https://instagram.com/actuallyaridan" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+                <li><a href="mailto:adnan@aridan.net" title="Email" aria-label="Email"><i class="fa-solid fa-at" aria-hidden="true"></i></a></li>
+                <li><a href="/feed.xml" title="RSS feed" aria-label="RSS feed"><i class="fa-solid fa-rss" aria-hidden="true"></i></a></li>
+            </ul>
+            <p class="footerNote">
+                <span>&copy; <span id="footerYear">2026</span> Adnan Bukvic <span class="rightsNote">unless stated otherwise</span></span>
+                <a class="inline" href="https://github.com/actuallyaridan/aridan.net" title="Source on GitHub" target="_blank" rel="noopener">Source on GitHub</a>
+                <a class="inline" href="/privacy/" title="Privacy">Privacy</a>
+            </p>
+            <p class="footerNote embedNote">This website embeds content from other websites and services. Lyrics, album art, logos and trademarks belong to their respective owners.</p>
+            <p class="footerNote lyricsNote">
+                <span class="lyricsCredit">Lyrics from</span>
+                <a class="inline" href="https://lrclib.net" title="LRCLIB" target="_blank" rel="noopener">LRCLIB</a>
+            </p>
+        </footer>
+    </div>
     <div id="lyricsOverlay" class="hide" role="dialog" aria-modal="true" aria-label="Lyrics" tabindex="-1">
         <canvas id="lyricsBackdrop" width="128" height="128" aria-hidden="true"></canvas>
         <div id="lyricsControls">
             <button type="button" id="lyricsFullscreenBtn" class="button lyricsIconBtn" aria-label="Full screen" title="Full screen" hidden>
                 <i class="fa-solid fa-expand" aria-hidden="true"></i>
             </button>
+            <div id="lyricsNowPlaying" class="pillNav">
+                <img id="lyricsNowArt" alt="" width="40" height="40" decoding="async" hidden>
+                <div class="lyricsNowText">
+                    <p id="lyricsNowTitle"></p>
+                    <p id="lyricsNowArtist"></p>
+                </div>
+            </div>
             <nav class="pillNav lyricsModes" aria-label="Lyrics style">
                 <div class="pillNavTrack">
                     <ul class="notAList">
@@ -359,27 +388,7 @@
         <div id="lyricsStage"></div>
         <div id="lyricsTranscript" class="visuallyHidden"></div>
         <p id="lyricsStatus" class="hide" role="status" aria-live="polite"></p>
-        <p id="lyricsCaption"></p>
     </div>
-    <footer>
-        <ul class="notAList footerSocial">
-            <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-            <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
-            <li><a href="https://instagram.com/actuallyaridan" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
-            <li><a href="mailto:adnan@aridan.net" title="Email" aria-label="Email"><i class="fa-solid fa-at" aria-hidden="true"></i></a></li>
-            <li><a href="/feed.xml" title="RSS feed" aria-label="RSS feed"><i class="fa-solid fa-rss" aria-hidden="true"></i></a></li>
-        </ul>
-        <p class="footerNote">
-            <span>&copy; <span id="footerYear">2026</span> Adnan Bukvic <span class="rightsNote">unless stated otherwise</span></span>
-            <a class="inline" href="https://github.com/actuallyaridan/aridan.net" title="Source on GitHub" target="_blank" rel="noopener">Source on GitHub</a>
-            <a class="inline" href="/privacy/" title="Privacy">Privacy</a>
-        </p>
-        <p class="footerNote embedNote">This website embeds content from other websites and services. Lyrics, album art, logos and trademarks belong to their respective owners.</p>
-        <p class="footerNote lyricsNote">
-            <span class="lyricsCredit">Lyrics from</span>
-            <a class="inline" href="https://lrclib.net" title="LRCLIB" target="_blank" rel="noopener">LRCLIB</a>
-        </p>
-    </footer>
 </body>
 
 </html>

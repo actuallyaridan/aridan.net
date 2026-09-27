@@ -1,4 +1,4 @@
-/* Theme, accent colour, style and preferences. Loaded without `defer` and first
+/* Theme, accent colour and preferences. Loaded without `defer` and first
  * on every page, because the root classes have to be on <html> before anything
  * paints or the page flashes in the wrong theme.
  */
@@ -8,7 +8,6 @@ const THEME_COLORS = { light: '#f1f1f1', dark: '#121212' };
 const DEFAULTS = {
     theme: 'auto',
     accentColor: 'blue',
-    style: 'liquid-glass',
     lyricsMode: 'immersive'
 };
 
@@ -31,8 +30,7 @@ const PREF_DEFAULT = {
 // Which radio group in the settings panel holds which setting.
 const RADIO_SETTINGS = {
     'theme-color': 'theme',
-    'accent-color': 'accentColor',
-    'style': 'style'
+    'accent-color': 'accentColor'
 };
 
 function prefEnabled(key) {
@@ -78,7 +76,10 @@ function applyRootSettings() {
 
     kept.push('theme-' + theme);
     kept.push('color-' + setting('accentColor'));
-    kept.push('style-' + setting('style'));
+
+    // Liquid Glass is the only style now - Flat was removed - but the CSS is
+    // still written against this class, so it is always there.
+    kept.push('style-liquid-glass');
 
     root.className = kept.join(' ');
 
@@ -234,14 +235,6 @@ onSettingsPanel(function wirePanel() {
         for (const radio of document.querySelectorAll('input[name="' + name + '"]')) {
             radio.addEventListener('change', function () {
                 localStorage.setItem(key, radio.value);
-
-                // The album's colour paints over the chosen one, so picking a
-                // colour while matching is on would look like it did nothing.
-                if (key === 'accentColor' && prefEnabled('albumAccent')) {
-                    localStorage.setItem('albumAccent', 'false');
-                    syncControls();
-                    announceChange('albumAccent', false);
-                }
 
                 applyRootSettings();
                 announceChange(key, radio.value);

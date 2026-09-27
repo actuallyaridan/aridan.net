@@ -576,7 +576,11 @@
     const label = alt || activity.assets?.large_image || "";
     el.alt = label;
     el.title = label;
+
+    // Shown again after being hidden: see restartSpin() in general.js.
+    const wasHidden = el.style.display === "none";
     el.style.display = "block";
+    if (wasHidden && window.restartSpin) window.restartSpin(el);
 
     climb(el, ladder, 0, state.token, false);
   }
@@ -598,6 +602,9 @@
 
       el.src = rung.url;
       state.src = rung.url;
+
+      // A new image on a turning cover: see restartSpin() in general.js.
+      if (window.restartSpin) window.restartSpin(el);
 
       climb(el, ladder, index + 1, token, true);
     }).catch(() => {

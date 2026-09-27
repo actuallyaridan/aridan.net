@@ -1,127 +1,56 @@
+/* Settings, as a layer under the page. Opening it slides the page aside to
+ * show the panel, the same way the mobile menu opens (openReveal() in
+ * general.js does the moving), so a change to the theme or accent can be
+ * seen on the page right beside it.
+ *
+ * The name and the SettingsModal API are kept from when this was a modal.
+ */
 (function () {
-    // Everything inside the dialog that the Tab key can reach.
-    var FOCUSABLE = [
-        'a[href]',
-        'button:not([disabled])',
-        'select',
-        'input:not([type="hidden"])',
-        '[tabindex]:not([tabindex="-1"])'
-    ].join(', ');
-
-    var opener = null;
-
     function shell() {
         return `
-<div id="settingsDialog">
-    <div id="settingsModalMenu" class="modal">
-        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
-            <h2 id="settingsModalTitle">Settings</h2>${window.SettingsPanel.markup({ withDone: true })}
-        </div>
+<aside id="settingsLayer" class="revealLayer settingsLayer theme-dark" data-reveal="settings" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle" tabindex="-1">
+    <div class="settingsSheet">
+        <h2 id="settingsModalTitle">Settings</h2>${window.SettingsPanel.markup({ withDone: true })}
     </div>
-</div>`;
+</aside>`;
     }
 
-    function backdrop() { return document.getElementById('settingsModalMenu'); }
+    function layer() {
+        return document.getElementById('settingsLayer');
+    }
 
     function isOpen() {
-        var el = backdrop();
-        return !!el && el.classList.contains('showMenuNoAnimation');
-    }
-
-    function focusable() {
-        var content = document.querySelector('#settingsModalMenu .modal-content');
-        if (!content) return [];
-
-        var visible = [];
-
-        for (const el of content.querySelectorAll(FOCUSABLE)) {
-            // A null offsetParent usually means display:none, but is also true of
-            // position:fixed, so getClientRects is checked as well.
-            var isVisible = el.offsetParent !== null || el.getClientRects().length > 0;
-            if (isVisible) visible.push(el);
-        }
-
-        return visible;
+        if (!window.PageReveal) return false;
+        return window.PageReveal.isOpen(layer());
     }
 
     function setOpen(open) {
-        var el = backdrop();
-        var dialog = document.getElementById('settingsDialog');
-        if (!el || !dialog) return;
-
-        el.classList.toggle('showMenuNoAnimation', open);
-        dialog.classList.toggle('showMenuNoAnimation', open);
-
-        for (const btn of document.querySelectorAll('[aria-haspopup="dialog"]')) {
-            if (open) {
-                btn.setAttribute('aria-expanded', 'true');
-            } else {
-                btn.setAttribute('aria-expanded', 'false');
-            }
-        }
+        if (!window.PageReveal) return;
 
         if (open) {
-            opener = document.activeElement;
-            var first = focusable()[0];
-            if (first) first.focus();
+            window.PageReveal.open(layer());
             return;
         }
 
-        // Hand focus back, as long as that element is still in the page.
-        if (opener) {
-            if (document.contains(opener)) opener.focus();
-            opener = null;
-        }
-    }
-
-    // Makes Tab wrap inside the dialog instead of walking out of it.
-    function trap(e) {
-        if (e.key !== 'Tab') return;
-        if (!isOpen()) return;
-
-        var items = focusable();
-        if (items.length === 0) return;
-
-        var first = items[0];
-        var last = items[items.length - 1];
-        var here = document.activeElement;
-
-        // Backwards off the front, or from outside the dialog, lands on the last item.
-        if (e.shiftKey) {
-            if (here === first || !items.includes(here)) {
-                e.preventDefault();
-                last.focus();
-            }
-            return;
-        }
-
-        if (here === last) {
-            e.preventDefault();
-            first.focus();
-        }
-    }
-
-    function onKeydown(e) {
-        if (!isOpen()) return;
-        if (e.key === 'Escape') {
-            e.preventDefault();
-            setOpen(false);
-            return;
-        }
-        trap(e);
-    }
-
-    function onClick(e) {
-        if (isOpen() && e.target === backdrop()) setOpen(false);
+        if (isOpen()) window.PageReveal.close();
     }
 
     function inject() {
-        if (document.getElementById('settingsDialog')) return;
+        if (layer()) return;
         if (document.getElementById('settingsInline')) return;
         if (!window.SettingsPanel) return;
-        document.body.insertAdjacentHTML('beforeend', shell().trim());
-        document.addEventListener('keydown', onKeydown);
-        backdrop().addEventListener('click', onClick);
+
+        // Under the page, next to the mobile menu, so the page covers it.
+        var page = document.getElementById('page');
+        var template = document.createElement('template');
+        template.innerHTML = shell().trim();
+
+        if (page) {
+            document.body.insertBefore(template.content, page);
+        } else {
+            document.body.appendChild(template.content);
+        }
+
         window.SettingsPanel.announceReady();
     }
 

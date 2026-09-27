@@ -28,13 +28,9 @@
             lastShown.nextElementSibling.classList.add("hide");
         }
 
-        for (const li of document.querySelectorAll(".projectFilter li")) {
-            const button = li.querySelector("button[data-status]");
-            if (!button) continue;
-
+        // aria-pressed doubles as the styling hook - see .projectFilter in styles.css.
+        for (const button of document.querySelectorAll(".projectFilter button[data-status]")) {
             const active = button.dataset.status === status;
-
-            li.classList.toggle("active", active);
 
             if (active) {
                 button.setAttribute("aria-pressed", "true");
@@ -42,8 +38,6 @@
                 button.setAttribute("aria-pressed", "false");
             }
         }
-
-        if (typeof repositionNavPills === "function") repositionNavPills();
     }
 
     function init() {

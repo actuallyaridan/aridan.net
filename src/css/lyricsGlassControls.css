@@ -1,8 +1,7 @@
 /* The lyrics control bar's own always-glass look, set aside.
 
    Not linked from any page. The bar uses the site's .button styles, so it
-   follows the Flat / Liquid Glass setting like everything else; this is the
-   earlier design, where the bar was always frosted glass - the three modes
+   looks like every other button; this is the earlier design, where the bar was always frosted glass - the three modes
    sitting inside one pill, the current one filled with the accent, and white
    glass over the album colours in immersive mode.
 
@@ -12,8 +11,7 @@
        <link rel="stylesheet" href="/src/css/lyricsGlassControls.css">
 
    Every selector starts at #lyricsControls or #lyricsOverlay so that it
-   outranks the site's `.style-flat .button` and `.style-liquid-glass .button`
-   rules, whichever style is chosen. */
+   outranks the site's `.style-liquid-glass .button` rules. */
 
 /* ---------- Shared glass ---------- */
 

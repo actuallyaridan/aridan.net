@@ -56,14 +56,6 @@
     --status-rgb: 249, 76, 87;
 }
 
-/* Flat buttons are borderless and unblurred, so the chips are too, the tint is
-   pushed up slightly to carry the state on its own. */
-.style-flat .statusWrapper {
-    border-radius: 12px;
-    font-weight: 550;
-    background-color: rgba(var(--status-rgb), 0.22);
-}
-
 .style-liquid-glass .statusWrapper {
     border-radius: min(43.25rem, 4.65rem + 36.5vw);
     border: 1px solid rgba(var(--status-rgb), 0.4);

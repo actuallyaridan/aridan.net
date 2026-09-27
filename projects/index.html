@@ -58,205 +58,204 @@
 <body>
     <a class="skipLink" href="#mainContent">Skip to content</a>
 
-    <header id="desktop-header">
-        <div>
-            <nav aria-label="Main">
-                <ul class="notAList">
-                    <li><a href="/">aridan.net</a></li>
-                    <li><a href="/experience/">Experience</a></li>
-                    <li class="active"><a href="/projects/" aria-current="page">Projects</a></li>
-                    <li><a href="/articles/">Articles</a></li>
-                    <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                    <li><a href="/pihole/">Pi-hole</a></li>
-                    <li><a href="/contact/">Contact</a></li>
-                </ul>
-            </nav>
-            <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
-            </ul>
-        </div>
-    </header>
-
-    <header id="mobile-header">
-        <div>
-            <ul class="notAList">
-                <li><a href="/">aridan.net</a></li>
-            </ul>
-            <ul class="notAList">
-                <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" data-action="menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
-            </ul>
-        </div>
-        <nav class="mobileMenu" id="mobileMenuID" aria-label="Main">
-            <ul class="notAList">
-                <li><a href="/experience/">Experience</a></li>
-                <li class="active"><a href="/projects/" aria-current="page">Projects</a></li>
-                <li><a href="/articles/">Articles</a></li>
-                <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
-                <li><a href="/pihole/">Pi-hole</a></li>
-                <li><a href="/contact/">Contact</a></li>
-            </ul>
-            <ul class="notAList">
-                <li><button type="button" class="noUI" title="Settings" aria-label="Settings" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
-                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
-            </ul>
-        </nav>
-    </header>
-    <main class="container" id="mainContent" tabindex="-1">
-        <div class="info">
-            <p class="icon"><i class="fa-solid fa-terminal icon-background" aria-hidden="true"></i></p>
-            <div>
-                <h1 class="name">Projects</h1>
-                <p class="description titleColor">I have a few projects that I've worked on, from translations all the
-                    way to a fully-fledged Twitter clone. Check them out! And by the way, the star and fork counts are dynamic!
-                </p>
-            </div>
-            <span class="warn" id="rateLimitGitHub" role="status"><p>You're rate limited on the GitHub API. Showing old values.</p></span>
-        </div>
-        <hr>
-        <nav class="projectFilter pillNav" aria-label="Project status">
-            <div class="pillNavTrack">
-                <ul class="notAList">
-                    <li><button type="button" class="noUI" data-status="ongoing" aria-pressed="true">Ongoing</button></li>
-                    <li><button type="button" class="noUI" data-status="paused" aria-pressed="false">Paused</button></li>
-                </ul>
-            </div>
-        </nav>
-        <div class="section" data-status="ongoing">
-            <div>
-                <h2 class="section-title">Windows-alike Software for Linux</h2>
-                <p class="section-content">A suite of Linux programs that recreate the Windows 7 originals down to the
-                    pixel, with my weird eye for detail - the same layouts, sprites, sounds and animations, only backed
-                    by real Linux system data. Three of them so far, and the suite keeps growing.</p>
-                <ul class="specs">
-                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>C++, Qt6, CMake</li>
-                    <li><i class="fa-solid fa-window-restore" aria-hidden="true"></i>Device Manager, Control Panel and Minesweeper</li>
-                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-wsl">371</span> stars,
-                        <span id="forks-wsl">9</span> forks</li>
-                    <li><i class="fa-solid fa-bars-progress" aria-hidden="true"></i>Ongoing</li>
-                </ul>
-            </div>
-            <div class="photo-container">
-                <img class="photo" src="/assets/uploads/images/wsl.webp"
-                    alt="The Windows 7 Device Manager, recreated on Linux, listing the hardware of an Arch Linux machine." loading="lazy" decoding="async">
-                <div class="linkCompany">
-                    <a title="Windows-alike Software for Linux - GitHub" aria-label="Windows-alike Software for Linux - GitHub"
-                        href="https://github.com/actuallyaridan?tab=repositories&amp;q=linux-" target="_blank" rel="noopener"><i
-                            class="fa-brands fa-github" aria-hidden="true"></i></a>
-                </div>
-            </div>
-        </div>
-                <hr class="onMobile">
-        <div class="section" data-status="paused">
-            <div>
-                <h2 class="section-title">NeoFreeBird</h2>
-                <p class="section-content">A tweak for the X app on iOS that brings back Twitter's original name and
-                    look, along with other interface and quality-of-life changes.</p>
-                <ul class="specs">
-                    <li><i class="fa-solid fa-code-fork" aria-hidden="true"></i>Forked from nyathea/FreeBird and BandarHL/BHTwitter</li>
-                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>Objective-C</li>
-                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-actuallyaridan-NeoFreeBird">1600</span>
-                        stars, <span id="forks-actuallyaridan-NeoFreeBird">101</span> forks</li>
-                    <li><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</li>
-                </ul>
-            </div>
-            <div class="photo-container">
-                <img class="photo"
-                    src="https://raw.githubusercontent.com/actuallyaridan/NeoFreeBird/88812c269efad0a5f8ab51f9830f3e007995fda2/Branding/Icon.jpg"
-                    alt="The NeoFreeBird app icon." loading="lazy" decoding="async">
-                <div class="linkCompany">
-                    <a title="neofreebird.aridan.net" aria-label="neofreebird.aridan.net" href="https://neofreebird.aridan.net" target="_blank" rel="noopener"><i
-                            class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="NeoFreeBird - GitHub" aria-label="NeoFreeBird - GitHub"
-                        href="https://github.com/actuallyaridan/NeoFreeBird" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
-                </div>
-            </div>
-        </div>
-                <hr class="onMobile">
-        <div class="section" data-status="paused">
-            <div>
-                <h2 class="section-title">Chirp</h2>
-                <p class="section-content">A completely self-made Twitter clone in PHP. Users can post (chirp), repost
-                    (rechirp) and like posts. Made to be familiar to Twitter, yet distinct.</p>
-                <ul class="specs">
-                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>PHP, HTML, CSS, JavaScript</li>
-                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-actuallyaridan-chirp">18</span> stars,
-                        <span id="forks-actuallyaridan-chirp">15</span> forks</li>
-                    <li><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</li>
-                </ul>
-            </div>
-            <div class="photo-container">
-                <img class="photo" src="/assets/uploads/images/chirp.webp"
-                    alt="The Chirp logo, a yellow bird." loading="lazy" decoding="async">
-                <div class="linkCompany">
-                    <a title="beta.chirpsocial.net" aria-label="beta.chirpsocial.net" href="https://beta.chirpsocial.net" target="_blank" rel="noopener"><i
-                            class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="Chirp - GitHub" aria-label="Chirp - GitHub"
-                        href="https://github.com/actuallyaridan/chirp" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
-                </div>
-            </div>
-        </div>
-                <hr class="onMobile">
-        <div class="section" data-status="ongoing">
-            <div>
-                <h2 class="section-title">This website</h2>
-                <p class="section-content">The thing you're looking at. A fast and modern website, with dynamic parts
-                    like Lanyard.</p>
-                <ul class="specs">
-                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>HTML, CSS, JavaScript</li>
-                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-actuallyaridan-aridan.net">2</span> stars,
-                        <span id="forks-actuallyaridan-aridan.net">5</span> forks</li>
-                    <li><i class="fa-solid fa-bars-progress" aria-hidden="true"></i>Ongoing</li>
-                </ul>
-            </div>
-            <div class="photo-container">
-                <img class="photo" src="/assets/media/favicons/android-chrome-512x512.png"
-                    alt="The aridan.net site icon." loading="lazy" decoding="async">
-                <div class="linkCompany">
-                    <a title="aridan.net" aria-label="aridan.net" href="https://aridan.net"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
-                        title="aridan.net - GitHub" aria-label="aridan.net - GitHub" href="https://github.com/actuallyaridan/aridan.net" target="_blank" rel="noopener"><i
-                            class="fa-brands fa-github" aria-hidden="true"></i></a>
-                </div>
-            </div>
-        </div>
-                <hr class="onMobile">
-        <div class="section" data-status="paused">
-            <div>
-                <h2 class="section-title">Swedish translation for OldTwitter</h2>
-                <p class="section-content">A new extension for Chrome and Firefox to restore Twitter's old web UI. I made
-                    the Swedish translation.</p>
-                <ul class="specs">
-                    <li><i class="fa-solid fa-code" aria-hidden="true"></i>JSON, localization</li>
-                    <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-dimdenGD-OldTwitter">2500</span> stars, <span
-                            id="forks-dimdenGD-OldTwitter">205</span> forks</li>
-                    <li><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</li>
-                </ul>
-            </div>
-            <div class="photo-container">
-                <img class="photo"
-                    src="https://raw.githubusercontent.com/dimdenGD/OldTwitter/refs/heads/master/images/logo512.png"
-                    alt="The OldTwitter extension logo." loading="lazy" decoding="async">
-                <div class="linkCompany"><a title="OldTwitter - GitHub" aria-label="OldTwitter - GitHub" href="https://github.com/dimdenGD/OldTwitter" target="_blank" rel="noopener"><i
-                            class="fa-brands fa-github" aria-hidden="true"></i></a>
-                </div>
-            </div>
-        </div>
-    </main>
-    <footer>
-        <ul class="notAList footerSocial">
+    <nav class="mobileMenu revealLayer" id="mobileMenuID" data-reveal="menu" aria-label="Main" tabindex="-1">
+        <button type="button" class="mobileMenuClose" title="Close menu" aria-label="Close menu" data-action="menu"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <ul class="notAList">
+            <li><a href="/experience/">Experience</a></li>
+            <li class="active"><a href="/projects/" aria-current="page">Projects</a></li>
+            <li><a href="/articles/">Articles</a></li>
+            <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+            <li><a href="/pihole/">Pi-hole</a></li>
+            <li><a href="/contact/">Contact</a></li>
+        </ul>
+        <ul class="notAList">
+            <li><button type="button" class="noUI" title="Settings" aria-label="Settings" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
             <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
             <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
-            <li><a href="https://instagram.com/actuallyaridan" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
-            <li><a href="mailto:adnan@aridan.net" title="Email" aria-label="Email"><i class="fa-solid fa-at" aria-hidden="true"></i></a></li>
-            <li><a href="/feed.xml" title="RSS feed" aria-label="RSS feed"><i class="fa-solid fa-rss" aria-hidden="true"></i></a></li>
         </ul>
-        <p class="footerNote">
-            <span>&copy; <span id="footerYear">2026</span> Adnan Bukvic <span class="rightsNote">unless stated otherwise</span></span>
-            <a class="inline" href="https://github.com/actuallyaridan/aridan.net" title="Source on GitHub" target="_blank" rel="noopener">Source on GitHub</a>
-            <a class="inline" href="/privacy/" title="Privacy">Privacy</a>
-        </p>
-        <p class="footerNote embedNote">This website embeds content from other websites and services. Lyrics, album art, logos and trademarks belong to their respective owners.</p>
-    </footer>
+    </nav>
+    <div id="page">
+        <header id="desktop-header">
+            <div>
+                <nav aria-label="Main">
+                    <ul class="notAList">
+                        <li><a href="/">aridan.net</a></li>
+                        <li><a href="/experience/">Experience</a></li>
+                        <li class="active"><a href="/projects/" aria-current="page">Projects</a></li>
+                        <li><a href="/articles/">Articles</a></li>
+                        <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+                        <li><a href="/pihole/">Pi-hole</a></li>
+                        <li><a href="/contact/">Contact</a></li>
+                    </ul>
+                </nav>
+                <ul class="notAList">
+                    <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                    <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                    <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                </ul>
+            </div>
+        </header>
+
+        <header id="mobile-header">
+            <div>
+                <ul class="notAList">
+                    <li><a href="/">aridan.net</a></li>
+                </ul>
+                <ul class="notAList">
+                    <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" data-action="menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
+                </ul>
+            </div>
+        </header>
+        <main class="container" id="mainContent" tabindex="-1">
+            <div class="info">
+                <p class="icon"><i class="fa-solid fa-terminal icon-background" aria-hidden="true"></i></p>
+                <div>
+                    <h1 class="name">Projects</h1>
+                    <p class="description titleColor">I have a few projects that I've worked on, from translations all the
+                        way to a fully-fledged Twitter clone. Check them out! And by the way, the star and fork counts are dynamic!
+                    </p>
+                    <div class="infoButtons projectFilter" role="group" aria-label="Project status">
+                        <button type="button" class="button" data-status="ongoing" aria-pressed="true"><i class="fa-solid fa-bars-progress" aria-hidden="true"></i>Ongoing</button>
+                        <button type="button" class="button" data-status="paused" aria-pressed="false"><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</button>
+                    </div>
+                </div>
+                <span class="warn" id="rateLimitGitHub" role="status"><p>You're rate limited on the GitHub API. Showing old values.</p></span>
+            </div>
+            <hr>
+            <div class="section" data-status="ongoing">
+                <div>
+                    <h2 class="section-title">Windows-alike Software for Linux</h2>
+                    <p class="section-content">A suite of Linux programs that recreate the Windows 7 originals down to the
+                        pixel, with my weird eye for detail - the same layouts, sprites, sounds and animations, only backed
+                        by real Linux system data. Three of them so far, and the suite keeps growing.</p>
+                    <ul class="specs">
+                        <li><i class="fa-solid fa-code" aria-hidden="true"></i>C++, Qt6, CMake</li>
+                        <li><i class="fa-solid fa-window-restore" aria-hidden="true"></i>Device Manager, Control Panel and Minesweeper</li>
+                        <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-wsl">371</span> stars,
+                            <span id="forks-wsl">9</span> forks</li>
+                        <li><i class="fa-solid fa-bars-progress" aria-hidden="true"></i>Ongoing</li>
+                    </ul>
+                </div>
+                <div class="photo-container">
+                    <img class="photo" src="/assets/uploads/images/wsl.webp"
+                        alt="The Windows 7 Device Manager, recreated on Linux, listing the hardware of an Arch Linux machine." loading="lazy" decoding="async">
+                    <div class="linkCompany">
+                        <a title="Windows-alike Software for Linux - GitHub" aria-label="Windows-alike Software for Linux - GitHub"
+                            href="https://github.com/actuallyaridan?tab=repositories&amp;q=linux-" target="_blank" rel="noopener"><i
+                                class="fa-brands fa-github" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+            </div>
+                    <hr class="onMobile">
+            <div class="section" data-status="paused">
+                <div>
+                    <h2 class="section-title">NeoFreeBird</h2>
+                    <p class="section-content">A tweak for the X app on iOS that brings back Twitter's original name and
+                        look, along with other interface and quality-of-life changes.</p>
+                    <ul class="specs">
+                        <li><i class="fa-solid fa-code-fork" aria-hidden="true"></i>Forked from nyathea/FreeBird and BandarHL/BHTwitter</li>
+                        <li><i class="fa-solid fa-code" aria-hidden="true"></i>Objective-C</li>
+                        <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-actuallyaridan-NeoFreeBird">1600</span>
+                            stars, <span id="forks-actuallyaridan-NeoFreeBird">101</span> forks</li>
+                        <li><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</li>
+                    </ul>
+                </div>
+                <div class="photo-container">
+                    <img class="photo"
+                        src="https://raw.githubusercontent.com/actuallyaridan/NeoFreeBird/88812c269efad0a5f8ab51f9830f3e007995fda2/Branding/Icon.jpg"
+                        alt="The NeoFreeBird app icon." loading="lazy" decoding="async">
+                    <div class="linkCompany">
+                        <a title="neofreebird.aridan.net" aria-label="neofreebird.aridan.net" href="https://neofreebird.aridan.net" target="_blank" rel="noopener"><i
+                                class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="NeoFreeBird - GitHub" aria-label="NeoFreeBird - GitHub"
+                            href="https://github.com/actuallyaridan/NeoFreeBird" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+            </div>
+                    <hr class="onMobile">
+            <div class="section" data-status="paused">
+                <div>
+                    <h2 class="section-title">Chirp</h2>
+                    <p class="section-content">A completely self-made Twitter clone in PHP. Users can post (chirp), repost
+                        (rechirp) and like posts. Made to be familiar to Twitter, yet distinct.</p>
+                    <ul class="specs">
+                        <li><i class="fa-solid fa-code" aria-hidden="true"></i>PHP, HTML, CSS, JavaScript</li>
+                        <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-actuallyaridan-chirp">18</span> stars,
+                            <span id="forks-actuallyaridan-chirp">15</span> forks</li>
+                        <li><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</li>
+                    </ul>
+                </div>
+                <div class="photo-container">
+                    <img class="photo" src="/assets/uploads/images/chirp.webp"
+                        alt="The Chirp logo, a yellow bird." loading="lazy" decoding="async">
+                    <div class="linkCompany">
+                        <a title="beta.chirpsocial.net" aria-label="beta.chirpsocial.net" href="https://beta.chirpsocial.net" target="_blank" rel="noopener"><i
+                                class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a title="Chirp - GitHub" aria-label="Chirp - GitHub"
+                            href="https://github.com/actuallyaridan/chirp" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+            </div>
+                    <hr class="onMobile">
+            <div class="section" data-status="ongoing">
+                <div>
+                    <h2 class="section-title">This website</h2>
+                    <p class="section-content">The thing you're looking at. A fast and modern website, with dynamic parts
+                        like Lanyard.</p>
+                    <ul class="specs">
+                        <li><i class="fa-solid fa-code" aria-hidden="true"></i>HTML, CSS, JavaScript</li>
+                        <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-actuallyaridan-aridan.net">2</span> stars,
+                            <span id="forks-actuallyaridan-aridan.net">5</span> forks</li>
+                        <li><i class="fa-solid fa-bars-progress" aria-hidden="true"></i>Ongoing</li>
+                    </ul>
+                </div>
+                <div class="photo-container">
+                    <img class="photo" src="/assets/media/favicons/android-chrome-512x512.png"
+                        alt="The aridan.net site icon." loading="lazy" decoding="async">
+                    <div class="linkCompany">
+                        <a title="aridan.net" aria-label="aridan.net" href="https://aridan.net"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a><a
+                            title="aridan.net - GitHub" aria-label="aridan.net - GitHub" href="https://github.com/actuallyaridan/aridan.net" target="_blank" rel="noopener"><i
+                                class="fa-brands fa-github" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+            </div>
+                    <hr class="onMobile">
+            <div class="section" data-status="paused">
+                <div>
+                    <h2 class="section-title">Swedish translation for OldTwitter</h2>
+                    <p class="section-content">A new extension for Chrome and Firefox to restore Twitter's old web UI. I made
+                        the Swedish translation.</p>
+                    <ul class="specs">
+                        <li><i class="fa-solid fa-code" aria-hidden="true"></i>JSON, localization</li>
+                        <li><i class="fa-solid fa-star" aria-hidden="true"></i><span id="stars-dimdenGD-OldTwitter">2500</span> stars, <span
+                                id="forks-dimdenGD-OldTwitter">205</span> forks</li>
+                        <li><i class="fa-solid fa-pause" aria-hidden="true"></i>Paused</li>
+                    </ul>
+                </div>
+                <div class="photo-container">
+                    <img class="photo"
+                        src="https://raw.githubusercontent.com/dimdenGD/OldTwitter/refs/heads/master/images/logo512.png"
+                        alt="The OldTwitter extension logo." loading="lazy" decoding="async">
+                    <div class="linkCompany"><a title="OldTwitter - GitHub" aria-label="OldTwitter - GitHub" href="https://github.com/dimdenGD/OldTwitter" target="_blank" rel="noopener"><i
+                                class="fa-brands fa-github" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer>
+            <ul class="notAList footerSocial">
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a href="https://instagram.com/actuallyaridan" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+                <li><a href="mailto:adnan@aridan.net" title="Email" aria-label="Email"><i class="fa-solid fa-at" aria-hidden="true"></i></a></li>
+                <li><a href="/feed.xml" title="RSS feed" aria-label="RSS feed"><i class="fa-solid fa-rss" aria-hidden="true"></i></a></li>
+            </ul>
+            <p class="footerNote">
+                <span>&copy; <span id="footerYear">2026</span> Adnan Bukvic <span class="rightsNote">unless stated otherwise</span></span>
+                <a class="inline" href="https://github.com/actuallyaridan/aridan.net" title="Source on GitHub" target="_blank" rel="noopener">Source on GitHub</a>
+                <a class="inline" href="/privacy/" title="Privacy">Privacy</a>
+            </p>
+            <p class="footerNote embedNote">This website embeds content from other websites and services. Lyrics, album art, logos and trademarks belong to their respective owners.</p>
+        </footer>
+    </div>
 </body>
 
 </html>
