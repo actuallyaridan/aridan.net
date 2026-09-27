@@ -159,8 +159,55 @@ async function cacheFirst(request) {
     return response;
 }
 
-// The cached copy goes back at once and a fresh one is fetched for next time, at
-// the cost of one-version-old CSS on the first load after a deploy.
+// The site's own CSS, JS and translations have to come from the same deploy
+// as the page. Served stale-while-revalidate, the first load after a deploy
+// paired the new HTML with the old stylesheet - the #page wrapper arrived
+// before the CSS that styles it, and the whole site sat off to the left. So
+// these are asked for from the network first, which is normally a quick
+// "not modified", and the cached copy is only used offline.
+const MUST_MATCH_PAGE = /^\/src\/.+\.(css|js|json)$/;
+
+// How long a slow connection gets before the cached copy is used instead.
+// The network answer still lands in the cache for next time.
+const ASSET_TIMEOUT_MS = 3000;
+
+async function networkFirstAsset(request) {
+    const cache = await caches.open(CACHE);
+
+    const network = fetch(request).then((response) => {
+        // clone() because the page may be about to read this body too.
+        if (response && response.ok) cache.put(request, response.clone());
+        return response;
+    });
+
+    // If the cached copy has already been handed over, a network failure
+    // afterwards has nobody left to tell - this keeps it from surfacing as
+    // an unhandled rejection. The awaits below still see it.
+    network.catch(() => {});
+
+    let timer = 0;
+    const timeout = new Promise((resolve) => {
+        timer = setTimeout(resolve, ASSET_TIMEOUT_MS, null);
+    });
+
+    try {
+        const response = await Promise.race([network, timeout]);
+        clearTimeout(timer);
+        if (response) return response;
+    } catch (err) {
+        clearTimeout(timer);
+    }
+
+    // Offline, or too slow: the cached copy if there is one, and otherwise
+    // whatever the network eventually says.
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    return network;
+}
+
+// The cached copy goes back at once and a fresh one is fetched for next time.
+// Only for what can be a version old without breaking anything - images,
+// fonts, icons.
 async function staleWhileRevalidate(request) {
     const cache = await caches.open(CACHE);
     const cached = await cache.match(request);
@@ -198,6 +245,11 @@ self.addEventListener("fetch", (event) => {
 
     if (request.mode === "navigate") {
         event.respondWith(networkFirst(request));
+        return;
+    }
+
+    if (MUST_MATCH_PAGE.test(url.pathname)) {
+        event.respondWith(networkFirstAsset(request));
         return;
     }
 
