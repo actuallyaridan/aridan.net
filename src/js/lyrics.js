@@ -55,8 +55,25 @@
   const BLUR_UP = [16, 32, 64];
 
   // How much more colourful the blurred art is made, the same as CSS
-  // saturate(1.7). See saturatePixels().
+  // saturate(1.7). See boostedCopy().
   const BACKDROP_SATURATION = 1.7;
+
+  // How far past the screen's edges CSS stretches the backdrop canvas - the
+  // scale() on #lyricsBackdrop in lyrics.css. See drawShade().
+  const BACKDROP_SCALE = 1.2;
+
+  // Where canvases cannot take a filter (Safari), each cover is boosted once
+  // as it loads instead, at this size - see boostedCopy(). The blur flattens
+  // everything down to 8px anyway, so no detail is lost, and a copy already
+  // averaged this far clips its brightest colours about as little as the
+  // blurred picture did.
+  const BOOST_SIZE = 16;
+
+  // The backdrop drifts slowly and is heavily blurred, so drawing it more
+  // often than 30 times a second changes nothing you can see - but every
+  // drawn frame is the whole screen redone. See backdropFrame().
+  const BACKDROP_FRAME_MS = 1000 / 30;
+  const BACKDROP_FRAME_SLACK_MS = 2;
 
   // LRCLIB only times whole lines, so the words inside one are spread out by
   // guesswork: roughly how long it takes to sing that many letters, but never
@@ -204,10 +221,15 @@
   let lastLayout = -1;
 
   let controlsTimer = 0;
+  let pageSleepTimer = 0;
   let pointerOnControls = false;
   let lastPointerType = "mouse";
 
+  // Lyrics already fetched, by song, so going back to one is instant. Only
+  // the most recent ANSWERS_KEPT are held on to: kept for every song, the
+  // list would only ever grow for as long as the page stays open.
   const answers = new Map();
+  const ANSWERS_KEPT = 20;
 
   function trackKey(track) {
     if (!track) return "";
@@ -261,7 +283,12 @@
   function fetchLyrics(want) {
     const key = trackKey(want);
     const known = answers.get(key);
-    if (known) return known;
+    if (known) {
+      // To the back of the queue, as the most recently wanted.
+      answers.delete(key);
+      answers.set(key, known);
+      return known;
+    }
 
     const params = new URLSearchParams({ artist: want.artist, track: want.title });
     if (want.album) params.set("album", want.album);
@@ -301,6 +328,14 @@
     });
 
     answers.set(key, guarded);
+
+    // A Map keeps the order things went in, so the first key is the song
+    // wanted longest ago.
+    while (answers.size > ANSWERS_KEPT) {
+      const oldest = answers.keys().next().value;
+      answers.delete(oldest);
+    }
+
     return guarded;
   }
 
@@ -775,14 +810,14 @@
     buffer: null,
     down: [],
     up: [],
+    // The 8x8 step with the colour boost drawn in, where canvas filters work.
+    boost: null,
     layers: [],
     url: "",
     rafId: 0,
 
-    // Whether the offscreen canvases can still have their pixels read. A
-    // canvas that has ever had art drawn on it without CORS permission is
-    // locked for good, so the only way back is a fresh set of canvases.
-    readable: true,
+    // When the backdrop was last drawn, for keeping it to BACKDROP_FRAME_MS.
+    lastDraw: 0,
   };
 
   function makeCanvas(size) {
@@ -792,10 +827,32 @@
     return canvas;
   }
 
+  // Whether this browser applies CSS filters when drawing onto a canvas.
+  // Chrome and Firefox do; Safari ignores them. Found out once, by inverting
+  // a single white pixel and seeing whether it came out black.
+  function canvasFiltersWork() {
+    const canvas = makeCanvas(1);
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!("filter" in ctx)) return false;
+
+    ctx.fillStyle = "#fff";
+    ctx.filter = "invert(1)";
+    ctx.fillRect(0, 0, 1, 1);
+
+    const red = ctx.getImageData(0, 0, 1, 1).data[0];
+    return red < 128;
+  }
+
+  const CANVAS_FILTERS = canvasFiltersWork();
+
   function makeCanvases() {
     backdrop.buffer = makeCanvas(ART_DRAW_SIZE);
     backdrop.down = [];
     backdrop.up = [];
+
+    // The smallest step again, for the colour boost to be drawn into.
+    const smallest = BLUR_DOWN[BLUR_DOWN.length - 1];
+    backdrop.boost = makeCanvas(smallest);
 
     for (const size of BLUR_DOWN) {
       backdrop.down.push(makeCanvas(size));
@@ -804,14 +861,6 @@
     for (const size of BLUR_UP) {
       backdrop.up.push(makeCanvas(size));
     }
-
-    // The smallest step is the one whose pixels are read every frame. Asking
-    // for that up front, on its first getContext, keeps it in memory the CPU
-    // can reach instead of on the GPU, where each read would be a round trip.
-    const smallest = backdrop.down[backdrop.down.length - 1];
-    smallest.getContext("2d", { willReadFrequently: true });
-
-    backdrop.readable = true;
   }
 
   makeCanvases();
@@ -835,8 +884,11 @@
      the stretch CSS does to fill the screen is short enough not to show
      seams either. Every browser does the same few tiny draws per frame.
 
-     The colour boost is applied at the bottom, on the 8x8 step, where it is
-     64 pixels of work, and the way back up carries it to the whole picture. */
+     The colour boost goes in at the bottom, on the 8x8 step, and the way back
+     up carries it to the whole picture. It is drawn there with a saturate()
+     filter, so nothing is read back off the graphics card. Safari has no
+     canvas filters, so there the boost is put into each cover as it loads
+     instead - see boostedCopy(). */
   function blurInto(ctx, source) {
     let from = source;
 
@@ -845,7 +897,14 @@
       from = step;
     }
 
-    saturatePixels(from);
+    if (CANVAS_FILTERS) {
+      const boostCtx = smoothContext(backdrop.boost);
+      boostCtx.clearRect(0, 0, backdrop.boost.width, backdrop.boost.height);
+      boostCtx.filter = "saturate(" + BACKDROP_SATURATION + ")";
+      boostCtx.drawImage(from, 0, 0);
+      boostCtx.filter = "none";
+      from = backdrop.boost;
+    }
 
     for (const step of backdrop.up) {
       drawStep(step, from);
@@ -874,20 +933,36 @@
      art moved those pixels flipped between neutral and tinted from frame to
      frame, which showed as blue flickering in the dark parts of a cover.
 
-     The numbers are the CSS saturate() matrix, from the Filter Effects spec. */
-  function saturatePixels(canvas) {
-    if (!backdrop.readable) return;
+     The numbers are the CSS saturate() matrix, from the Filter Effects spec.
 
-    const ctx = canvas.getContext("2d");
+     Only where canvases cannot take a saturate() filter - Safari. Everywhere
+     else the boost is drawn with a filter at the bottom of the blur (see
+     blurInto()). It used to be done by hand there on every frame, reading
+     pixels back off the graphics card 60 times a second - a stall the card
+     had to wait on each time - so here it is done once per cover, as it
+     loads, onto a small copy that is then what gets drawn.
+
+     Boosting before the art is blended and blurred gives nearly the same
+     picture: the boost is a fixed mix of each pixel's red, green and blue,
+     and blending and blurring are averages, and averaging then mixing is the
+     same as mixing then averaging. Only colours pushed past full brightness
+     come out a little different, clipped before the averaging rather than
+     after - the reddest spots of a red cover end up a shade less red.
+
+     Returns null for art without CORS permission, whose pixels cannot be
+     read; that is then shown as it is, without the boost. */
+  function boostedCopy(img) {
+    const canvas = makeCanvas(BOOST_SIZE);
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, BOOST_SIZE, BOOST_SIZE);
 
     let image;
     try {
-      image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      image = ctx.getImageData(0, 0, BOOST_SIZE, BOOST_SIZE);
     } catch {
-      // Art without CORS permission was drawn in. It is still shown, only
-      // without the boost, until it is gone - see drawBackdrop().
-      backdrop.readable = false;
-      return;
+      return null;
     }
 
     const s = BACKDROP_SATURATION;
@@ -905,6 +980,7 @@
     }
 
     ctx.putImageData(image, 0, 0);
+    return canvas;
   }
 
   // Each copy of the art drifts in a slow circle while it turns. Slightly
@@ -951,14 +1027,6 @@
       backdrop.layers = [newest];
     }
 
-    // Once a cover without CORS permission is no longer being drawn, fresh
-    // canvases bring the colour boost back.
-    const allReadable = backdrop.layers.every((layer) => layer.readable);
-    if (!backdrop.readable && allReadable) {
-      makeCanvases();
-    }
-
-    // Fetched only now, since makeCanvases() above may have just replaced it.
     const bufferCtx = backdrop.buffer.getContext("2d");
 
     // Cleared every frame: a cover with transparent parts would otherwise
@@ -974,17 +1042,56 @@
 
       bufferCtx.save();
       bufferCtx.globalAlpha = alpha;
-      drawArt(bufferCtx, layer.img, seconds);
+      drawArt(bufferCtx, layer.art, seconds);
       bufferCtx.restore();
     }
 
     blurInto(ctx, backdrop.buffer);
+    drawShade(ctx);
+  }
+
+  /* Darkens the art just enough for white text to hold up on a bright cover,
+     more at the edges than the middle so the colour still comes through.
+
+     Drawn into the backdrop rather than laid over it as a layer of its own:
+     it was a full-screen see-through layer, and the browser had to blend it
+     over the whole screen on every frame the backdrop moved. Here it costs
+     one small fill on a 128px canvas.
+
+     Only the middle of the canvas is on screen - CSS stretches it past the
+     edges by BACKDROP_SCALE - so the gradient is sized to reach the corners
+     of that part, the way the CSS radial-gradient(ellipse at center) it
+     replaces reached the corners of the screen. Round on the square canvas,
+     it comes out as the same ellipse once stretched to the screen's shape. */
+  function drawShade(ctx) {
+    const size = ctx.canvas.width;
+    const centre = size / 2;
+    const visible = size / BACKDROP_SCALE;
+    const radius = (visible / 2) * Math.SQRT2;
+
+    const gradient = ctx.createRadialGradient(centre, centre, 0, centre, centre, radius);
+    gradient.addColorStop(0, "rgba(0, 0, 0, 0.18)");
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0.5)");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
   }
 
   function backdropFrame(now) {
     backdrop.rafId = 0;
     if (!overlayOpen || !overlay.classList.contains("isImmersive")) return;
 
+    // At most 30 draws a second; in between, only the next frame is asked for.
+    // A couple of milliseconds of slack, because two frames of a 60Hz screen
+    // come to 33.33ms, and a hair under the limit would skip a third frame
+    // too and leave the backdrop at 20 draws a second.
+    const sinceDraw = now - backdrop.lastDraw;
+    if (sinceDraw < BACKDROP_FRAME_MS - BACKDROP_FRAME_SLACK_MS) {
+      backdrop.rafId = window.requestAnimationFrame(backdropFrame);
+      return;
+    }
+
+    backdrop.lastDraw = now;
     drawBackdrop(now);
 
     // Still art only needs drawing until its fade-in is over.
@@ -1037,7 +1144,19 @@
       // Another track may have come on while this one was loading.
       if (backdrop.url !== url) return;
 
-      backdrop.layers.push({ img: img, born: performance.now(), readable: withCors });
+      // Without canvas filters, boosted once here instead of on every frame -
+      // see boostedCopy(). Art without CORS permission cannot be read, so it
+      // is used as it is.
+      let art = img;
+      if (!CANVAS_FILTERS && withCors) {
+        const boosted = boostedCopy(img);
+        if (boosted) art = boosted;
+      }
+
+      backdrop.layers.push({ art: art, born: performance.now() });
+
+      // Drawn on the very next frame, not up to a thirtieth of a second on.
+      backdrop.lastDraw = 0;
       startBackdrop();
     };
 
@@ -1311,6 +1430,16 @@
     overlay.classList.add("lyricsOpening");
     document.body.style.overflow = "hidden";
 
+    // Once the overlay has faded in and covers everything, the page behind
+    // it is put to sleep - see html.lyricsOpen in lyrics.css. Not straight
+    // away, or the page would vanish from under the fade.
+    window.clearTimeout(pageSleepTimer);
+    let fadeIn = CLOSE_ANIM_MS;
+    if (reduceMotion()) fadeIn = 0;
+    pageSleepTimer = window.setTimeout(function () {
+      document.documentElement.classList.add("lyricsOpen");
+    }, fadeIn);
+
     opener = document.activeElement;
 
     // pointerleave does not fire for a pointer that was over the bar when the
@@ -1371,6 +1500,14 @@
     overlay.classList.remove("lyricsOpening");
     overlay.classList.add("lyricsClosing");
     document.body.style.overflow = "";
+
+    // Awake again before focus goes back to it: a hidden element cannot take
+    // focus, and the page has to be there to fade back in to.
+    window.clearTimeout(pageSleepTimer);
+    document.documentElement.classList.remove("lyricsOpen");
+
+    // For lanyard.js, whose card stood still while it was covered.
+    window.dispatchEvent(new CustomEvent("lyrics:close"));
 
     if (opener && document.contains(opener)) opener.focus();
     opener = null;

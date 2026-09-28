@@ -31,6 +31,21 @@ footer>.footerNote.lyricsNote {
     display: none;
 }
 
+/* The page behind the open overlay is out of sight, but left alone it keeps
+   animating - the Apple Music card's spinning cover, its progress bar - and
+   every frame of that makes the browser redraw the whole screen, the
+   full-screen overlay on top included. So once the overlay has faded in,
+   lyrics.js adds .lyricsOpen and the page stops being drawn and its
+   animations wait where they are. visibility, not display, so nothing
+   reflows and the scroll position is kept. */
+html.lyricsOpen #page {
+    visibility: hidden;
+}
+
+html.lyricsOpen #page * {
+    animation-play-state: paused !important;
+}
+
 #lyricsOverlay.lyricsOpening {
     animation: lyricsFadeIn 0.25s ease;
 }
@@ -486,6 +501,7 @@ html.reduce-motion #lyricsOverlay.lyricsClosing {
     width: 100%;
     height: 100%;
     z-index: 0;
+    /* BACKDROP_SCALE in lyrics.js has to match, for the shade drawn into it. */
     transform: scale(1.2);
 }
 
@@ -493,18 +509,10 @@ html.reduce-motion #lyricsOverlay.lyricsClosing {
     display: block;
 }
 
-/* Darkens the art just enough for white text to hold up on a bright cover,
-   more at the edges than the middle so the colour still comes through. */
-#lyricsOverlay.isImmersive::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.5));
-}
+/* The shade that darkens the art for the text is drawn into the canvas
+   itself - see drawShade() in lyrics.js. */
 
-/* Everything that has to sit above the backdrop and its shade. */
+/* Everything that has to sit above the backdrop. */
 #lyricsOverlay.isImmersive #lyricsStage {
     position: relative;
     z-index: 1;

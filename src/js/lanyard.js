@@ -54,8 +54,7 @@
   };
 
   let presence = null;
-  let rafId = 0;
-  let lastTick = 0;
+  let tickTimer = 0;
   let lastStatus;
   let clockTimer = null;
   let loaderTimer = null;
@@ -542,9 +541,13 @@
         url: art.proxy(HIGH_RES, "&animated=true"),
         label: "animated standard definition album cover (" + HIGH_RES + "px)",
       });
+      // Through the proxy at UPGRADE_RES, not straight from the original: on
+      // the Cider host that can be a multi-megabyte file thousands of pixels
+      // across, and the browser keeps every frame of it decoded in memory -
+      // for a cover shown at 96px.
       ladder.push({
-        url: art.direct,
-        label: "animated album cover at full resolution",
+        url: art.proxy(UPGRADE_RES, "&animated=true"),
+        label: "animated high definition album cover (" + UPGRADE_RES + "px)",
       });
     }
 
@@ -966,28 +969,86 @@
     return "";
   }
 
-  function tick(ts) {
-    if (ts - lastTick > 100) {
-      lastTick = ts;
+  /* The clock and the progress bar are updated once a second, just after
+     the moment the clock ticks over, so the two move together. More often
+     changes nothing anyone can see - on a three-and-a-half minute song the
+     bar moves about 1.4px a second - and every update is a new frame the
+     browser has to draw. */
 
-      const activities = presence?.activities || [];
-      const music = window.Lanyard.appleMusic(presence);
+  // How long after the clock's turn the update lands, so the rounding in
+  // clock() has definitely flipped by then.
+  const TICK_LATE_MS = 20;
 
-      if (music) {
-        updateProgressBar(music.timestamps);
-        updateActivityTime(music.timestamps, "am");
-      }
-
-      const other = activities.find((a) => a !== music && a?.timestamps);
-      if (other) {
-        updateActivityTime(other.timestamps);
-        updateProgressBar(other.timestamps, "");
-      }
-    }
-    rafId = requestAnimationFrame(tick);
+  function tick() {
+    tickTimer = 0;
+    updateTimes();
+    tickTimer = setTimeout(tick, msUntilClockTurns());
   }
 
-  // No point burning a frame callback when nothing on screen is counting.
+  // Lined up with whichever clock the card shows: counting down to the end
+  // if the song has one, otherwise counting up from the start.
+  function msUntilClockTurns() {
+    const activities = presence?.activities || [];
+
+    let timed = window.Lanyard.appleMusic(presence);
+    if (!timed?.timestamps) {
+      timed = activities.find((a) => a?.timestamps);
+    }
+
+    const stamps = timed?.timestamps;
+    const now = Date.now();
+
+    let wait = 1000 - (now % 1000);
+
+    if (stamps?.end) {
+      const remaining = new Date(stamps.end).getTime() - now;
+      wait = remaining % 1000;
+    } else if (stamps?.start) {
+      const elapsed = now - new Date(stamps.start).getTime();
+      wait = 1000 - (elapsed % 1000);
+    }
+
+    // Past the end, the remainder comes out negative.
+    if (wait <= 0) {
+      wait = wait + 1000;
+    }
+
+    return wait + TICK_LATE_MS;
+  }
+
+  function updateTimes() {
+    // Nothing to update while the lyrics overlay covers the page, or the tab
+    // is in the background. Both catch up the moment they end - see the
+    // listeners below.
+    if (document.documentElement.classList.contains("lyricsOpen")) return;
+    if (document.hidden) return;
+
+    const activities = presence?.activities || [];
+    const music = window.Lanyard.appleMusic(presence);
+
+    if (music) {
+      updateProgressBar(music.timestamps);
+      updateActivityTime(music.timestamps, "am");
+    }
+
+    const other = activities.find((a) => a !== music && a?.timestamps);
+    if (other) {
+      updateActivityTime(other.timestamps);
+      updateProgressBar(other.timestamps, "");
+    }
+  }
+
+  // Straight back up to date when the page is on show again, rather than up
+  // to a second later with the time from before.
+  window.addEventListener("lyrics:close", function () {
+    if (tickTimer) updateTimes();
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    if (tickTimer) updateTimes();
+  });
+
+  // No point keeping a timer going when nothing on screen is counting.
   function syncTicker() {
     const activities = presence?.activities || [];
     const anythingTimed = activities.some((a) => {
@@ -996,14 +1057,18 @@
 
     const wanted = window.Lanyard.autoUpdate && anythingTimed;
 
-    if (wanted && !rafId) {
-      rafId = requestAnimationFrame(tick);
+    // Started over on every presence update, not only the first: a new song
+    // is shown at once, and its clock turns over at different moments from
+    // the last one's, so the timer lines up with it afresh.
+    if (wanted) {
+      clearTimeout(tickTimer);
+      tick();
       return;
     }
 
-    if (!wanted && rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = 0;
+    if (!wanted && tickTimer) {
+      clearTimeout(tickTimer);
+      tickTimer = 0;
     }
   }
 
