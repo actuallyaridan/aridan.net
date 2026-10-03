@@ -58,18 +58,23 @@ export async function onRequestGet({ request }) {
     return json({ found: false, reason: "not_playing" }, 409);
   }
 
-  let hit;
+  let result;
   try {
     // Album and duration come from the presence, not the query string, so the
     // only thing a caller controls is which song to ask about - and that has
     // to be the one playing.
-    hit = await lookup(playing.artist, playing.track, playing.album, playing.duration);
+    result = await lookup(playing.artist, playing.track, playing.album, playing.duration);
   } catch (err) {
     return json({ found: false, reason: "upstream", detail: String(err?.message || err) }, 502);
   }
 
-  if (!hit) return json({ found: false, reason: "no_match" }, 404);
-  return json(shape(hit), 200);
+  if (!result.hit) {
+    // Only whether plain lyrics exist, never the text itself, so the page can
+    // say why nothing was shown.
+    return json({ found: false, reason: "no_match", plain: result.plain }, 404);
+  }
+
+  return json(shape(result.hit), 200);
 }
 
 // The Apple Music activity from my presence, read the same way lyrics.js reads
@@ -121,8 +126,12 @@ function samePlay(playing, artist, track) {
   return true;
 }
 
-// Three widening attempts, stopping at the first that answers.
+// Three widening attempts, stopping at the first that answers. Returns the
+// row that was picked, if any, and whether a plain-text-only row was passed
+// over on the way.
 async function lookup(artist, track, album, duration) {
+  let plain = false;
+
   // Artist, track, album and duration together are specific enough to rule out
   // covers and re-recordings, so it is worth one request when Discord gave us
   // all four.
@@ -133,20 +142,36 @@ async function lookup(artist, track, album, duration) {
       album_name: album,
       duration,
     });
-    if (usable(exact)) return exact;
+    if (usable(exact)) return { hit: exact, plain: false };
+    if (plainOnly(exact)) plain = true;
   }
 
   // Duration is deliberately dropped here rather than kept as the last filter:
   // LRCLIB hard-404s when it disagrees by more than a second or two, and a
   // presence timestamp drifts by about that much on its own.
   const loose = await lrclib("/get", { artist_name: artist, track_name: track });
-  if (usable(loose)) return loose;
+  if (usable(loose)) return { hit: loose, plain: false };
+  if (plainOnly(loose)) plain = true;
 
   // Search returns every recording of the title, including other artists'
   // covers, so the choice of which one is ours is made below rather than by
   // taking the first row.
-  const results = await lrclib("/search", { artist_name: artist, track_name: track });
-  return best(Array.isArray(results) ? results : [], duration);
+  let results = await lrclib("/search", { artist_name: artist, track_name: track });
+  if (!Array.isArray(results)) results = [];
+
+  const hit = best(results, duration);
+  if (hit) return { hit: hit, plain: false };
+
+  if (results.some(plainOnly)) plain = true;
+  return { hit: null, plain: plain };
+}
+
+// A row with the words but no timestamps - the one kind usable() turns away
+// that is still worth mentioning.
+function plainOnly(row) {
+  if (!row) return false;
+  if (row.syncedLyrics) return false;
+  return !!row.plainLyrics;
 }
 
 // Only time-synced lyrics are ever shown, one line at a time as they are sung,

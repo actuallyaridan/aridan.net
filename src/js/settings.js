@@ -22,6 +22,7 @@ const LANGUAGES = {
 const PREF_DEFAULT = {
     autoUpdateActivity: () => true,
     albumAccent: () => true,
+    hideExplicit: () => true,
     upgradeArtwork: () => true,
     reduceMotion: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
     reduceTransparency: () => matchMedia('(prefers-reduced-transparency: reduce)').matches

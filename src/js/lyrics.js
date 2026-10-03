@@ -287,12 +287,15 @@
       // To the back of the queue, as the most recently wanted.
       answers.delete(key);
       answers.set(key, known);
+      logCached(want, known);
       return known;
     }
 
     const params = new URLSearchParams({ artist: want.artist, track: want.title });
     if (want.album) params.set("album", want.album);
     if (want.duration) params.set("duration", String(Math.round(want.duration)));
+
+    console.log("[Lyrics] Looking for lyrics for " + want.title + " - " + want.artist + " on LRCLIB...");
 
     const request = fetch("/api/lyrics?" + params, {
       headers: { accept: "application/json" }
@@ -314,6 +317,7 @@
       }
 
       const body = await res.json();
+      logAnswer(res.status, body);
 
       // 404 is a real answer here, so it is handled like a success.
       if (res.ok || res.status === 404) return body;
@@ -337,6 +341,57 @@
     }
 
     return guarded;
+  }
+
+  // What the search turned up, in words. Errors are left to the warning the
+  // caller already prints.
+  function logAnswer(status, body) {
+    if (body.found && body.instrumental) {
+      console.log("[Lyrics] Found an instrumental track");
+      return;
+    }
+
+    if (body.found && body.synced) {
+      console.log("[Lyrics] Found time synced lyrics (" + body.lines.length + " lines)");
+      return;
+    }
+
+    if (body.found) {
+      console.log("[Lyrics] Found time synced lyrics, but none of the lines could be read");
+      return;
+    }
+
+    if (status === 404 && body.plain) {
+      console.log("[Lyrics] Found plain lyrics, but only time synced lyrics can be shown");
+      return;
+    }
+
+    if (status === 404) {
+      console.log("[Lyrics] No lyrics found");
+      return;
+    }
+
+    if (body.reason === "not_playing") {
+      console.log("[Lyrics] The song changed before LRCLIB was asked");
+    }
+  }
+
+  // A saved answer is a promise, and it may still be waiting on the search
+  // that made it - so this waits for it too, and says what it held. "No
+  // lyrics" is saved just like lyrics are, and gets its own line.
+  function logCached(want, known) {
+    const name = want.title + " - " + want.artist;
+
+    known.then((body) => {
+      if (body.found) {
+        console.log("[Lyrics] Found cached lyrics for " + name);
+        return;
+      }
+
+      console.log("[Lyrics] Already searched for " + name + ", no lyrics");
+    }, () => {
+      // A failed search is logged where it is caught, in loadInto().
+    });
   }
 
   function setStatus(key) {
@@ -389,8 +444,8 @@
     let title = "";
     let artist = "";
     if (track) {
-      title = track.title;
-      artist = track.artist;
+      title = shown(track.title);
+      artist = shown(track.artist);
     }
 
     resizeNowPlaying(function () {
@@ -462,10 +517,18 @@
     scene = null;
   }
 
+  // What a line, title or artist looks like on screen - see profanity.js.
+  // Only ever applied here, at the last step, so the lyrics lookup and the
+  // cache are still keyed by the real names.
+  function shown(text) {
+    if (window.Profanity) return window.Profanity.clean(text);
+    return text;
+  }
+
   function textRow(text) {
     const el = document.createElement("p");
     el.className = "lyricsRow";
-    el.textContent = text;
+    el.textContent = shown(text);
     stage.appendChild(el);
     return el;
   }
@@ -577,7 +640,7 @@
       if (!line.text) continue;
 
       const el = document.createElement("p");
-      el.textContent = line.text;
+      el.textContent = shown(line.text);
       transcript.appendChild(el);
     }
 
@@ -661,7 +724,7 @@
   }
 
   function buildScene(cue) {
-    const words = cue.text.split(/\s+/).filter(Boolean);
+    const words = shown(cue.text).split(/\s+/).filter(Boolean);
     const rows = rowsOf(words);
     const layout = pickLayout();
 
@@ -1166,7 +1229,7 @@
         return;
       }
 
-      console.warn("[lyrics] backdrop artwork failed to load:", url);
+      console.warn("[Lyrics] backdrop artwork failed to load:", url);
     };
 
     img.src = url;
@@ -1300,7 +1363,7 @@
   function enterFullscreen() {
     if (overlay.requestFullscreen) {
       overlay.requestFullscreen().catch((err) => {
-        console.warn("[lyrics] full screen was refused:", err);
+        console.warn("[Lyrics] full screen was refused:", err);
       });
       return;
     }
@@ -1469,7 +1532,7 @@
       if (!overlayOpen || trackKey(track) !== requested) return;
       present(data);
     } catch (err) {
-      console.warn("[lyrics]", err);
+      console.warn("[Lyrics]", err);
       if (!overlayOpen || trackKey(track) !== requested) return;
 
       stopTicking();
@@ -1645,9 +1708,10 @@
 
   // A mode change - from the control bar, or a reset in the settings dialog
   // while the lyrics are open - redraws them straight away in the new style.
+  // So does turning "Hide explicit language" on or off.
   window.addEventListener("settings:change", (event) => {
     const key = event.detail?.key;
-    if (key !== "lyricsMode" && key !== "reduceMotion") return;
+    if (key !== "lyricsMode" && key !== "reduceMotion" && key !== "hideExplicit") return;
     if (!overlayOpen) return;
 
     if (shownData) {

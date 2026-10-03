@@ -1,7 +1,7 @@
 (function (global) {
     "use strict";
 
-    var VERSION = "6.0.2";
+    var VERSION = "6.1";
 
     function toggleMarkup(id, label) {
         return `
@@ -77,7 +77,7 @@
             </div>
         </div>
         <div>
-            <${h} class="settingsGroupHeading"><i class="fa-solid fa-sliders" aria-hidden="true"></i>General</${h}>${toggleMarkup("autoUpdateActivity", "Automatically update activities")}${toggleMarkup("albumAccent", "Match accent color to album art")}
+            <${h} class="settingsGroupHeading"><i class="fa-solid fa-sliders" aria-hidden="true"></i>General</${h}>${toggleMarkup("autoUpdateActivity", "Automatically update activities")}${toggleMarkup("albumAccent", "Match accent color to album art")}${toggleMarkup("hideExplicit", "Hide explicit language")}
         </div>
         <div>
             <${h} class="settingsGroupHeading"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i>Performance</${h}>${toggleMarkup("upgradeArtwork", "Upgrade album art quality")}

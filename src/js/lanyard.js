@@ -117,6 +117,11 @@
       return;
     }
 
+    if (key === "hideExplicit") {
+      if (presence) updateUi();
+      return;
+    }
+
     if (key !== "autoUpdateActivity") return;
     syncRefreshButton();
     syncTicker();
@@ -331,8 +336,8 @@
 
     const a = activities[0];
     setText(els.activityName, a.name);
-    setText(els.activityDetails, a.details);
-    setText(els.activityState, a.state || "");
+    setText(els.activityDetails, shown(a.details));
+    setText(els.activityState, shown(a.state || ""));
 
     updateActivityTime(a.timestamps);
     updateProgressBar(a.timestamps, "");
@@ -344,8 +349,8 @@
     updateImage(els.amActivityLogoLarge, a, a.assets?.large_text);
 
     setText(els.amActivityName, a.name);
-    setText(els.amActivityState, artistOf(a.state));
-    setText(els.amActivityDetails, a.details);
+    setText(els.amActivityState, shown(artistOf(a.state)));
+    setText(els.amActivityDetails, shown(a.details));
 
     updateActivityTime(a.timestamps, "am");
     updateProgressBar(a.timestamps);
@@ -565,6 +570,12 @@
       return;
     }
 
+    // Set on every update, not only when the art changes, so turning
+    // "Hide explicit language" on or off reaches an album name already shown.
+    const label = shown(alt || activity.assets?.large_image || "");
+    el.alt = label;
+    el.title = label;
+
     const state = artState.get(el) || { src: "", token: 0 };
 
     // Already showing one of the rungs for this same cover, so leave it be.
@@ -575,10 +586,6 @@
     // Bumping the token makes any climb still in flight abandon itself.
     state.token++;
     artState.set(el, state);
-
-    const label = alt || activity.assets?.large_image || "";
-    el.alt = label;
-    el.title = label;
 
     // Shown again after being hidden: see restartSpin() in general.js.
     const wasHidden = el.style.display === "none";
@@ -1121,6 +1128,13 @@
     if (!el) return;
     if (yes) el.style.display = "flex";
     else el.style.display = "none";
+  }
+
+  // What a song, artist or album is called on screen - see profanity.js. The
+  // real names are still what the Apple Music lookup is given.
+  function shown(text) {
+    if (window.Profanity) return window.Profanity.clean(text);
+    return text;
   }
 
   function setText(el, text) {

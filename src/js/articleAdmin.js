@@ -60,18 +60,10 @@
         link.innerHTML = '<i class="fa-solid fa-plus"></i>' + t("New article");
         info.appendChild(link);
 
+        // No browser warning here: the editor's folder bar says so where it
+        // matters, when there is something to save.
         addNoticeBar(info);
 
-        if (!Store.isSupported()) {
-            var warn = document.createElement("span");
-            warn.className = "warn browserSupportWarning";
-            warn.id = "browserSupportWarning";
-            var line = document.createElement("p");
-            line.textContent = Store.UNSUPPORTED;
-            warn.appendChild(line);
-            (info.parentNode || info).appendChild(warn);
-            retranslate.push(function () { line.textContent = Store.UNSUPPORTED; });
-        }
         retranslate.push(function () {
             link.innerHTML = '<i class="fa-solid fa-plus"></i>' + t("New article");
         });
@@ -118,76 +110,10 @@
         });
     }
 
-    function decorate(card) {
-        var slug = card.dataset.slug;
-        var actions = card.querySelector(".readMore");
-        if (!slug || !actions || card.querySelector(".articleAdminActions")) return;
-
-        var group = document.createElement("span");
-        group.className = "articleAdminActions";
-
-        var edit = document.createElement("a");
-        edit.className = "button";
-        edit.href = editUrl(slug);
-        edit.title = t("Edit this article");
-        edit.setAttribute("aria-label", t("Edit this article"));
-        edit.innerHTML = '<i class="fa-solid fa-pen" aria-hidden="true"></i>';
-
-        var del = button("destructive", t("Delete this article"), "fa-trash-can");
-
-        if (Store.isSupported()) {
-            del.addEventListener("click", function () {
-                removeArticle(slug, function (slugs) {
-                    card.remove();
-
-                    var message;
-                    if (slugs.length === 1) {
-                        message = t("Deleted {0}.md. 1 article left.", slug);
-                    } else {
-                        message = t("Deleted {0}.md. {1} articles left.", slug, slugs.length);
-                    }
-
-                    notice(message, "ok");
-                });
-            });
-        } else {
-            disableDelete(del);
-        }
-
-        retranslate.push(function () {
-            edit.title = t("Edit this article");
-            edit.setAttribute("aria-label", t("Edit this article"));
-            if (!del.disabled) {
-                del.title = t("Delete this article");
-                del.setAttribute("aria-label", t("Delete this article"));
-            }
-        });
-
-        group.appendChild(edit);
-        group.appendChild(del);
-
-        // Before the "read more" arrow, so the arrow stays last in the row.
-        var arrow = actions.querySelector("a.backButton");
-        if (arrow) {
-            arrow.parentNode.insertBefore(group, arrow);
-        } else {
-            actions.appendChild(group);
-        }
-    }
-
+    // Edit and Delete live on the article page only, not on the cards in the
+    // list - one step further from deleting something by accident.
     function enhance() {
         addNewButton();
-
-        for (const card of document.querySelectorAll(".articlePreview[data-slug]")) {
-            decorate(card);
-        }
-    }
-
-    function labelledButton(tag, className, icon, text) {
-        var el = document.createElement(tag);
-        el.className = "button " + className;
-        el.innerHTML = '<i class="fa-solid ' + icon + '" aria-hidden="true"></i>' + text;
-        return el;
     }
 
     function decorateArticle(slug) {
@@ -201,16 +127,23 @@
 
         if (back) row.appendChild(back);
 
-        var edit = labelledButton("a", "", "fa-pen", t("Edit"));
+        // Edit is a button of its own, and the page's main action, so it is
+        // .primary like New article and Save. Only Delete goes in the menu.
+        var edit = document.createElement("a");
+        edit.className = "button primary";
         edit.href = editUrl(slug);
-        row.appendChild(edit);
 
-        var del = labelledButton("button", "destructive", "fa-trash-can", t("Delete"));
+        var del = document.createElement("button");
         del.type = "button";
-        retranslate.push(function () {
-            edit.innerHTML = '<i class="fa-solid fa-pen"></i>' + t("Edit");
-            del.innerHTML = '<i class="fa-solid fa-trash-can"></i>' + t("Delete");
-        });
+        del.className = "articleDelete";
+
+        function label() {
+            edit.innerHTML = '<i class="fa-solid fa-pen" aria-hidden="true"></i>' + t("Edit");
+            del.innerHTML = '<i class="fa-solid fa-trash-can" aria-hidden="true"></i>' + t("Delete");
+        }
+        label();
+        retranslate.push(label);
+
         if (Store.isSupported()) {
             del.addEventListener("click", function () {
                 removeArticle(slug, function () {
@@ -220,7 +153,17 @@
         } else {
             disableDelete(del);
         }
-        row.appendChild(del);
+
+        row.appendChild(edit);
+        // Delete is kept behind the "more" menu - see articleMenu.js. Should a
+        // cached page not load that yet, it is a plain button rather than
+        // missing, which would take the whole row with it.
+        if (window.ArticleMenu) {
+            row.appendChild(window.ArticleMenu.create([del]));
+        } else {
+            del.className = "button destructive";
+            row.appendChild(del);
+        }
 
         meta.appendChild(row);
         addNoticeBar(meta);

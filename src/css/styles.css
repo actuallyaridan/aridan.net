@@ -1426,25 +1426,6 @@ li>a>i, li>button.noUI>i {
     border: none;
 }
 
-.articlePreview {
-    display: flex;
-    flex-grow: 2;
-    padding: 10px;
-    flex-direction: column !important;
-    justify-content: center;
-    align-items: start;
-    text-align: left;
-    margin: 12px;
-    padding: 12px;
-    border-radius: 12px;
-    background-color: var(--card-background-color);
-}
-
-.style-liquid-glass .articlePreview {
-    background-color: rgba(255, 255, 255, 0.05);
-background-color: var(--liquid-glass-button-background);
-border: 1px solid var(--liquid-glass-button-border);
-}
 
 .gridButtons {
     display: flex;
@@ -1594,29 +1575,79 @@ html.reduce-motion .emailDialog[open] {
     text-align: center;
 }
 
+/* ---------- Article list ----------
+
+   One card per article: the title, the preview and the date. Built like the
+   Apple Music card on the home page - the same glass, border and corners, and
+   no shadow - and spaced like the Pi-hole page's stat cards. The whole card is the link - see
+   .articleLink below - and it answers hover and press the way a .button
+   does, since that is what it is.
+
+   .section.articlePreview, not just .articlePreview, to outrank div.section,
+   which would make it a flex row. */
+.section.articlePreview {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 18px;
+    margin: 16px 12px 0;
+    padding: 16px 18px;
+    text-align: left;
+    border-radius: 12px;
+    background-color: var(--card-background-color);
+}
+
+.style-liquid-glass .articlePreview {
+    background-color: var(--liquid-glass-button-background);
+    border: 1px solid var(--liquid-glass-button-border);
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .12s ease;
+}
+
+/* 16px between cards, the gap in the Pi-hole page's .pi-grid. Only a top
+   margin, since a bottom one would collapse into it; the last card gets the
+   bottom margin that keeps the footer off it. */
+.section.articlePreview:not(:has(~ .articlePreview)) {
+    margin-bottom: 18px;
+}
+
+/* The same tint as .button:hover, without the shadow - a card with one
+   would look like it was floating off the page. */
+.style-liquid-glass .articlePreview:hover {
+    background: rgba(127, 127, 127, 0.18);
+    border-color: rgba(127, 127, 127, 0.3);
+}
+
+.style-liquid-glass .articlePreview:active {
+    transform: scale(0.98);
+}
+
+html.reduce-motion .articlePreview:active {
+    transform: none;
+}
+
+/* The title link has the focus, but the ring goes round the whole card,
+   since that is what it opens. */
+.articlePreview:has(.articleLink:focus-visible) {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
 .articlePreview>.preview {
-    flex: 3;
-    width: 100%;
+    min-width: 0;
 }
 
-.preview>span {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: start;
-    gap: 10px;
-}
-
-.preview>span>.date {
-    margin-top: .25em;
-    display: flex;
-    text-align: right;
-}
-
-.preview > span > h2 {
-    margin: 0;
+/* The colour and weight of the Pi-hole page's big numbers (.pi-num): the
+   main text of a card in full title colour, with the preview and date below
+   it in paragraph colour like .pi-label. */
+.articlePreview .section-title {
+    margin: 0 0 4px;
     font-size: 1.2em;
-    flex-grow: 1;
+    font-weight: 500;
+    color: var(--title-color);
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -1625,33 +1656,101 @@ html.reduce-motion .emailDialog[open] {
     word-break: break-word;
 }
 
+.articleLink {
+    color: inherit;
+    text-decoration: none;
+}
+
+.articleLink:focus-visible {
+    outline: none;
+}
+
+/* Stretched over the card, so a click anywhere on it opens the article. */
+.articleLink::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+}
+
 .previewContent {
+    margin: 0;
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    word-break: break-word; 
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    word-break: break-word;
+}
+
+.articleMeta {
+    display: flex;
+    /* Spelled out, since every ul is a column by default here. */
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: .85em;
+    color: var(--paragraph-color);
+}
+
+.articleMeta>li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* The same colour as the date beside it - an icon here is a label, not an
+   accent. */
+.articleMeta i {
+    margin: 0;
+    color: inherit;
 }
 
 .articlePreview>.readMore {
-    flex: 1;
     display: flex;
-    justify-content: flex-end;
     align-items: center;
-    text-align: center;
-    margin-top: 10px;
-    width: 100%;
+    gap: 10px;
 }
 
-.articlePreview>.readMore>a {
+/* Only says "this opens" - the card itself is the link - so it never takes
+   a click or a hover of its own. */
+.articleArrow {
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
 }
 
-.articlePreview>.readMore>a>i {
-    margin: 0px;
+.articleArrow>i {
+    margin: 0;
+}
+
+/* Just the arrow, no button around it - the card is the button. */
+.style-liquid-glass .articleArrow {
+    background: none;
+    border-color: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+/* On a phone the arrow goes - the whole card is obviously the thing to tap. */
+@media (max-width: 600px) {
+    .section.articlePreview {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .articleArrow {
+        display: none;
+    }
+
+    .articlePreview>.readMore {
+        display: none;
+    }
 }
 
 #articleContent {
@@ -1690,6 +1789,12 @@ html.reduce-motion .emailDialog[open] {
     padding: 0px;
 }
 
+/* The article's date, as a byline over the body - the same calendar line
+   the article list's cards have. Its own room above the first heading. */
+.articleByline {
+    margin: 0 0 18px;
+}
+
 .article-content {
     line-height: 1.6;
 }
@@ -1714,10 +1819,6 @@ html.reduce-motion .emailDialog[open] {
     text-align: center;
     margin: 0px;
     gap: 0px;
-}
-
-.articleAdminActions>*>i {
-    margin: 0px;
 }
 
 .backButton>i {
@@ -1813,9 +1914,9 @@ span.token{
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Sits as far below the hero buttons as the Chromium warning on Articles,
-   which has the admin bar's empty status line (.articleAdminNotice, 1.4em
-   tall) between it and the New article button. */
+/* Sits as far below the hero buttons as anything under the New article
+   button on Articles, which has the admin bar's empty status line
+   (.articleAdminNotice, 1.4em tall) between them. */
 #rateLimitGitHub{
     display: none;
     margin-top: calc(10px + 1.4em);

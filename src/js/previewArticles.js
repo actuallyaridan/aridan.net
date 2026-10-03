@@ -11,34 +11,32 @@
         // Escaped, so a title with a < in it shows as text.
         var title = AF.escapeHtml(article.meta.title || "Untitled article");
         var rawDate = AF.escapeHtml(article.meta.date || "");
-        var shownDate = AF.escapeHtml(AF.formatDate(article.meta.date));
+        var isoDate = AF.formatDate(article.meta.date) || "";
+        var shownDate = AF.escapeHtml(AF.localDate(isoDate));
         var preview = AF.escapeHtml(article.meta.preview || "");
         var href = AF.escapeHtml(articleUrl(article.slug));
-        // Every card's link says "Read more", so screen readers get the title too.
         var slugId = AF.escapeHtml(article.slug);
 
         var el = document.createElement("div");
         el.className = "section articlePreview";
         el.dataset.slug = article.slug;
 
+        // The title is the card's one link, stretched over the whole card in
+        // styles.css, so the card is a single tab stop that a screen reader
+        // reads by its title. The arrow only says "this opens"; the admin
+        // buttons sit on top of the stretched link so they still get clicks.
         el.innerHTML = `
             <div class="preview">
-                <span class="titleContainer">
-                    <h2 class="section-title" id="articleTitle-${slugId}">${title}</h2>
-                    <p class="date section-content">
-                        <time datetime="${rawDate}">${shownDate}</time>
-                    </p>
-                </span>
+                <h2 class="section-title" id="articleTitle-${slugId}"><a class="articleLink" href="${href}">${title}</a></h2>
                 <p class="section-content previewContent">${preview}</p>
+                <ul class="articleMeta">
+                    <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><time datetime="${rawDate}" data-iso="${AF.escapeHtml(isoDate)}">${shownDate}</time></li>
+                </ul>
             </div>
             <div class="readMore">
-                <div>
-                    <a href="${href}" title="Read more" aria-label="Read more"
-                       data-title-id="articleTitle-${slugId}"
-                       class="button backButton">
-                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                    </a>
-                </div>
+                <span class="button backButton articleArrow" aria-hidden="true">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </span>
             </div>`;
 
         return el;
@@ -117,7 +115,7 @@
                 // These cards land long after the one-off emoji pass on load.
                 if (window.parseEmoji) window.parseEmoji(frag);
                 container.appendChild(frag);
-                labelReadMore();
+                labelCards();
                 document.dispatchEvent(new CustomEvent("articles:rendered"));
             })
             .catch(function (err) {
@@ -130,17 +128,15 @@
     }
 
     // i18n's pass over the page has usually run before the cards arrive, so the
-    // links are labelled here, and again whenever the language changes.
-    function labelReadMore() {
-        var label = window.i18n ? window.i18n.t("Read more") : "Read more";
-        document.querySelectorAll(".readMore a[data-title-id]").forEach(function (link) {
-            var heading = document.getElementById(link.dataset.titleId);
-            link.title = label;
-            link.setAttribute("aria-label", heading ? label + ": " + heading.textContent : label);
+    // dates are written here, and again whenever the language changes.
+    function labelCards() {
+        document.querySelectorAll(".articleMeta time[data-iso]").forEach(function (el) {
+            el.textContent = AF.localDate(el.dataset.iso);
         });
+
     }
 
-    if (window.i18n) window.i18n.onChange(labelReadMore);
+    if (window.i18n) window.i18n.onChange(labelCards);
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", render);

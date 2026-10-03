@@ -270,6 +270,39 @@
             });
     }
 
+    // Everything in the folder that has no business in the articles folder -
+    // anything but .md files and index.json, subfolders included. Picking
+    // the repo root by mistake passes looksLikeArticlesDir(), since
+    // README.md counts as an article, but not this. Hidden files (.DS_Store
+    // and the like) are left out; every folder can have those.
+    function strayEntries(dir) {
+        var strays = [];
+        var entries = dir.values();
+
+        function step() {
+            return entries.next().then(function (res) {
+                if (res.done) return strays;
+
+                var entry = res.value;
+                var name = entry.name;
+
+                if (name.startsWith(".")) return step();
+
+                if (entry.kind === "directory") {
+                    strays.push(name + "/");
+                } else if (name !== "index.json" && !/\.md$/i.test(name)) {
+                    strays.push(name);
+                }
+
+                return step();
+            });
+        }
+
+        return step().catch(function () {
+            return [];
+        });
+    }
+
     var UNSUPPORTED = "You need to use a Chromium browser to save or delete articles.";
     var CANNOT_SAVE = "Use a Chromium browser to save articles.";
     var CANNOT_DELETE = "Use a Chromium browser to delete articles.";
@@ -291,6 +324,7 @@
         getDir: getDir,
         forgetDir: forgetDir,
         looksLikeArticlesDir: looksLikeArticlesDir,
+        strayEntries: strayEntries,
         readArticle: readArticle,
         writeArticle: writeArticle,
         deleteArticle: deleteArticle,

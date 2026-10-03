@@ -42,9 +42,12 @@
         "main #Elapsed",
         "main .warn:not(#editorFolderBar) p",
         "main .articleAdminBar > button.button",
+        "main .articleAdminBar #deleteArticle",
         "main #editorFolderBar > button.button",
-        "main .editorField > span",
-        "main .editorField > small",
+        // The label only - the first child. A field with a hint also has a
+        // span.editorInput around its input, which must not be written over.
+        "main .editorField > span:first-child",
+        "main .editorField .fieldHintText",
         "#settingsLayer h2",
         ".settingsPanel .settingsGroupHeading",
         ".settingsPanel label.theme-label",
@@ -57,7 +60,7 @@
         ["main .editorField > input[placeholder]", "placeholder"],
         ["main .editorField > textarea[placeholder]", "placeholder"],
         ["main .articleAdminBar [title]", "title"],
-        ["main .articleAdminActions [title]", "title"],
+        ["main .articleAdminBar .articleMenuButton[aria-label]", "aria-label"],
         ["main .readMore a[title]", "title"],
         ["main #editorFolderBar [title]", "title"],
         ["main .article-navigation a[title]", "title"],

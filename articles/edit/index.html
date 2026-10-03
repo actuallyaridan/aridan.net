@@ -24,9 +24,6 @@
     <link rel="stylesheet" href="/src/css/settings.css">
     <link rel="stylesheet" href="/src/css/lanyard.css">
     <link rel="stylesheet" href="/src/css/editor.css">
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.css">
-    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
     <script src="/src/js/general.js" defer></script>
     <script src="/src/js/i18n.js" defer></script>
     <script src="/src/js/lanyardClient.js" defer></script>
@@ -34,6 +31,7 @@
 
     <script src="/src/js/articleFormat.js" defer></script>
     <script src="/src/js/articleStore.js" defer></script>
+    <script src="/src/js/articleMenu.js" defer></script>
     <script src="/src/js/articleEditor.js" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@17.0.3/dist/twemoji.min.js" integrity="sha384-Y5xukbGJwykbHHkTbLJykYLcBPFxrwipTbEh0puxhkz9CZ90raTPGe2Ks4vCxsYU" referrerpolicy="no-referrer"
         crossorigin="anonymous"></script>
@@ -112,13 +110,24 @@
                         <button type="button" class="button" id="downloadArticle">
                             <i class="fa-solid fa-download" aria-hidden="true"></i>Download
                         </button>
-                        <button type="button" class="button destructive" id="deleteArticle">
-                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>Delete
-                        </button>
+                        <!-- Delete is kept behind the "more" menu - see articleMenu.js. -->
+                        <span class="articleMenu">
+                            <button type="button" class="button articleMenuButton" title="More options"
+                                aria-label="More options" aria-haspopup="menu" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                            </button>
+                            <div class="articleMenuList" role="menu" hidden>
+                                <button type="button" class="articleDelete" id="deleteArticle" role="menuitem">
+                                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>Delete
+                                </button>
+                            </div>
+                        </span>
                     </div>
                 </div>
 
-                <span class="warn" id="editorFolderBar">
+                <span id="editorFolderBar" data-state="empty">
+                    <i class="fa-solid fa-circle-exclamation" id="editorFolderIcon" aria-hidden="true"></i>
+                    <div class="lds-ring smallLoader" id="editorFolderLoader" aria-hidden="true"><div></div><div></div><div></div><div></div></div>
                     <p role="status" aria-live="polite"><span id="editorFolderState">No folder selected yet.</span></p>
                     <button type="button" class="button" id="editorPickFolder"
                         title="Pick assets/content/articles/">Select folder</button>
@@ -135,27 +144,28 @@
 
                     <label class="editorField">
                         <span>File name</span>
-                        <input type="text" id="fieldSlug" class="button" placeholder="the-identifier-for-this-article" required>
-                        <small id="slugHint">Becomes <code>&lt;name&gt;.md</code> and the article's web address.</small>
+                        <span class="editorInput">
+                            <input type="text" id="fieldSlug" class="button" placeholder="the-identifier-for-this-article"
+                                aria-describedby="slugHint" required>
+                            <span class="fieldHint" tabindex="0">
+                                <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                                <span class="fieldHintText" id="slugHint" role="tooltip">Becomes <code>&lt;name&gt;.md</code> and the article's web address.</span>
+                            </span>
+                        </span>
                     </label>
 
-                    <label class="editorField">
-                        <span>Date</span>
-                        <input type="date" id="fieldDate" class="button" required>
-                    </label>
 
                     <label class="editorField">
-                        <span>Preview</span>
+                        <span>Summary</span>
                         <textarea id="fieldPreview" class="button" rows="3"
                             placeholder="A short description of the article for the listing page."></textarea>
                     </label>
 
-                    <div class="editorField">
+                    <label class="editorField">
                         <span>Body</span>
-                        <div id="fieldBodyEditor"></div>
-                        <textarea id="fieldBody" class="button editorBody hide" rows="18"
+                        <textarea id="fieldBody" class="button editorBody" rows="18"
                             placeholder="## A heading&#10;&#10;Write your article in Markdown."></textarea>
-                    </div>
+                    </label>
                 </form>
 
             </div>

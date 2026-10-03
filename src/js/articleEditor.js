@@ -13,106 +13,95 @@
     var slugEditedByHand = false;
     var dirty = false;
     var busy = false;
+
+    // Front matter the form has no field for, kept from the loaded file so a
+    // save writes it back. See fillForm() and the stringify call.
+    var extraMeta = {};
+
+    // There is no date field: a new article is dated the day it is written,
+    // and an edited one keeps its date - see fillForm().
+    var articleDate = AF.todayISO();
     var el = {};
 
     function viewUrl(slug) {
         return "/articles/view/index.html?article=" + encodeURIComponent(slug);
     }
 
+    // The body is a plain Markdown textarea. (It was a Toast UI rich editor
+    // once; this wrapper is the one place that would change to bring one back.)
     var bodyEditor = {
-        instance: null,
         get: function () {
-            return this.instance ? this.instance.getMarkdown() : el.body.value;
+            return el.body.value;
         },
         set: function (text) {
-            if (this.instance) this.instance.setMarkdown(text || "", false);
-            else el.body.value = text || "";
+            el.body.value = text || "";
         }
     };
-
-    function applyEditorTheme() {
-        if (!el.bodyHost || !bodyEditor.instance) return;
-        el.bodyHost.classList.toggle(
-            "toastui-editor-dark",
-            document.documentElement.classList.contains("theme-dark")
-        );
-    }
-
-    function useTextareaFallback() {
-        el.body.classList.remove("hide");
-        if (el.bodyHost) el.bodyHost.classList.add("hide");
-    }
-
-    function initBodyEditor() {
-        var Editor = window.toastui && window.toastui.Editor;
-        if (!el.bodyHost || !Editor) { useTextareaFallback(); return; }
-
-        try {
-            bodyEditor.instance = new Editor({
-                el: el.bodyHost,
-                height: "auto",
-                minHeight: "420px",
-                initialEditType: "wysiwyg",
-                previewStyle: "vertical",
-                hideModeSwitch: false,
-                usageStatistics: false,
-                autofocus: false,
-                initialValue: ""
-            });
-            bodyEditor.instance.on("change", markDirty);
-            applyEditorTheme();
-            labelEditorControls();
-            new MutationObserver(applyEditorTheme).observe(document.documentElement, {
-                attributes: true, attributeFilter: ["class"]
-            });
-        } catch (err) {
-            console.error("Couldn't start the rich editor, using a plain textarea:", err);
-            useTextareaFallback();
-        }
-    }
-
-    function labelEditorControls() {
-        if (!el.bodyHost) return;
-
-        var known = {
-            more: "More formatting options",
-            "scroll-sync": "Sync scrolling between editor and preview"
-        };
-
-        el.bodyHost.querySelectorAll("button").forEach(function (btn) {
-            if (btn.getAttribute("aria-label") || btn.textContent.trim()) return;
-
-            var name = btn.getAttribute("title");
-            if (!name) {
-                Object.keys(known).some(function (cls) {
-                    if (btn.classList.contains(cls)) { name = known[cls]; return true; }
-                    return false;
-                });
-            }
-            if (name) btn.setAttribute("aria-label", t(name));
-        });
-    }
 
     var currentDir = null;
     var statusMessage = "";
     var statusKind = "";
 
+    // What else is in the chosen folder besides articles - see
+    // Store.strayEntries(). Anything there means it may be the wrong folder.
+    var strays = [];
+
+    // A few of them by name is enough to recognise the folder by.
+    function strayList() {
+        var shown = strays.slice(0, 3).map(function (name) {
+            return '"' + name + '"';
+        });
+        if (strays.length > 3) shown.push("…");
+        return shown.join(", ");
+    }
+
     function folderText() {
         if (!Store.isSupported()) return Store.UNSUPPORTED;
-        return currentDir
-            ? t('Saving into "{0}".', currentDir.name)
-            : t("No folder selected yet.");
+        if (!currentDir) return t("No folder selected yet.");
+
+        if (strays.length) {
+            return t('Saving into "{0}", but it also has {1} in it. Is this really the articles folder?',
+                currentDir.name, strayList());
+        }
+
+        return t('Saving into "{0}".', currentDir.name);
+    }
+
+    // What the folder bar is saying, which picks its icon and colour in
+    // editor.css. Only an error is red. While busy, the site's loading ring
+    // (#editorFolderLoader) shows instead of an icon.
+    var FOLDER_ICONS = {
+        empty: "fa-circle-exclamation",
+        suspect: "fa-circle-exclamation",
+        ready: "fa-folder",
+        busy: "fa-folder",
+        ok: "fa-circle-check",
+        error: "fa-circle-xmark",
+        unsupported: "fa-circle-exclamation"
+    };
+
+    function folderState() {
+        if (statusKind === "error") return "error";
+        if (statusKind === "ok") return "ok";
+        if (statusMessage) return "busy";
+        if (!Store.isSupported()) return "unsupported";
+        if (!currentDir) return "empty";
+        if (strays.length) return "suspect";
+        return "ready";
     }
 
     function renderFolderBar() {
         if (!el.folderState || !el.folderBar) return;
         el.folderState.textContent = statusMessage || folderText();
 
-        var problem = statusKind === "error" || (!statusMessage && !currentDir);
-        el.folderBar.classList.toggle("resolved", !problem);
-        el.folderBar.classList.toggle("ok", statusKind === "ok");
+        var state = folderState();
+        el.folderBar.dataset.state = state;
+        if (el.folderIcon) el.folderIcon.className = "fa-solid " + FOLDER_ICONS[state];
 
         if (el.pickFolder) {
+            // The one thing to do while there is no folder, so it is the
+            // primary button; after that it is only "Change".
+            el.pickFolder.classList.toggle("primary", !currentDir);
             el.pickFolder.textContent = currentDir ? t("Change") : t("Select folder");
             el.pickFolder.title = currentDir
                 ? t("Pick a different folder")
@@ -166,22 +155,34 @@
     }
 
     function buildFile() {
-        return AF.stringify({
+        // Anything in the front matter the form has no field for - an article's
+        // icon, say - is carried through from the file as it was loaded, so
+        // saving here does not quietly drop it.
+        var meta = Object.assign({}, extraMeta, {
             title: el.title.value.trim(),
-            date: el.date.value,
+            date: articleDate,
             preview: el.preview.value.trim()
-        }, bodyEditor.get());
+        });
+
+        return AF.stringify(meta, bodyEditor.get());
     }
 
     function fillForm(meta, body) {
+        extraMeta = {};
+        for (var key in meta) {
+            if (key === "title" || key === "date" || key === "preview") continue;
+            extraMeta[key] = meta[key];
+        }
+
         el.title.value = meta.title || "";
 
-        // <input type="date"> only accepts YYYY-MM-DD; anything else is left blank.
+        // An edited article keeps the date it was published on; only one
+        // with no readable date gets today's.
         var formatted = AF.formatDate(meta.date);
         if (/^\d{4}-\d{2}-\d{2}$/.test(formatted)) {
-            el.date.value = formatted;
+            articleDate = formatted;
         } else {
-            el.date.value = "";
+            articleDate = AF.todayISO();
         }
 
         el.preview.value = meta.preview || "";
@@ -209,10 +210,6 @@
             };
         }
 
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(el.date.value)) {
-            return { field: el.date, message: t("Pick a date.") };
-        }
-
         if (!bodyEditor.get().trim()) {
             return { field: null, message: t("The article has no body yet.") };
         }
@@ -227,7 +224,19 @@
 
     function setFolderState(dir) {
         currentDir = dir;
+        strays = [];
         renderFolderBar();
+
+        // Looked at after the bar is drawn, so it never waits on the check.
+        // Only applied if the folder has not changed again meanwhile.
+        if (dir) {
+            Store.strayEntries(dir).then(function (found) {
+                if (currentDir !== dir) return;
+                strays = found;
+                renderFolderBar();
+            });
+        }
+
         return dir;
     }
 
@@ -460,14 +469,13 @@
             title: document.getElementById("fieldTitle"),
             slug: document.getElementById("fieldSlug"),
             slugHint: document.getElementById("slugHint"),
-            date: document.getElementById("fieldDate"),
             preview: document.getElementById("fieldPreview"),
             body: document.getElementById("fieldBody"),
-            bodyHost: document.getElementById("fieldBodyEditor"),
             layout: document.querySelector(".editorLayout"),
             spinner: document.getElementById("loading"),
             folderBar: document.getElementById("editorFolderBar"),
             folderState: document.getElementById("editorFolderState"),
+            folderIcon: document.getElementById("editorFolderIcon"),
             pickFolder: document.getElementById("editorPickFolder"),
             save: document.getElementById("saveArticle"),
             download: document.getElementById("downloadArticle"),
@@ -475,8 +483,6 @@
         };
         if (!el.form || !el.title) return;
 
-        el.date.value = AF.todayISO();
-        initBodyEditor();
 
         el.form.addEventListener("input", markDirty);
         el.form.addEventListener("submit", save);

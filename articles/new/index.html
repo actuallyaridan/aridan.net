@@ -24,9 +24,6 @@
     <link rel="stylesheet" href="/src/css/settings.css">
     <link rel="stylesheet" href="/src/css/lanyard.css">
     <link rel="stylesheet" href="/src/css/editor.css">
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.css">
-    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
     <script src="/src/js/general.js" defer></script>
     <script src="/src/js/i18n.js" defer></script>
     <script src="/src/js/lanyardClient.js" defer></script>
@@ -115,7 +112,9 @@
                     </div>
                 </div>
 
-                <span class="warn" id="editorFolderBar">
+                <span id="editorFolderBar" data-state="empty">
+                    <i class="fa-solid fa-circle-exclamation" id="editorFolderIcon" aria-hidden="true"></i>
+                    <div class="lds-ring smallLoader" id="editorFolderLoader" aria-hidden="true"><div></div><div></div><div></div><div></div></div>
                     <p role="status" aria-live="polite"><span id="editorFolderState">No folder selected yet.</span></p>
                     <button type="button" class="button" id="editorPickFolder"
                         title="Pick assets/content/articles/">Select folder</button>
@@ -132,27 +131,28 @@
 
                     <label class="editorField">
                         <span>File name</span>
-                        <input type="text" id="fieldSlug" class="button" placeholder="the-identifier-for-this-article" required>
-                        <small id="slugHint">Becomes <code>&lt;name&gt;.md</code> and the article's web address.</small>
+                        <span class="editorInput">
+                            <input type="text" id="fieldSlug" class="button" placeholder="the-identifier-for-this-article"
+                                aria-describedby="slugHint" required>
+                            <span class="fieldHint" tabindex="0">
+                                <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                                <span class="fieldHintText" id="slugHint" role="tooltip">Becomes <code>&lt;name&gt;.md</code> and the article's web address.</span>
+                            </span>
+                        </span>
                     </label>
 
-                    <label class="editorField">
-                        <span>Date</span>
-                        <input type="date" id="fieldDate" class="button" required>
-                    </label>
 
                     <label class="editorField">
-                        <span>Preview</span>
+                        <span>Summary</span>
                         <textarea id="fieldPreview" class="button" rows="3"
                             placeholder="A short description of the article for the listing page."></textarea>
                     </label>
 
-                    <div class="editorField">
+                    <label class="editorField">
                         <span>Body</span>
-                        <div id="fieldBodyEditor"></div>
-                        <textarea id="fieldBody" class="button editorBody hide" rows="18"
+                        <textarea id="fieldBody" class="button editorBody" rows="18"
                             placeholder="## A heading&#10;&#10;Write your article in Markdown."></textarea>
-                    </div>
+                    </label>
                 </form>
 
             </div>

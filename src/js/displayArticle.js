@@ -38,7 +38,14 @@
         // Escaped, so a title containing < or & cannot become real markup.
         var title = AF.escapeHtml(meta.title || "Untitled article");
         var rawDate = AF.escapeHtml(meta.date || "");
-        var shownDate = AF.escapeHtml(AF.formatDate(meta.date));
+        var isoDate = AF.formatDate(meta.date) || "";
+        var shownDate = AF.escapeHtml(AF.localDate(isoDate));
+
+        // The preview sits under the title, where every page has its intro.
+        var preview = "";
+        if (meta.preview) {
+            preview = '<p class="description titleColor">' + AF.escapeHtml(meta.preview) + "</p>";
+        }
 
         container.innerHTML = `
             <article class="full-article">
@@ -48,9 +55,7 @@
                     </p>
                     <div>
                         <h1 class="name">${title}</h1>
-                        <p class="description titleColor">
-                            <time datetime="${rawDate}">${shownDate}</time>
-                        </p>
+                        ${preview}
                         <a href="/articles/" title="Back to Articles"
                            aria-label="Back to Articles" class="button backButton">
                             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
@@ -58,6 +63,9 @@
                     </div>
                 </div>
                 <hr>
+                <ul class="articleMeta articleByline">
+                    <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><time datetime="${rawDate}" data-iso="${AF.escapeHtml(isoDate)}">${shownDate}</time></li>
+                </ul>
                 <div class="article-content"></div>
             </article>`;
 
@@ -66,6 +74,15 @@
         content.innerHTML = bodyHtml;
         if (window.markExternalLinks) window.markExternalLinks(content);
     }
+
+    // Written again when the language changes, like the dates in the list.
+    function relabelDate() {
+        document.querySelectorAll(".articleByline time[data-iso]").forEach(function (el) {
+            el.textContent = AF.localDate(el.dataset.iso);
+        });
+    }
+
+    if (window.i18n) window.i18n.onChange(relabelDate);
 
     function renderError(container, heading, detail) {
         document.title = heading + " - aridan.net";

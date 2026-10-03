@@ -241,6 +241,28 @@
         return "0000-00-00";
     }
 
+    // A YYYY-MM-DD date the way the visitor's language writes it - "Oct 3,
+    // 2026", "3 okt. 2026" - or the plain date if it will not parse. Used by
+    // the article list and the article page.
+    function localDate(iso) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+        if (!m) return iso || "";
+
+        var lang = (global.i18n && global.i18n.lang) || "en";
+        var date = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+
+        try {
+            return new Intl.DateTimeFormat(lang, {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                timeZone: "UTC"
+            }).format(date);
+        } catch (e) {
+            return iso;
+        }
+    }
+
     global.ArticleFormat = {
         parse: parse,
         stringify: stringify,
@@ -249,6 +271,7 @@
         isValidSlug: isValidSlug,
         todayISO: todayISO,
         formatDate: formatDate,
+        localDate: localDate,
         dateSortKey: dateSortKey,
         INDEX_URL: "/assets/content/articles/index.json",
         DIR_URL: "/assets/content/articles/"
