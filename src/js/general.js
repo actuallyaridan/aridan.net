@@ -255,6 +255,7 @@ function openReveal(layer) {
     layer.focus({ preventScroll: true });
 
     syncRevealButtons();
+    announceRevealOpened(layer);
 }
 
 function closeReveal() {
@@ -350,6 +351,17 @@ function announceRevealClosed(layer) {
     }));
 }
 
+// settings.js shows a back arrow in settings when it was opened from the menu.
+function announceRevealOpened(layer) {
+    window.dispatchEvent(new CustomEvent("reveal:open", {
+        detail: { layer: layer }
+    }));
+}
+
+function revealHasParent() {
+    return revealParent !== null;
+}
+
 // Back to the layer the open one was reached from, with focus back on what
 // opened it - the Settings button in the menu, say.
 function returnToRevealParent() {
@@ -439,7 +451,9 @@ document.addEventListener("keydown", function (e) {
 window.PageReveal = {
     open: openReveal,
     close: closeReveal,
-    isOpen: revealIsOpen
+    isOpen: revealIsOpen,
+    hasParent: revealHasParent,
+    back: returnToRevealParent
 };
 
 const settlePill = [];
@@ -521,7 +535,7 @@ function initServiceWorker() {
 
     if (!isLocalHost() && !/^\/articles\/(new|edit)\//.test(location.pathname)) {
         navigator.serviceWorker.register("/sw.js").catch(function (err) {
-            console.warn("Service worker registration failed", err);
+            debug.warn("Service worker registration failed", err);
         });
         return;
     }

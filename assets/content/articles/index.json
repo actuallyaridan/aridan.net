@@ -1,5 +1,20 @@
 [
-    "liquid-glass",
-    "lyrics",
-    "pihole"
+    {
+        "slug": "liquid-glass",
+        "title": "Hello, Liquid Glass",
+        "date": "2026-03-30",
+        "preview": "If you've been following Apple's software updates, you've probably heard of Liquid Glass."
+    },
+    {
+        "slug": "lyrics",
+        "title": "Making lyrics feel alive",
+        "date": "2026-10-03",
+        "preview": "How the lyrics on my homepage go from a list of timestamps to something that feels like a lyric video."
+    },
+    {
+        "slug": "pihole",
+        "title": "Block ads on your home network with a Raspberry Pi",
+        "date": "2026-08-18",
+        "preview": "Tired of ads? Don't want to be tracked on your own network? There's a solution!"
+    }
 ]

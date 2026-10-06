@@ -10,7 +10,9 @@
         return `
 <aside id="settingsLayer" class="revealLayer settingsLayer theme-dark" data-reveal="settings" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle" tabindex="-1">
     <div class="settingsSheet">
-        <h2 id="settingsModalTitle">Settings</h2>${window.SettingsPanel.markup({ withDone: true })}
+        <div class="settingsSheetHeader">
+            <h2 id="settingsModalTitle">Settings</h2>
+        </div>${window.SettingsPanel.markup({ withDone: true })}
     </div>
 </aside>`;
     }

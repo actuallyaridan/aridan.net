@@ -65,6 +65,28 @@
             });
     }
 
+    // The editor writes each article's title, date and preview into
+    // index.json, so a card needs nothing else. A bare slug - added by hand,
+    // per the editor's download message - still works, by fetching the file.
+    function fromIndex(entry) {
+        if (typeof entry === "string") {
+            if (!AF.isValidSlug(entry)) return null;
+            return loadArticle(entry);
+        }
+
+        if (!entry || typeof entry !== "object") return null;
+        if (!AF.isValidSlug(entry.slug)) return null;
+
+        return {
+            slug: entry.slug,
+            meta: {
+                title: entry.title,
+                date: entry.date,
+                preview: entry.preview
+            }
+        };
+    }
+
     function render() {
         var container = document.querySelector("main.container");
         var spinner = document.getElementById("loading");
@@ -76,19 +98,12 @@
                 if (!res.ok) throw new Error("Could not load the article list (" + res.status + ").");
                 return res.json();
             })
-            .then(function (slugs) {
-                if (!Array.isArray(slugs)) {
-                    throw new Error("index.json should contain a list of slugs.");
+            .then(function (entries) {
+                if (!Array.isArray(entries)) {
+                    throw new Error("index.json should contain a list of articles.");
                 }
 
-                var valid = [];
-                slugs.forEach(function (slug) {
-                    if (typeof slug !== "string") return;
-                    if (!AF.isValidSlug(slug)) return;
-                    valid.push(slug);
-                });
-
-                return Promise.all(valid.map(loadArticle));
+                return Promise.all(entries.map(fromIndex));
             })
             .then(function (articles) {
                 // loadArticle returns null for anything that failed.

@@ -266,7 +266,7 @@ async function updatePiholeStats() {
 
     // 503 means the Pi has not reported in yet, which fixes itself.
     if (response.status === 503) {
-      console.warn("Pi-hole stats not available yet.");
+      debug.warn("Pi-hole stats not available yet.");
       return;
     }
 

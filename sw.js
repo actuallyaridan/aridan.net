@@ -69,8 +69,10 @@ function cdnRequest(url) {
 //   /api/            - Pi-hole stats, the whole point is that they are current
 //   /assets/content/ - article markdown the local editor reads back after writes
 //   /articles/new/, /articles/edit/ - local-only editor screens
+//   /__presence/     - the local presence Worker, only there in development
 const BYPASS = [
     /^\/api\//,
+    /^\/__presence\//,
     /^\/assets\/content\//,
     /^\/articles\/(new|edit)\//,
     /^\/feed\.xml$/,

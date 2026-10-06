@@ -259,3 +259,251 @@ input[type="radio"] {
         inset 0 1px 0 rgba(255, 255, 255, 0.25),
         0 2px 8px rgba(0, 0, 0, 0.18);
 }
+
+/* ---------- Subpages ----------
+   A row that opens its own page in place of the settings, like Wi-Fi in a
+   phone's Settings app. settings.js swaps which .settingsPage is shown. */
+
+/* Laid out like a toggle row - label on the left, the chevron where the
+   toggle would be - so it reads as one more setting. */
+.settingsNavRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 6px 8px;
+    margin: 0 -8px;
+    box-sizing: content-box;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color .2s ease;
+}
+
+.settingsNavRow:hover {
+    background-color: var(--button-background-color);
+}
+
+.settingsNavRow:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.settingsNavRow>.fa-solid {
+    font-size: 0.85em;
+    opacity: 0.7;
+    margin-right: 6px;
+}
+
+/* Also a .modalSettings, so it has exactly the main page's box - padding,
+   margins and width - in the settings layer and on /settings alike. */
+.settingsSubpage {
+    align-items: flex-start;
+    gap: 12px;
+}
+
+/* The panel centres its children, so a page left to size itself would shrink
+   to its content - the full width is what keeps every page's edges in line. */
+.settingsPage {
+    width: 100%;
+}
+
+.settingsPage[hidden] {
+    display: none;
+}
+
+/* The settings layer's title bar: "Settings", or a subpage's name, with the
+   back arrow to its left. It stays at the top while the settings scroll
+   under it, the way iOS 26 does it: no bar with an edge, just the content
+   darkening and blurring more the closer it gets to the top - see ::before.
+
+   It carries the sheet's top padding (see .settingsSheet in styles.css), so
+   it starts where the title always has, and stretches over the sheet's right
+   padding so the effect reaches the edge of the screen.
+
+   Three columns - arrow, title, and an empty one as wide as the arrow - so
+   the title stays centred whether the arrow is there or not. */
+.settingsSheetHeader {
+    --sheet-right: max(16px, env(safe-area-inset-right));
+    /* The layer's own background - .revealLayer in styles.css. */
+    --sheet-shade: color-mix(in srgb, var(--accent-fill) 22%, #0b0b0b);
+
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
+    align-items: center;
+    width: calc(100% + var(--sheet-right));
+    box-sizing: border-box;
+    margin-right: calc(-1 * var(--sheet-right));
+    padding: max(28px, env(safe-area-inset-top)) var(--sheet-right) 10px 0;
+    text-align: center;
+}
+
+/* The fade behind the title. It runs on past the bottom of the bar, and both
+   the blur and the shade thin out towards that end, so there is never a line
+   where the bar stops. The mask is what thins the blur - a blur on its own
+   can only be all or nothing. */
+.settingsSheetHeader::before {
+    content: "";
+    position: absolute;
+    /* Out to the left edge of the screen too, over the strip of layer beside
+       the page - stopping at the sheet left a hard vertical line there. A
+       negative overflow like this never adds a scrollbar. */
+    inset: 0 0 -32px -100vw;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(to bottom,
+            color-mix(in srgb, var(--sheet-shade) 90%, transparent) 0%,
+            color-mix(in srgb, var(--sheet-shade) 65%, transparent) 50%,
+            transparent 100%);
+    -webkit-backdrop-filter: blur(var(--blur-regular));
+    backdrop-filter: blur(var(--blur-regular));
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+
+.settingsSheetHeader>h2 {
+    grid-column: 2;
+    margin: 0;
+}
+
+/* Reduce transparency: the same fade, with less of the settings showing
+   through it. */
+html.reduce-transparency .settingsSheetHeader::before {
+    background: linear-gradient(to bottom,
+            var(--sheet-shade) 0%,
+            color-mix(in srgb, var(--sheet-shade) 90%, transparent) 60%,
+            transparent 100%);
+}
+
+/* The back arrow. No background: it is the corner of the title bar, not one
+   of the panel's buttons. The /settings page uses the site's .backButton
+   instead. */
+.settingsBack {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    /* The title's colour beside it - the dimmer h2 grey - brightening to
+       full white when pointed at. */
+    color: var(--secondary-title-color);
+    font-size: 1.15em;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color .2s ease;
+}
+
+.settingsBack:hover {
+    color: var(--title-color);
+}
+
+.settingsBack:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* .backButton sets its own display, which would otherwise win over hidden. */
+.settingsBack[hidden],
+.settingsPageBack[hidden] {
+    display: none;
+}
+
+/* Clear of the fixed header when it is scrolled to. */
+.settingsPageBack {
+    scroll-margin-top: 90px;
+}
+
+/* Done and Reset belong to the main page; a subpage is left by going back. */
+.settingsPanel:not([data-page="main"]) .modalButtons {
+    display: none;
+}
+
+.versionCheckResults {
+    width: 100%;
+}
+
+.versionCheckResults p {
+    margin: 0;
+}
+
+/* Centred in the space the list will take, like the article list's. */
+.versionLoading {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.versionList {
+    list-style: none;
+    margin: 0 0 8px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.versionItem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: var(--button-background-color);
+    --status-color: var(--border-color);
+}
+
+.versionItem[data-status="current"] {
+    --status-color: light-dark(#23692f, #37a349);
+}
+
+.versionItem[data-status="outdated"] {
+    --status-color: light-dark(#a14a00, #ff9a3c);
+}
+
+.versionItem[data-status="unknown"] {
+    --status-color: light-dark(#ba0a00, #ff5046);
+}
+
+.versionHead {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4px 10px;
+}
+
+.versionName {
+    font-weight: 600;
+    color: var(--title-color);
+    overflow-wrap: anywhere;
+}
+
+.versionBadge {
+    font-size: 0.85em;
+    font-weight: 550;
+    color: var(--status-color);
+}
+
+.versionItem[data-status="unpinned"] .versionBadge,
+.versionItem[data-status="pending"] .versionBadge {
+    color: var(--secondary-title-color);
+}
+
+.versionDetail {
+    color: var(--secondary-title-color);
+}
+

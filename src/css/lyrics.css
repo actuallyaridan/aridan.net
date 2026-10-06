@@ -678,6 +678,12 @@ html.reduce-motion #lyricsOverlay.lyricsClosing {
     transform: none;
 }
 
+/* Backing vocals are fainter than the lead. A colour with alpha rather than
+   opacity, since opacity is what animates the word in and out. */
+.immersiveWord.isBacking {
+    color: rgba(255, 255, 255, 0.65);
+}
+
 /* On the way out the words blur away one after another, starting from the
    first, while the next line is already coming in. */
 .immersiveScene.isLeaving .immersiveWord {

@@ -127,7 +127,7 @@
                 // Failing to remember it only costs another pick next time.
                 return rememberDir(picked)
                     .catch(function (err) {
-                        console.warn("Couldn't remember the folder:", err);
+                        debug.warn("Couldn't remember the folder:", err);
                     })
                     .then(function () {
                         return picked;
@@ -239,15 +239,35 @@
         return step();
     }
 
-    // index.json is what the live site reads, so it is rewritten after any change.
+    // What the article list shows on a card, read out of one article's file.
+    function indexEntry(dir, slug) {
+        return readArticle(dir, slug).then(function (text) {
+            var meta = AF.parse(text).meta;
+
+            return {
+                slug: slug,
+                title: meta.title || "",
+                date: meta.date || "",
+                preview: meta.preview || ""
+            };
+        });
+    }
+
+    // index.json is what the live site reads, so it is rewritten after any
+    // change. It carries each card's title, date and preview too, so the
+    // article list is one fetch rather than one per article.
     function rebuildIndex(dir) {
         return listSlugs(dir).then(function (slugs) {
             slugs.sort();
 
-            var json = JSON.stringify(slugs, null, 4) + "\n";
+            return Promise.all(slugs.map(function (slug) {
+                return indexEntry(dir, slug);
+            })).then(function (entries) {
+                var json = JSON.stringify(entries, null, 4) + "\n";
 
-            return writeFile(dir, "index.json", json).then(function () {
-                return slugs;
+                return writeFile(dir, "index.json", json).then(function () {
+                    return slugs;
+                });
             });
         });
     }

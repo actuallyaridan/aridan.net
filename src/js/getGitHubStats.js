@@ -16,7 +16,7 @@ async function updateGitHubRepoStats(repos) {
 
             if (response.status === 403) {
                 showRateLimitNotice();
-                console.warn("Rate limited by GitHub API when fetching " + repo);
+                debug.warn("Rate limited by GitHub API when fetching " + repo);
                 break;
             }
 
@@ -48,7 +48,7 @@ async function updateGitHubGroupStats(groupId, repos) {
 
             if (response.status === 403) {
                 showRateLimitNotice();
-                console.warn("Rate limited by GitHub API when fetching " + repo);
+                debug.warn("Rate limited by GitHub API when fetching " + repo);
                 return;
             }
 

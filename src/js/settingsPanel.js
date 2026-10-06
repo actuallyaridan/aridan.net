@@ -1,7 +1,7 @@
 (function (global) {
     "use strict";
 
-    var VERSION = "6.1";
+    var VERSION = "6.1.1";
 
     function toggleMarkup(id, label) {
         return `
@@ -22,6 +22,18 @@
                     </div>`;
     }
 
+    // A row that opens one of the panel's own pages, like a phone's Settings
+    // app does for Wi-Fi - settings.js does the switching.
+    function navRowMarkup(page, label) {
+        return `
+                    <div>
+                        <button type="button" class="settingsNavRow" data-subpage="${page}">
+                            <span class="title">${label}</span>
+                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>`;
+    }
+
     function languageOptions() {
         return Object.entries(LANGUAGES)
             .map(([code, name]) => `<option value="${code}">${name}</option>`)
@@ -32,7 +44,8 @@
         var withDone = !!(opts && opts.withDone);
         var h = "h" + ((opts && opts.headingLevel) || 3);
         return `
-<div class="settingsPanel">
+<div class="settingsPanel" data-page="main">
+    <div class="settingsPage" data-page="main">
     <div class="modalSettings">
         <div>
             <${h} class="settingsGroupHeading" id="settingsLanguageHeading"><i class="fa-solid fa-language" aria-hidden="true"></i>Language</${h}>
@@ -85,8 +98,18 @@
         <div>
             <${h} class="settingsGroupHeading"><i class="fa-solid fa-universal-access" aria-hidden="true"></i>Accessibility</${h}>${toggleMarkup("reduceMotion", "Reduce motion")}${toggleMarkup("reduceTransparency", "Reduce transparency")}
         </div>
+        <div>
+            <${h} class="settingsGroupHeading"><i class="fa-solid fa-bug" aria-hidden="true"></i>Developer options</${h}>${toggleMarkup("debugMode", "Debug mode")}${navRowMarkup("versions", "Component versions")}
+        </div>
     </div>
     <p class="modalDescription">version ${VERSION}</p>
+    </div>
+    <div class="settingsPage" data-page="versions" data-icon="fa-code-compare" hidden>
+    <div class="modalSettings settingsSubpage">
+        <p class="settingsSubpageTitle" hidden>Component versions</p>
+        <div class="versionCheckResults" aria-live="polite"></div>
+    </div>
+    </div>
     <div class="modalButtons">${withDone ? `
         <button type="button" class="button primary" data-action="settings">Done</button>` : ""}
         <button type="button" class="button dangerZone destructive">Reset</button>

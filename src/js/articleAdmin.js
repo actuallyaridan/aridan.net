@@ -188,7 +188,9 @@
                 decorateArticle(event.detail.slug);
             });
 
-            if (document.querySelector(".full-article")) {
+            // The article is in the HTML from the start, so it is the class
+            // displayArticle.js adds that says it actually loaded.
+            if (document.querySelector(".full-article.isLoaded")) {
                 var slug = new URLSearchParams(location.search).get("article");
                 if (slug) decorateArticle(slug);
             }

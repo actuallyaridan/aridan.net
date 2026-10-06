@@ -126,18 +126,35 @@
             </div>
         </header>
         <main class="container" id="mainContent" tabindex="-1">
-
-        </main>
-        <div id="loading" class="fullPage" style="display: none;">
-            <div>
-                <div id="loadingSpinner" class="lds-ring">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
+            <article class="full-article">
+                <div class="info">
+                    <p class="icon">
+                        <i class="fa-solid fa-newspaper icon-background" id="articleIcon" aria-hidden="true"></i>
+                    </p>
+                    <div>
+                        <h1 class="name" id="articleTitle"></h1>
+                        <p class="description titleColor" id="articlePreview" hidden></p>
+                        <a href="/articles/" title="Back to Articles"
+                           aria-label="Back to Articles" class="button backButton">
+                            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
-            </div>
-        </div>
+                <hr>
+                <ul class="articleMeta articleByline" id="articleByline" hidden></ul>
+                <div id="loading">
+                    <div>
+                        <div id="loadingSpinner" class="lds-ring">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="article-content"></div>
+            </article>
+        </main>
         <footer>
             <ul class="notAList footerSocial">
                 <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>

@@ -53,6 +53,8 @@
         ".settingsPanel label.theme-label",
         ".settingsPanel label.button",
         ".settingsPanel label.title",
+        ".settingsPanel .settingsNavRow > .title",
+        ".settingsPanel .settingsSubpageTitle",
         ".modalButtons button"
     ];
 

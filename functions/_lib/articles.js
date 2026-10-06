@@ -53,7 +53,11 @@ export async function listSlugs(env, request) {
     const res = await assetFetch(env, request, INDEX_URL);
     if (!res.ok) return [];
     const list = await res.json();
-    return Array.isArray(list) ? list.filter(isValidSlug) : [];
+    if (!Array.isArray(list)) return [];
+    // Entries are { slug, title, date, preview } objects, or bare slugs added by hand.
+    return list
+        .map((entry) => (typeof entry === "string" ? entry : entry && entry.slug))
+        .filter(isValidSlug);
 }
 
 export async function loadArticle(env, request, slug) {

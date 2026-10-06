@@ -392,11 +392,11 @@
     }
 
     function log(...parts) {
-        console.log("[AlbumAccent]", ...parts);
+        debug.log("[AlbumAccent]", ...parts);
     }
 
     function warn(...parts) {
-        console.warn("[AlbumAccent]", ...parts);
+        debug.warn("[AlbumAccent]", ...parts);
     }
 
     function clamp(value, min, max) {

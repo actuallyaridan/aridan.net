@@ -16,6 +16,12 @@ const UA = "aridan.net/1.0 (+https://github.com/actuallyaridan/aridan.net)";
 const LANYARD = "https://api.lanyard.rest/v1/users/701403809129168978";
 const APPLE_APP_ID = "773825528921849856";
 
+// What the aridan-presence agent reports, which knows about music with
+// Discord closed. PRESENCE_URL points this at a local Worker in development.
+const DEFAULT_PRESENCE_URL = "https://presence.aridan.net";
+
+const LISTENING = 2;
+
 const UPSTREAM_TIMEOUT_MS = 6000;
 const MAX_FIELD = 200;
 
@@ -33,7 +39,7 @@ const jsonHeaders = {
   "cache-control": "no-store",
 };
 
-export async function onRequestGet({ request }) {
+export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
 
   const artist = field(url.searchParams.get("artist"));
@@ -43,18 +49,26 @@ export async function onRequestGet({ request }) {
     return json({ error: "artist and track are required" }, 400);
   }
 
-  let playing;
+  let candidates;
   try {
-    playing = await nowPlaying();
+    candidates = await nowPlaying(env);
   } catch (err) {
     return json({ found: false, reason: "upstream", detail: String(err?.message || err) }, 502);
+  }
+
+  let playing = null;
+  for (const candidate of candidates) {
+    if (samePlay(candidate, artist, track)) {
+      playing = candidate;
+      break;
+    }
   }
 
   // A 409 rather than a 404 on purpose: the page treats a 404 as a final
   // answer and remembers it, and a mismatch is usually just the song changing
   // between the page asking and this check - worth trying again, not
   // remembering.
-  if (!playing || !samePlay(playing, artist, track)) {
+  if (!playing) {
     return json({ found: false, reason: "not_playing" }, 409);
   }
 
@@ -77,9 +91,55 @@ export async function onRequestGet({ request }) {
   return json(shape(result.hit), 200);
 }
 
-// The Apple Music activity from my presence, read the same way lyrics.js reads
-// it, or null when nothing is playing.
-async function nowPlaying() {
+// Every song my presence says is playing - the agent's and Lanyard's, which
+// can differ for a moment while one of them catches up. Asked both at once;
+// only if neither answers is that an error.
+async function nowPlaying(env) {
+  let presenceUrl = DEFAULT_PRESENCE_URL;
+  if (env?.PRESENCE_URL) presenceUrl = env.PRESENCE_URL;
+
+  const answers = await Promise.allSettled([
+    fromAgent(presenceUrl),
+    fromLanyard(),
+  ]);
+
+  const songs = [];
+  const errors = [];
+
+  for (const answer of answers) {
+    if (answer.status === "rejected") {
+      errors.push(String(answer.reason?.message || answer.reason));
+      continue;
+    }
+
+    if (answer.value) songs.push(answer.value);
+  }
+
+  if (errors.length === answers.length) {
+    throw new Error(errors.join("; "));
+  }
+
+  return songs;
+}
+
+// Everything the agent reports as listening is music, whichever player.
+async function fromAgent(presenceUrl) {
+  const res = await fetch(presenceUrl + "/presence", {
+    headers: { "user-agent": UA, accept: "application/json" },
+    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+  });
+
+  if (!res.ok) throw new Error(`presence responded ${res.status}`);
+
+  const body = await res.json();
+  const activities = body?.activities || [];
+
+  const activity = activities.find((a) => a.type === LISTENING);
+  return readSong(activity);
+}
+
+// The Apple Music activity, read the same way lyrics.js reads it.
+async function fromLanyard() {
   const res = await fetch(LANYARD, {
     headers: { "user-agent": UA, accept: "application/json" },
     signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
@@ -94,6 +154,11 @@ async function nowPlaying() {
     if (a.name === "Apple Music") return true;
     return a.application_id === APPLE_APP_ID;
   });
+  return readSong(activity);
+}
+
+// null when there is no song in it.
+function readSong(activity) {
   if (!activity) return null;
 
   const track = field(activity.details);

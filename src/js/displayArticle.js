@@ -34,43 +34,32 @@
         canonical.setAttribute("href", location.href);
     }
 
-    function renderArticle(container, meta, bodyHtml) {
-        // Escaped, so a title containing < or & cannot become real markup.
-        var title = AF.escapeHtml(meta.title || "Untitled article");
+    // textContent rather than innerHTML, so a title can't become markup.
+    function setHero(title, preview) {
+        var titleEl = document.getElementById("articleTitle");
+        var previewEl = document.getElementById("articlePreview");
+
+        titleEl.textContent = title;
+        previewEl.textContent = preview;
+        previewEl.hidden = !preview;
+    }
+
+    // The hero is already in the page, so only its text is written here;
+    // replacing it would make it flash while the body loads.
+    function renderArticle(meta, bodyHtml) {
+        var preview = meta.preview || "";
+        setHero(meta.title || "Untitled article", preview);
+
         var rawDate = AF.escapeHtml(meta.date || "");
         var isoDate = AF.formatDate(meta.date) || "";
         var shownDate = AF.escapeHtml(AF.localDate(isoDate));
 
-        // The preview sits under the title, where every page has its intro.
-        var preview = "";
-        if (meta.preview) {
-            preview = '<p class="description titleColor">' + AF.escapeHtml(meta.preview) + "</p>";
-        }
-
-        container.innerHTML = `
-            <article class="full-article">
-                <div class="info">
-                    <p class="icon">
-                        <i class="fa-solid fa-newspaper icon-background" aria-hidden="true"></i>
-                    </p>
-                    <div>
-                        <h1 class="name">${title}</h1>
-                        ${preview}
-                        <a href="/articles/" title="Back to Articles"
-                           aria-label="Back to Articles" class="button backButton">
-                            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                        </a>
-                    </div>
-                </div>
-                <hr>
-                <ul class="articleMeta articleByline">
-                    <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><time datetime="${rawDate}" data-iso="${AF.escapeHtml(isoDate)}">${shownDate}</time></li>
-                </ul>
-                <div class="article-content"></div>
-            </article>`;
+        var byline = document.getElementById("articleByline");
+        byline.innerHTML = `<li><i class="fa-regular fa-calendar" aria-hidden="true"></i><time datetime="${rawDate}" data-iso="${AF.escapeHtml(isoDate)}">${shownDate}</time></li>`;
+        byline.hidden = false;
 
         // Already HTML, produced by marked, so it must not be escaped.
-        var content = container.querySelector(".article-content");
+        var content = document.querySelector(".full-article .article-content");
         content.innerHTML = bodyHtml;
         if (window.markExternalLinks) window.markExternalLinks(content);
     }
@@ -84,37 +73,32 @@
 
     if (window.i18n) window.i18n.onChange(relabelDate);
 
-    function renderError(container, heading, detail) {
+    // Reuses the hero too, with the icon swapped, rather than drawing a new one.
+    function renderError(heading, detail) {
         document.title = heading + " - aridan.net";
 
-        var safeHeading = AF.escapeHtml(heading);
-        var safeDetail = AF.escapeHtml(detail);
+        var icon = document.getElementById("articleIcon");
+        if (icon) {
+            icon.classList.remove("fa-newspaper");
+            icon.classList.add("fa-xmark");
+        }
 
-        container.innerHTML = `
-            <div class="info">
-                <p class="icon">
-                    <i class="fa-solid fa-xmark icon-background" aria-hidden="true"></i>
-                </p>
-                <div>
-                    <h1 class="name">${safeHeading}</h1>
-                    <p class="description titleColor">${safeDetail}</p>
-                    <a href="/articles/" class="button">
-                        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>Back to Articles
-                    </a>
-                </div>
-            </div>`;
+        setHero(heading, detail);
+
+        // There's no article under it, so nothing for the line to divide.
+        var rule = document.querySelector(".full-article > hr");
+        if (rule) rule.hidden = true;
     }
 
     function load() {
-        var container = document.querySelector("main.container");
+        // Shown from the start in the HTML, so there is no gap before it appears.
         var spinner = document.getElementById("loading");
-        if (!container) return;
-        if (spinner) spinner.style.display = "flex";
+        if (!document.querySelector(".full-article")) return;
 
         var slug = new URLSearchParams(location.search).get("article");
 
         if (!slug) {
-            renderError(container,
+            renderError(
                 "No article specified",
                 "The address is missing an article name.");
             if (spinner) spinner.style.display = "none";
@@ -123,7 +107,7 @@
 
         // Checked before it reaches a URL, so a typed address cannot escape the folder.
         if (!AF.isValidSlug(slug)) {
-            renderError(container,
+            renderError(
                 "Article not found",
                 "\u201c" + slug + "\u201d isn't a valid article name.");
             if (spinner) spinner.style.display = "none";
@@ -142,10 +126,13 @@
                 applyMetadata(parsed.meta);
 
                 var bodyHtml = marked.parse(parsed.body);
-                renderArticle(container, parsed.meta, bodyHtml);
+                renderArticle(parsed.meta, bodyHtml);
+
+                var article = document.querySelector(".full-article");
+                article.classList.add("isLoaded");
 
                 if (window.Prism) Prism.highlightAll();
-                if (window.parseEmoji) window.parseEmoji(container);
+                if (window.parseEmoji) window.parseEmoji(article);
 
                 var event = new CustomEvent("article:rendered", {
                     detail: { slug: slug }
@@ -154,14 +141,14 @@
             })
             .catch(function (err) {
                 if (err.message === "notfound") {
-                    renderError(container,
+                    renderError(
                         "Article not found",
                         "There's no article called \u201c" + slug + "\u201d.");
                     return;
                 }
 
                 console.error("Error loading article:", err);
-                renderError(container,
+                renderError(
                     "Unable to display article",
                     "Something went wrong loading this article.");
             })

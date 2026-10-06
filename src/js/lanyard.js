@@ -65,11 +65,11 @@
   let lastAppleTrack = null;
 
   function log(...parts) {
-    console.log("[Activity]", ...parts);
+    debug.log("[Activity]", ...parts);
   }
 
   function warn(...parts) {
-    console.warn("[Activity]", ...parts);
+    debug.warn("[Activity]", ...parts);
   }
 
   for (const card of [els.amCard, els.otherCard]) {
@@ -249,7 +249,9 @@
   }
 
   function updateActivityInfo(activities, status) {
-    show(els.lanyardDiscord, status === "online");
+    // Discord only reports activity while online, but the aridan-presence
+    // agent reports it with Discord closed too, so either one opens this.
+    show(els.lanyardDiscord, status === "online" || activities.length > 0);
 
     // Nothing playing: the whole card collapses, and the collapse needs a height
     // to shrink from, so the last frame is left mounted rather than emptied out
@@ -531,17 +533,28 @@
       }];
     }
 
-    const ladder = [{
-      url: art.proxy(HIGH_RES),
-      label: "standard definition album cover (" + HIGH_RES + "px)",
-    }];
+    // Covers from the aridan-presence agent come as plain Apple addresses with
+    // no Discord proxy to go through, so their first rung is Apple's own.
+    const ladder = [];
+
+    if (art.proxy) {
+      ladder.push({
+        url: art.proxy(HIGH_RES),
+        label: "standard definition album cover (" + HIGH_RES + "px)",
+      });
+    } else if (art.mzstatic) {
+      ladder.push({
+        url: art.mzstatic(HIGH_RES),
+        label: "standard definition album cover (" + HIGH_RES + "px)",
+      });
+    }
 
     if (art.mzstatic) {
       ladder.push({
         url: art.mzstatic(UPGRADE_RES),
         label: "high definition album cover (" + UPGRADE_RES + "px)",
       });
-    } else if (art.direct) {
+    } else if (art.direct && art.proxy) {
       ladder.push({
         url: art.proxy(HIGH_RES, "&animated=true"),
         label: "animated standard definition album cover (" + HIGH_RES + "px)",

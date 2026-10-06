@@ -295,7 +295,7 @@
     if (want.album) params.set("album", want.album);
     if (want.duration) params.set("duration", String(Math.round(want.duration)));
 
-    console.log("[Lyrics] Looking for lyrics for " + want.title + " - " + want.artist + " on LRCLIB...");
+    debug.log("[Lyrics] Looking for lyrics for " + want.title + " - " + want.artist + " on LRCLIB...");
 
     const request = fetch("/api/lyrics?" + params, {
       headers: { accept: "application/json" }
@@ -347,32 +347,32 @@
   // caller already prints.
   function logAnswer(status, body) {
     if (body.found && body.instrumental) {
-      console.log("[Lyrics] Found an instrumental track");
+      debug.log("[Lyrics] Found an instrumental track");
       return;
     }
 
     if (body.found && body.synced) {
-      console.log("[Lyrics] Found time synced lyrics (" + body.lines.length + " lines)");
+      debug.log("[Lyrics] Found time synced lyrics (" + body.lines.length + " lines)");
       return;
     }
 
     if (body.found) {
-      console.log("[Lyrics] Found time synced lyrics, but none of the lines could be read");
+      debug.log("[Lyrics] Found time synced lyrics, but none of the lines could be read");
       return;
     }
 
     if (status === 404 && body.plain) {
-      console.log("[Lyrics] Found plain lyrics, but only time synced lyrics can be shown");
+      debug.log("[Lyrics] Found plain lyrics, but only time synced lyrics can be shown");
       return;
     }
 
     if (status === 404) {
-      console.log("[Lyrics] No lyrics found");
+      debug.log("[Lyrics] No lyrics found");
       return;
     }
 
     if (body.reason === "not_playing") {
-      console.log("[Lyrics] The song changed before LRCLIB was asked");
+      debug.log("[Lyrics] The song changed before LRCLIB was asked");
     }
   }
 
@@ -384,11 +384,11 @@
 
     known.then((body) => {
       if (body.found) {
-        console.log("[Lyrics] Found cached lyrics for " + name);
+        debug.log("[Lyrics] Found cached lyrics for " + name);
         return;
       }
 
-      console.log("[Lyrics] Already searched for " + name + ", no lyrics");
+      debug.log("[Lyrics] Already searched for " + name + ", no lyrics");
     }, () => {
       // A failed search is logged where it is caught, in loadInto().
     });
@@ -759,6 +759,10 @@
     let before = 0;
     let order = 0;
 
+    // How many brackets are open at the current word - every word from a "("
+    // to its ")" is a backing vocal, which can span several words.
+    let depth = 0;
+
     for (const row of rows) {
       const rowEl = document.createElement("div");
       rowEl.className = "immersiveRow";
@@ -774,6 +778,11 @@
         span.className = "immersiveWord";
         span.textContent = word;
         span.style.setProperty("--i", String(order));
+
+        const opens = word.split("(").length - 1;
+        const closes = word.split(")").length - 1;
+        if (depth > 0 || opens > 0) span.classList.add("isBacking");
+        depth = Math.max(0, depth + opens - closes);
 
         const color = colorOf(word);
         if (color) paintColorWord(span, word, color);
@@ -1229,7 +1238,7 @@
         return;
       }
 
-      console.warn("[Lyrics] backdrop artwork failed to load:", url);
+      debug.warn("[Lyrics] backdrop artwork failed to load:", url);
     };
 
     img.src = url;
@@ -1363,7 +1372,7 @@
   function enterFullscreen() {
     if (overlay.requestFullscreen) {
       overlay.requestFullscreen().catch((err) => {
-        console.warn("[Lyrics] full screen was refused:", err);
+        debug.warn("[Lyrics] full screen was refused:", err);
       });
       return;
     }
@@ -1532,7 +1541,7 @@
       if (!overlayOpen || trackKey(track) !== requested) return;
       present(data);
     } catch (err) {
-      console.warn("[Lyrics]", err);
+      debug.warn("[Lyrics]", err);
       if (!overlayOpen || trackKey(track) !== requested) return;
 
       stopTicking();
