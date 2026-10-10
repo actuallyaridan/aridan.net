@@ -829,51 +829,31 @@
     });
   }
 
-  // itunes.apple.com has no CORS headers, so its JSONP mode is the only way to
-  // read it from a page.
-  function fetchJsonp(url, timeoutMs = 6000) {
-    return new Promise((resolve, reject) => {
-      const cb = "jsonp_" + Math.random().toString(36).slice(2);
-      const script = document.createElement("script");
-
-      const timer = setTimeout(() => {
-        cleanup();
-        reject(new Error("JSONP timeout: " + url));
-      }, timeoutMs);
-
-      function cleanup() {
-        clearTimeout(timer);
-        delete window[cb];
-        script.remove();
-      }
-
-      // The server wraps its JSON in a call to the name we pass, so the
-      // downloaded script runs this function.
-      window[cb] = (data) => {
-        cleanup();
-        resolve(data);
-      };
-
-      script.onerror = () => {
-        cleanup();
-        reject(new Error("JSONP failed: " + url));
-      };
-
-      let separator = "?";
-      if (url.includes("?")) separator = "&";
-      script.src = url + separator + "callback=" + cb;
-
-      document.head.appendChild(script);
-    });
-  }
-
-  function itunes(path, params) {
+  // A plain fetch: itunes.apple.com answers with Access-Control-Allow-Origin: *.
+  // This used to be JSONP, a <script> injected for every lookup, which meant
+  // the CSP had to let Apple's server run code on the page, and which Firefox
+  // now and then blocked under default-src anyway.
+  async function itunes(path, params) {
     const query = new URLSearchParams(params);
     const url = "https://itunes.apple.com/" + path + "?" + query;
 
-    return fetchJsonp(url).then((response) => {
-      return response?.results || [];
-    });
+    const response = await fetchItunes(url);
+    return response?.results || [];
+  }
+
+  async function fetchItunes(url, timeoutMs = 6000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+
+      // Sent as text/javascript, but without a callback the body is JSON.
+      return await response.json();
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   // Intl.Locale rather than the last two characters of the tag: a bare "sv"
