@@ -19,72 +19,50 @@
     justify-content: center;
 }
 
-/* Collapsed to a 0fr grid row rather than display:none, so the card can grow and
-   shrink smoothly. #loadedLanyardInner is the single row that gets clipped,
-   with more than one child the fr tracks would size equally and double the
-   card's height. The margin animates too, or the 12px would jump on its own. */
-/* Closing. An fr track resolves to pixels non-linearly, which front-loads the
-   visible movement, so the slow start cancels that out and the card shrinks at
-   a roughly even rate instead of dropping then crawling. */
+/* Collapsed to a 0fr grid row rather than display:none, so the card keeps its
+   layout while closed and can be measured. #loadedLanyardInner is the single
+   row; with more than one child the fr tracks would size equally and double
+   the card's height. There are no transitions here: opening and closing are
+   animated by slideCard() in lanyard.js, which moves the page below with
+   transforms instead of re-laying it out on every frame. */
 #loadedLanyard {
     display: grid;
     grid-template-rows: 0fr;
     overflow: hidden;
     margin-top: 0;
     opacity: 0;
-    /* visibility flips only once the collapse has finished, so the closing card
-       stays rendered on the way out but leaves the accessibility tree after. */
     visibility: hidden;
-    transition:
-        grid-template-rows .35s ease-in,
-        margin-top .35s ease-in,
-        opacity .2s ease-in,
-        visibility 0s linear .35s;
 }
 
-/* Opening is back-loaded for the same reason, so it takes the mirror curve,
-   the two directions then move identically. */
 #loadedLanyard.showActivity {
     grid-template-rows: 1fr;
     margin-top: 12px;
     opacity: 1;
     visibility: visible;
-    transition:
-        grid-template-rows .35s ease-out,
-        margin-top .35s ease-out,
-        opacity .2s ease-out,
-        visibility 0s linear;
 }
 
+/* Top-anchored, with nothing allowed to shrink, so while the row is opening
+   the card keeps its full layout and is simply uncovered from the top. With
+   centring and shrinking, everything inside was squashed to fit the row and
+   stretched back out as it grew - laid out again every frame, with the text
+   creeping 170px down the card and snapping to whole pixels as it went. */
 #loadedLanyardInner {
     min-height: 0;
     min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     text-align: center;
 }
 
-/* First open on page load. The room for the card is normally already held
-   open (see reserveLanyardSpace() in settings.js), so it takes its full height
-   at once and the contents come into focus in place. Opens and closes after
-   that are the plain slide, those are the card reacting to something changing. */
-#loadedLanyard.revealing {
-    transition: none;
+#loadedLanyardInner > * {
+    flex-shrink: 0;
 }
 
-/* First visit, or nothing was playing last time, so there is no room held and
-   the card has to push the page down. It grows to do that at the usual
-   opening speed, with the contents coming into focus as it goes. */
-#loadedLanyard.revealing.revealGrow {
-    transition:
-        grid-template-rows .35s ease-out,
-        margin-top .35s ease-out,
-        opacity .2s ease-out,
-        visibility 0s linear;
-}
-
+/* First open on page load: the contents come into focus. When the room for
+   the card was already held (see reserveLanyardSpace() in settings.js) that
+   is all that happens; otherwise slideCard() opens it as well. */
 #loadedLanyard.revealing #loadedLanyardInner {
     animation: lanyard-focus-in .32s cubic-bezier(.2, .7, .3, 1) both;
 }
@@ -101,12 +79,6 @@
         filter: blur(0);
         transform: scale(1);
     }
-}
-
-/* settings.js folds the OS prefers-reduced-motion query into this same class, so
-   this covers both the system preference and the site's own toggle. */
-html.reduce-motion #loadedLanyard {
-    transition: none;
 }
 
 #loadedLanyard>p,
@@ -557,13 +529,7 @@ div#amTimeremaning>p {
     text-align: center;
     padding: 12px 0;
     margin: 12px 0;
-    /* 0 rather than unset, so there is a length to ease from when the room
-       below is let go. */
-    min-height: 0 !important;
-    /* Eases away whatever room settings.js held open, so if the card from last
-       time is not back (or came back a different size) the page closes up
-       smoothly rather than snapping. */
-    transition: min-height .35s ease-out;
+    min-height: unset !important;
 }
 
 /* The whole section rather than just the card, so the Lyrics and Refresh
@@ -571,10 +537,6 @@ div#amTimeremaning>p {
    !important above. */
 html.lanyard-reserve .discordWrapper {
     min-height: var(--lanyard-reserve) !important;
-}
-
-html.reduce-motion .discordWrapper {
-    transition: none;
 }
 
 /* Arrives with the card on load, so it comes into focus alongside it rather

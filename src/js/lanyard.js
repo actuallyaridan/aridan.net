@@ -12,6 +12,10 @@
   const CARD_MS = 320;
   const CARD_EASE = "cubic-bezier(.2,.7,.3,1)";
 
+  // Opening and closing the whole card, and the page below making way for it.
+  const SLIDE_MS = 380;
+  const SLIDE_EASE = "cubic-bezier(.25,.8,.3,1)";
+
   function byId(id) {
     if (!id) return null;
     return document.getElementById(id);
@@ -62,6 +66,12 @@
   let lastAppleTrack = null;
   let firstAnswerSeen = false;
 
+  // Whether the card is open, or on its way open. The showActivity class
+  // cannot say: it stays on while the card is closing, so it is still drawn.
+  let cardOpen = false;
+  let slideAnimations = [];
+  let slideCleanup = null;
+
   function log(...parts) {
     debug.log(...parts);
   }
@@ -78,7 +88,7 @@
   // back to its usual slide so closing it later still animates.
   els.content?.addEventListener("animationend", (e) => {
     if (e.animationName !== "lanyard-focus-in") return;
-    els.content.classList.remove("revealing", "revealGrow");
+    els.content.classList.remove("revealing");
   });
 
   initAccessibility();
@@ -270,8 +280,6 @@
     }
   }
 
-  // #loadedLanyard animates open/closed, so it is toggled by class rather than
-  // by display, display:none cannot transition.
   function showActivityCard(yes) {
     const content = els.content;
     if (!content) return;
@@ -281,24 +289,176 @@
     const isFirst = !firstAnswerSeen;
     firstAnswerSeen = true;
 
-    // Reduced motion never plays the animation, so animationend would never
-    // come to take the class off again.
-    const reduceMotion = document.documentElement.classList.contains("reduce-motion");
+    const root = document.documentElement;
+    const roomHeld = root.classList.contains("lanyard-reserve");
 
-    if (yes && isFirst && !reduceMotion) {
+    const wasOpen = cardOpen;
+    cardOpen = !!yes;
+    const changing = wasOpen !== cardOpen;
+
+    // Letting go of the held room can move the page too, if the card came
+    // back a different size or not at all, so that goes through the slide.
+    const releasing = isFirst && roomHeld;
+    if (!changing && !releasing) return;
+
+    // Reduced motion never plays the focus animation, so animationend would
+    // never come to take the class off again.
+    if (cardOpen && isFirst && !reduceMotion()) {
       content.classList.add("revealing");
-
-      const roomHeld = document.documentElement.classList.contains("lanyard-reserve");
-      if (!roomHeld) content.classList.add("revealGrow");
     }
 
-    content.classList.toggle("showActivity", !!yes);
+    slideCard(() => {
+      if (releasing) root.classList.remove("lanyard-reserve");
+    }, changing, roomHeld);
+  }
 
-    // The card is in (at full height, in the same frame) or isn't coming, so
-    // the held room can go. #lanyardDiscord eases to its real height from it.
-    if (isFirst) {
-      document.documentElement.classList.remove("lanyard-reserve");
+  // Opening or closing the card moves everything below it. Letting the layout
+  // animate did that by laying the page out again on every frame at a
+  // fractional offset, and the text, snapped to whole pixels each time, moved
+  // in visible steps. FLIP instead: note where everything below is, apply the
+  // new layout at once, then slide it all from the old place with
+  // `translate`, which the compositor moves smoothly and lays nothing out.
+  // The card itself is uncovered (or covered back up) with a clip, in step.
+  function slideCard(alsoChange, changing, roomHeld) {
+    const content = els.content;
+
+    settleSlide();
+
+    const animate = !reduceMotion() && !document.hidden;
+    const followers = elementsBelow(els.lanyardDiscord);
+
+    let before = null;
+    if (animate) before = followers.map(boxTop);
+
+    alsoChange();
+
+    if (changing && cardOpen) {
+      content.classList.add("showActivity");
+
+      // With the room held, the card is already where it will be, and coming
+      // into focus is its entrance. Otherwise it is uncovered as the page
+      // below makes way.
+      if (animate && !roomHeld) {
+        track(content.animate(
+          [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0)" }],
+          { duration: SLIDE_MS, easing: SLIDE_EASE }
+        ));
+      }
     }
+
+    if (changing && !cardOpen) {
+      if (!animate) {
+        content.classList.remove("showActivity");
+      } else {
+        // The page below has to close up now, for the FLIP, but the card has
+        // to stay on screen while it is covered back up. A negative bottom
+        // margin as big as the card takes its room away without taking the
+        // card away. The total is exactly what closed takes up, so swapping
+        // one for the other afterwards moves nothing.
+        const height = content.getBoundingClientRect().height;
+        const marginTop = parseFloat(getComputedStyle(content).marginTop) || 0;
+        content.style.marginBottom = -(height + marginTop) + "px";
+
+        const closing = content.animate(
+          [{ clipPath: "inset(0)" }, { clipPath: "inset(0 0 100% 0)" }],
+          { duration: SLIDE_MS, easing: SLIDE_EASE, fill: "forwards" }
+        );
+        track(closing);
+
+        slideCleanup = () => {
+          content.style.marginBottom = "";
+          content.classList.remove("showActivity");
+        };
+        closing.onfinish = settleSlide;
+      }
+    }
+
+    if (!animate) return;
+
+    // The Lyrics button shows or hides in this same presence update, but from
+    // lyrics.js's handler, which runs after this one. A microtask waits until
+    // every handler has had its turn, so its move is counted in too.
+    queueMicrotask(() => {
+      // How far the card's bottom edge travels while opening.
+      let cardGrowth = 0;
+      if (changing && cardOpen) {
+        const marginTop = parseFloat(getComputedStyle(content).marginTop) || 0;
+        cardGrowth = content.getBoundingClientRect().height + marginTop;
+      }
+
+      followers.forEach((el, i) => {
+        const after = boxTop(el);
+        const was = before[i];
+
+        // Only just appeared - the Lyrics button, as a song starts - so it
+        // has no old place of its own. It rides down with the card's bottom
+        // edge, the way it would have if it had been there all along.
+        if (was === null) {
+          if (after !== null) {
+            track(el.animate(
+              [
+                { opacity: 0, translate: "0 " + -cardGrowth + "px" },
+                { opacity: 1, translate: "0 0" },
+              ],
+              { duration: SLIDE_MS, easing: SLIDE_EASE }
+            ));
+          }
+          return;
+        }
+
+        if (after === null) return;
+
+        const dy = was - after;
+        if (Math.abs(dy) < 0.5) return;
+
+        // `translate`, not `transform`, so anything that already has a
+        // transform of its own keeps it.
+        track(el.animate(
+          [{ translate: "0 " + dy + "px" }, { translate: "0 0" }],
+          { duration: SLIDE_MS, easing: SLIDE_EASE }
+        ));
+      });
+    });
+  }
+
+  // Everything that comes after `el` in the page, so everything its height
+  // pushes about: its later siblings, then its parent's, and so on up. Fixed
+  // things, the header and the lyrics overlay, stay where they are anyway.
+  function elementsBelow(el) {
+    const found = [];
+    let node = el;
+
+    while (node && node !== document.body) {
+      let next = node.nextElementSibling;
+      while (next) {
+        if (getComputedStyle(next).position !== "fixed") found.push(next);
+        next = next.nextElementSibling;
+      }
+      node = node.parentElement;
+    }
+
+    return found;
+  }
+
+  // null for something not on the page at all (display:none).
+  function boxTop(el) {
+    if (!el.getClientRects().length) return null;
+    return el.getBoundingClientRect().top;
+  }
+
+  function track(animation) {
+    slideAnimations.push(animation);
+  }
+
+  // Jumps any slide still going to its end, so a new one measures from where
+  // things really are rather than from halfway through the last.
+  function settleSlide() {
+    for (const animation of slideAnimations) animation.cancel();
+    slideAnimations = [];
+
+    const cleanup = slideCleanup;
+    slideCleanup = null;
+    if (cleanup) cleanup();
   }
 
   // How tall the card is when the visitor leaves, for settings.js to hold open
@@ -309,7 +469,7 @@
     // visit knows nothing new; keep what the last one saved.
     if (!firstAnswerSeen) return;
 
-    const open = els.content?.classList.contains("showActivity");
+    const open = cardOpen;
 
     // The whole section, so the Lyrics button under the card is counted too.
     const section = document.querySelector(".discordWrapper");
