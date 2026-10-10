@@ -654,6 +654,11 @@ li>a:active, li>button.noUI:active {
     position: relative;
     max-width: 200px;
     max-height: 60vh;
+    /* The width and height attributes are only there for their ratio, so the
+       space is held before the photo has loaded. Without this the height
+       attribute would be taken as the height itself. Firefox paints before
+       the photo decodes, and with no ratio the whole page below it jumped. */
+    height: auto;
 }
 
 .photo::before {

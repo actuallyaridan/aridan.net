@@ -28,6 +28,19 @@
   // nothing; they are only there to notice a dead connection.
   const AGENT_PING_MS = 30000;
 
+  // How long the first presence waits for the slower of the two sides. With
+  // Discord closed, Lanyard answers "nothing" and the music only comes from
+  // the agent, so publishing whichever lands first showed an empty card that
+  // then filled in a moment later. A side that is down only costs this much.
+  const FIRST_ANSWER_WAIT_MS = 1500;
+
+  // The last presence seen, kept between pages so the card is up from the
+  // first frame instead of after both sockets have connected and answered.
+  // The live answer corrects it straight after. Older than this, or with a
+  // song that has already ended, it is more likely wrong than right.
+  const CACHE_KEY = "presenceCache";
+  const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
+
   const subscribers = new Set();
 
   let socket = null;
@@ -48,18 +61,81 @@
   let wantSnapshot = false;
   let stopped = false;
 
+  // Whether each side has said anything yet. The agent's answer can be an
+  // empty presence (null), so fromAgent alone cannot tell.
+  let lanyardAnswered = false;
+  let agentAnswered = false;
+  let firstWaitOver = false;
+
+  // Whether anything live has gone out yet. `latest` cannot tell, since it
+  // can be the cached presence from the last page.
+  let liveSent = false;
+
+  setTimeout(() => {
+    firstWaitOver = true;
+
+    // Already out if both answered in time. Otherwise go with whichever did.
+    if (liveSent) return;
+    if (lanyardAnswered || agentAnswered) publishMerged();
+  }, FIRST_ANSWER_WAIT_MS);
+
+  // Not published here, nothing has subscribed yet. subscribe() hands it to
+  // each subscriber as it arrives, the same as a live presence.
+  latest = readCache();
+
   let autoUpdate = prefEnabled("autoUpdateActivity");
 
   function log(...parts) {
-    debug.log("[Lanyard]", ...parts);
+    debug.log(...parts);
   }
 
   function warn(...parts) {
-    debug.warn("[Lanyard]", ...parts);
+    debug.warn(...parts);
   }
 
   function publishMerged() {
-    publish(merge(fromLanyard, fromAgent));
+    // Only the first one waits. After that each side is published the moment
+    // it changes, as before.
+    const bothAnswered = lanyardAnswered && agentAnswered;
+    if (!liveSent && !bothAnswered && !firstWaitOver) return;
+
+    liveSent = true;
+
+    const presence = merge(fromLanyard, fromAgent);
+    writeCache(presence);
+    publish(presence);
+  }
+
+  function readCache() {
+    let saved;
+    try {
+      saved = JSON.parse(localStorage.getItem(CACHE_KEY));
+    } catch {
+      return null;
+    }
+
+    if (!saved || !saved.presence) return null;
+
+    const age = Date.now() - saved.at;
+    if (!(age >= 0 && age < CACHE_MAX_AGE_MS)) return null;
+
+    // A song that ran out while nobody was looking would show a finished
+    // progress bar until the live answer came, so it is not worth showing.
+    const activities = saved.presence.activities || [];
+    for (const activity of activities) {
+      const end = activity?.timestamps?.end;
+      if (end && end < Date.now()) return null;
+    }
+
+    return saved.presence;
+  }
+
+  function writeCache(presence) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), presence: presence }));
+    } catch {
+      // Storage full or blocked, the next page just waits for the sockets.
+    }
   }
 
   function publish(presence) {
@@ -114,6 +190,7 @@
       if (msg.op !== 0) return;
 
       fromLanyard = msg.d || {};
+      lanyardAnswered = true;
       publishMerged();
       if (!autoUpdate) {
         wantSnapshot = false;
@@ -184,7 +261,9 @@
     disconnectAgent();
     if (!fromAgent) fetchAgentSnapshot();
 
-    if (latest) {
+    // lanyardAnswered, not latest: latest can be the cached presence from the
+    // last page, which still needs checking once.
+    if (lanyardAnswered) {
       wantSnapshot = false;
       disconnect();
     } else {
@@ -204,19 +283,13 @@
 
   /* ---------- presence.aridan.net ---------- */
 
-  // In production, the Worker's own hostname. On this computer or the LAN,
-  // .claude/dev-server.js passes /__presence through to a local Worker, so
-  // testing never touches the real one.
+  // The real Worker everywhere, test servers included, so a local copy of the
+  // site shows what my computers are actually reporting. It answers any
+  // origin, so localhost and the LAN can reach it directly.
+  const AGENT_BASE = "https://presence.aridan.net";
+
   function agentBase() {
-    const host = location.hostname;
-
-    let local = false;
-    if (host === "localhost" || host === "127.0.0.1") local = true;
-    if (host.startsWith("192.168.") || host.startsWith("10.")) local = true;
-    if (host.endsWith(".local")) local = true;
-
-    if (local) return location.origin + "/__presence";
-    return "https://presence.aridan.net";
+    return AGENT_BASE;
   }
 
   function connectAgent() {
@@ -255,6 +328,7 @@
       if (msg.op !== "presence") return;
 
       fromAgent = msg.d || null;
+      agentAnswered = true;
       publishMerged();
     };
 
@@ -311,6 +385,7 @@
       })
       .then((body) => {
         fromAgent = body;
+        agentAnswered = true;
         publishMerged();
       })
       .catch((err) => warn("Could not read the agent feed", err));
@@ -404,11 +479,18 @@
     // icon - is used as it is, at whatever size it comes.
     if (image.startsWith("https://")) {
       if (image.includes("mzstatic.com/")) {
+        // With Discord closed, the agent swaps Cider's animated cover for
+        // Apple's still and sends the animated one alongside. It cannot be
+        // resized or read by a canvas, so it is only ever the card's top rung.
+        let animated = activity.assets.large_image_animated;
+        if (!animated || !animated.startsWith("https://")) animated = null;
+
         return {
           proxy: null,
           direct: image,
           mzstatic: (size) => resizeApple(image, size),
           appAsset: null,
+          animated: animated,
         };
       }
 
@@ -474,11 +556,23 @@
     if (!document.hidden) send({ op: 3 });
   });
 
-  window.addEventListener("beforeunload", () => {
+  // pagehide rather than beforeunload, so there is a pageshow to undo it: going
+  // Back can bring this page out of the back/forward cache exactly as it was
+  // left, sockets closed, and it would sit on a frozen card from then on.
+  window.addEventListener("pagehide", () => {
     stopped = true;
     disconnect();
     disconnectAgent();
-  }, { once: true });
+  });
+
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+
+    stopped = false;
+    attempts = 0;
+    agentAttempts = 0;
+    applyMode();
+  });
 
   window.Lanyard = {
     get autoUpdate() { return autoUpdate; },

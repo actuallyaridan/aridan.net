@@ -134,10 +134,10 @@
             if (!res.ok) throw new Error("/api/versions responded " + res.status);
 
             const data = await res.json();
-            debug.log("[versions]", data);
+            debug.log(data);
             render(results, data);
         } catch (err) {
-            console.error("[versions]", err);
+            console.error("[versionCheck.js]", err);
             results.textContent = "";
             results.appendChild(element("p", "versionDetail", t("Couldn't check versions: {0}", err.message)));
         }

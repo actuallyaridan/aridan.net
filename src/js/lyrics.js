@@ -295,7 +295,7 @@
     if (want.album) params.set("album", want.album);
     if (want.duration) params.set("duration", String(Math.round(want.duration)));
 
-    debug.log("[Lyrics] Looking for lyrics for " + want.title + " - " + want.artist + " on LRCLIB...");
+    debug.log("Looking for lyrics for " + want.title + " - " + want.artist + " on LRCLIB...");
 
     const request = fetch("/api/lyrics?" + params, {
       headers: { accept: "application/json" }
@@ -347,32 +347,32 @@
   // caller already prints.
   function logAnswer(status, body) {
     if (body.found && body.instrumental) {
-      debug.log("[Lyrics] Found an instrumental track");
+      debug.log("Found an instrumental track");
       return;
     }
 
     if (body.found && body.synced) {
-      debug.log("[Lyrics] Found time synced lyrics (" + body.lines.length + " lines)");
+      debug.log("Found time synced lyrics (" + body.lines.length + " lines)");
       return;
     }
 
     if (body.found) {
-      debug.log("[Lyrics] Found time synced lyrics, but none of the lines could be read");
+      debug.log("Found time synced lyrics, but none of the lines could be read");
       return;
     }
 
     if (status === 404 && body.plain) {
-      debug.log("[Lyrics] Found plain lyrics, but only time synced lyrics can be shown");
+      debug.log("Found plain lyrics, but only time synced lyrics can be shown");
       return;
     }
 
     if (status === 404) {
-      debug.log("[Lyrics] No lyrics found");
+      debug.log("No lyrics found");
       return;
     }
 
     if (body.reason === "not_playing") {
-      debug.log("[Lyrics] The song changed before LRCLIB was asked");
+      debug.log("The song changed before LRCLIB was asked");
     }
   }
 
@@ -384,11 +384,11 @@
 
     known.then((body) => {
       if (body.found) {
-        debug.log("[Lyrics] Found cached lyrics for " + name);
+        debug.log("Found cached lyrics for " + name);
         return;
       }
 
-      debug.log("[Lyrics] Already searched for " + name + ", no lyrics");
+      debug.log("Already searched for " + name + ", no lyrics");
     }, () => {
       // A failed search is logged where it is caught, in loadInto().
     });
@@ -1238,7 +1238,7 @@
         return;
       }
 
-      debug.warn("[Lyrics] backdrop artwork failed to load:", url);
+      debug.warn("backdrop artwork failed to load:", url);
     };
 
     img.src = url;
@@ -1372,7 +1372,7 @@
   function enterFullscreen() {
     if (overlay.requestFullscreen) {
       overlay.requestFullscreen().catch((err) => {
-        debug.warn("[Lyrics] full screen was refused:", err);
+        debug.warn("full screen was refused:", err);
       });
       return;
     }
@@ -1541,7 +1541,7 @@
       if (!overlayOpen || trackKey(track) !== requested) return;
       present(data);
     } catch (err) {
-      debug.warn("[Lyrics]", err);
+      debug.warn(err);
       if (!overlayOpen || trackKey(track) !== requested) return;
 
       stopTicking();

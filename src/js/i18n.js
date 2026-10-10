@@ -35,7 +35,6 @@
         "main a.button",
         "main .pi-label",
         "main .pi-stat-label",
-        "main p.statusWrapper:not(#statusWrapperOffline)",
         "main #lanyardRefresh",
         "main #lyricsBtn",
         "main #Remaining",
@@ -80,8 +79,7 @@
 
     // Phrases sharing a text node with markup, replaced inside it.
     const PARTIAL = [
-        ["main .description.white", "a Swedish"],
-        ["#statusWrapperConnecting", "Connecting"]
+        ["main .description.white", "a Swedish"]
     ];
 
     const dicts = {};

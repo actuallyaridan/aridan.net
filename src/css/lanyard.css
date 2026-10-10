@@ -5,68 +5,6 @@
     src: url(/src/fonts/SevenSegment.otf) format("opentype");
 }
 
-/* Geometry tracks .button so the chips read as the same component family as the
-   buttons on Experience; only the accent colour changes per state. */
-.statusWrapper {
-    list-style-type: none;
-    color: white;
-    font-family: Jost, sans-serif;
-    padding: 10px 20px;
-    font-size: 1rem;
-    text-decoration: none;
-    width: -moz-fit-content;
-    width: -webkit-fit-content;
-    width: fit-content;
-    height: -moz-fit-content;
-    height: -webkit-fit-content;
-    height: fit-content;
-    background-color: rgba(var(--status-rgb), 0.15);
-    border: none;
-    border-radius: 12px;
-    transition: background-color .2s, border-color .2s, box-shadow .2s;
-    touch-action: manipulation;
-    -webkit-appearance: none;
-    appearance: none;
-    text-align: center;
-    margin: 4px 0;
-    display: block;
-}
-
-.statusWrapper.online {
-    --status-rgb: 83, 215, 105;
-}
-
-.statusWrapper.idle {
-    --status-rgb: 242, 132, 29;
-}
-
-.statusWrapper.dnd {
-    --status-rgb: 249, 76, 87;
-}
-
-/* Neutral, not red: being away isn't an error state, and red here reads as
-   "the site is down" rather than "he's asleep". */
-.statusWrapper.offline,
-.statusWrapper.dcloading {
-    --status-rgb: 144, 144, 144;
-}
-
-/* The one case where red is the honest reading, the site really did fail. */
-.statusWrapper.error {
-    --status-rgb: 249, 76, 87;
-}
-
-.style-liquid-glass .statusWrapper {
-    border-radius: min(43.25rem, 4.65rem + 36.5vw);
-    border: 1px solid rgba(var(--status-rgb), 0.4);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    -webkit-backdrop-filter: blur(var(--blur-heavy));
-    backdrop-filter: blur(var(--blur-heavy));
-}
-
-.statusWrapper.hide {
-    display: none;
-}
 /* Column, not row: #loading, #errorMessage and #loadedLanyard are meant to be
    mutually exclusive states, but the collapsed card is only 0 tall, never 0
    wide, so as a row item its width:100% basis still claimed half the row and
@@ -128,6 +66,43 @@
     text-align: center;
 }
 
+/* First open on page load. The room for the card is normally already held
+   open (see reserveLanyardSpace() in settings.js), so it takes its full height
+   at once and the contents come into focus in place. Opens and closes after
+   that are the plain slide, those are the card reacting to something changing. */
+#loadedLanyard.revealing {
+    transition: none;
+}
+
+/* First visit, or nothing was playing last time, so there is no room held and
+   the card has to push the page down. It grows to do that at the usual
+   opening speed, with the contents coming into focus as it goes. */
+#loadedLanyard.revealing.revealGrow {
+    transition:
+        grid-template-rows .35s ease-out,
+        margin-top .35s ease-out,
+        opacity .2s ease-out,
+        visibility 0s linear;
+}
+
+#loadedLanyard.revealing #loadedLanyardInner {
+    animation: lanyard-focus-in .32s cubic-bezier(.2, .7, .3, 1) both;
+}
+
+@keyframes lanyard-focus-in {
+    from {
+        opacity: 0;
+        filter: blur(10px);
+        transform: scale(.94);
+    }
+
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(1);
+    }
+}
+
 /* settings.js folds the OS prefers-reduced-motion query into this same class, so
    this covers both the system preference and the site's own toggle. */
 html.reduce-motion #loadedLanyard {
@@ -157,14 +132,6 @@ html.reduce-motion #loadedLanyard {
 
 img.albumArt {
     pointer-events: none;
-}
-
-#statusLocalTime {
-    font-variant-numeric: tabular-nums;
-}
-
-.dcloading {
-    text-align: center;
 }
 
 .discordWrapper,
@@ -361,22 +328,12 @@ html.reduce-motion .lds-ring.smallLoader::before {
     font-size: 0.9em;
 }
 
-html.reduce-motion .lds-ring.lanyardConnecting::before {
-    color: inherit;
-}
-
 .lds-ring.smallLoader {
     display: none;
     position: relative;
     width: 1em;
     height: 1em;
 }
-.lanyardConnecting {
-    display: inline-block !important;
-    color: white;
-    margin-right: .5em;
-}
-
 .lds-ring.smallLoader div {
     box-sizing: border-box;
     display: block;
@@ -388,19 +345,6 @@ html.reduce-motion .lds-ring.lanyardConnecting::before {
     border-radius: 50%;
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     border-color: var(--accent-color, rgba(128, 128, 128, 0.8)) transparent transparent transparent;
-}
-
-.lds-ring.lanyardConnecting div {
-    box-sizing: border-box;
-    display: block;
-    position: absolute;
-    width: 0.8em;
-    height: 0.8em;
-    margin: 0.25em;
-    border: 0.1em solid transparent;
-    border-radius: 50%;
-    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    border-color: white transparent transparent transparent;
 }
 
 .lds-ring.smallLoader div:nth-child(1) {
@@ -613,7 +557,30 @@ div#amTimeremaning>p {
     text-align: center;
     padding: 12px 0;
     margin: 12px 0;
-    min-height: unset !important;
+    /* 0 rather than unset, so there is a length to ease from when the room
+       below is let go. */
+    min-height: 0 !important;
+    /* Eases away whatever room settings.js held open, so if the card from last
+       time is not back (or came back a different size) the page closes up
+       smoothly rather than snapping. */
+    transition: min-height .35s ease-out;
+}
+
+/* The whole section rather than just the card, so the Lyrics and Refresh
+   buttons under it are inside the held room too. The html prefix outranks the
+   !important above. */
+html.lanyard-reserve .discordWrapper {
+    min-height: var(--lanyard-reserve) !important;
+}
+
+html.reduce-motion .discordWrapper {
+    transition: none;
+}
+
+/* Arrives with the card on load, so it comes into focus alongside it rather
+   than popping in sharp underneath a card that is still blurred. */
+.discordWrapper:has(#loadedLanyard.revealing) #lyricsBtn {
+    animation: lanyard-focus-in .32s cubic-bezier(.2, .7, .3, 1) both;
 }
 
 .progress-bar {

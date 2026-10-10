@@ -52,17 +52,40 @@ function prefEnabled(key) {
 // console.error directly - those should be seen whether debugging or not.
 // The pref is read on each call, not cached, so flipping the toggle takes
 // effect without a reload.
+//
+// Since every line is printed from here, the console names settings.js as the
+// source of all of them. Each one is tagged with the file that really logged
+// it instead, e.g. [lanyard.js], read off the call stack.
 const debug = {
     log(...parts) {
         if (!prefEnabled('debugMode')) return;
-        console.log(...parts);
+        console.log(callerTag(), ...parts);
     },
 
     warn(...parts) {
         if (!prefEnabled('debugMode')) return;
-        console.warn(...parts);
+        console.warn(callerTag(), ...parts);
     }
 };
+
+// Every browser writes stack lines a little differently, but all of them end
+// in ".../name.js:line:column", sometimes with a ?query before the line. The
+// first file that is not this one is whoever called debug.
+const STACK_FILE = /\/([^\/?#:]+\.js)(\?[^:]*)?:\d+:\d+/;
+
+function callerTag() {
+    const stack = new Error().stack || '';
+
+    for (const line of stack.split('\n')) {
+        const match = line.match(STACK_FILE);
+        if (!match) continue;
+        if (match[1] === 'settings.js') continue;
+
+        return '[' + match[1] + ']';
+    }
+
+    return '[unknown]';
+}
 
 function setting(key) {
     return localStorage.getItem(key) || DEFAULTS[key];
@@ -156,8 +179,23 @@ function restoreAlbumAccent(theme) {
     root.classList.add('album-accent');
 }
 
+// Holds open the room the "now playing" card took up on the last visit, before
+// the first frame. Presence only arrives after the page is up, and a card
+// opening then shoves everything below it down by its whole height. With the
+// room already there, lanyard.js just fades the card into it. Has to be here
+// because this is the only script that runs before the page is painted.
+function reserveLanyardSpace() {
+    const saved = Number(localStorage.getItem('lanyardReserve'));
+    if (!saved) return;
+
+    const root = document.documentElement;
+    root.style.setProperty('--lanyard-reserve', saved + 'px');
+    root.classList.add('lanyard-reserve');
+}
+
 applyRootSettings();
 applyAccessibilityPrefs();
+reserveLanyardSpace();
 
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (setting('theme') === 'auto') applyRootSettings();

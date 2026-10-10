@@ -6,7 +6,6 @@
 
   const HIGH_RES = 512;
   const UPGRADE_RES = 1024;
-  const SWEDEN_TZ = "Europe/Stockholm";
   const LOADER_MS = 500;
   const REFRESH_TIMEOUT_MS = 10000;
 
@@ -55,26 +54,32 @@
 
   let presence = null;
   let tickTimer = 0;
-  let lastStatus;
-  let clockTimer = null;
   let loaderTimer = null;
   let refreshTimer = null;
   let upgradeArt = prefEnabled("upgradeArtwork");
   let lastTrackKey = "";
   let lastAppleHref = "";
   let lastAppleTrack = null;
+  let firstAnswerSeen = false;
 
   function log(...parts) {
-    debug.log("[Activity]", ...parts);
+    debug.log(...parts);
   }
 
   function warn(...parts) {
-    debug.warn("[Activity]", ...parts);
+    debug.warn(...parts);
   }
 
   for (const card of [els.amCard, els.otherCard]) {
     if (card) card.classList.add("activity");
   }
+
+  // The load-time entrance is a one-off: once it has played, the card goes
+  // back to its usual slide so closing it later still animates.
+  els.content?.addEventListener("animationend", (e) => {
+    if (e.animationName !== "lanyard-focus-in") return;
+    els.content.classList.remove("revealing", "revealGrow");
+  });
 
   initAccessibility();
   initStripNav();
@@ -88,10 +93,11 @@
   });
 
   window.addEventListener("settings:change", onSettingsChange);
+  // settings.js registered its own listener first, so the reduce-motion class
+  // is already up to date by the time this one runs.
+  matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", onMotionChange);
   els.refresh?.addEventListener("click", onRefreshClick);
   window.i18n?.onChange(() => {
-    if (lastStatus === "offline") renderOfflineStatus();
-
     applyAppleHref();
 
     if (lastAppleTrack) {
@@ -122,9 +128,32 @@
       return;
     }
 
+    if (key === "reduceMotion") {
+      onMotionChange();
+      return;
+    }
+
     if (key !== "autoUpdateActivity") return;
     syncRefreshButton();
     syncTicker();
+  }
+
+  // Restarts the climb so the cover swaps between still and animated straight
+  // away. The token is bumped rather than the state deleted: a fresh state
+  // starts its token over, so a climb still in flight could match it and go on
+  // to load an animated rung after motion was turned off.
+  function onMotionChange() {
+    if (!presence) return;
+
+    for (const el of [els.amActivityLogoLarge, els.activityLogoLarge]) {
+      const state = artState.get(el);
+      if (!state) continue;
+
+      state.token++;
+      state.src = "";
+    }
+
+    updateUi();
   }
 
   function syncRefreshButton() {
@@ -222,7 +251,6 @@
       const activities = presence?.activities || [];
       const status = presence?.discord_status || "";
 
-      updateStatusWrapper(status);
       updateActivityInfo(activities, status);
 
       const music = window.Lanyard.appleMusic(presence);
@@ -245,7 +273,56 @@
   // #loadedLanyard animates open/closed, so it is toggled by class rather than
   // by display, display:none cannot transition.
   function showActivityCard(yes) {
-    els.content?.classList.toggle("showActivity", !!yes);
+    const content = els.content;
+    if (!content) return;
+
+    // Only the very first answer counts as "on load". If nothing was playing
+    // then, a later open is a change and slides like any other.
+    const isFirst = !firstAnswerSeen;
+    firstAnswerSeen = true;
+
+    // Reduced motion never plays the animation, so animationend would never
+    // come to take the class off again.
+    const reduceMotion = document.documentElement.classList.contains("reduce-motion");
+
+    if (yes && isFirst && !reduceMotion) {
+      content.classList.add("revealing");
+
+      const roomHeld = document.documentElement.classList.contains("lanyard-reserve");
+      if (!roomHeld) content.classList.add("revealGrow");
+    }
+
+    content.classList.toggle("showActivity", !!yes);
+
+    // The card is in (at full height, in the same frame) or isn't coming, so
+    // the held room can go. #lanyardDiscord eases to its real height from it.
+    if (isFirst) {
+      document.documentElement.classList.remove("lanyard-reserve");
+    }
+  }
+
+  // How tall the card is when the visitor leaves, for settings.js to hold open
+  // next time. Taken on the way out because by then the card has long since
+  // finished opening, mid-animation heights would be wrong.
+  function rememberCardHeight() {
+    // Left before presence came in (or switched tabs that early), so this
+    // visit knows nothing new; keep what the last one saved.
+    if (!firstAnswerSeen) return;
+
+    const open = els.content?.classList.contains("showActivity");
+
+    // The whole section, so the Lyrics button under the card is counted too.
+    const section = document.querySelector(".discordWrapper");
+
+    try {
+      if (open && section) {
+        localStorage.setItem("lanyardReserve", String(section.offsetHeight));
+      } else {
+        localStorage.removeItem("lanyardReserve");
+      }
+    } catch {
+      // Storage blocked, the next visit just grows the card instead.
+    }
   }
 
   function updateActivityInfo(activities, status) {
@@ -277,9 +354,18 @@
 
   // The cards sit in a centred flex row, so revealing one also shoves its
   // neighbour sideways. FLIP: note where each card is, apply the change, then
-  // animate from the old box, new cards fade up, existing ones slide across.
+  // animate from the old box, new cards come into focus the same way the whole
+  // card does on load (lanyard-focus-in in lanyard.css), existing ones slide
+  // across.
   function animateActivityChange(mutate) {
     if (reduceMotion()) {
+      mutate();
+      return;
+    }
+
+    // First presence on load: the whole card is about to come into focus, so
+    // the cards inside it doing it again on top would only blur twice.
+    if (!firstAnswerSeen) {
       mutate();
       return;
     }
@@ -299,8 +385,8 @@
       if (!previous) {
         card.animate(
           [
-            { opacity: 0, transform: "translateY(10px) scale(.97)" },
-            { opacity: 1, transform: "none" },
+            { opacity: 0, filter: "blur(10px)", transform: "scale(.94)" },
+            { opacity: 1, filter: "blur(0)", transform: "none" },
           ],
           { duration: CARD_MS, easing: CARD_EASE }
         );
@@ -366,91 +452,6 @@
       lastTrackKey = trackKey;
       refreshAppleMusicLink(a.details, a.state, a.assets?.large_text, a.assets?.large_image);
     }
-  }
-
-  function updateStatusWrapper(status) {
-    if (status !== lastStatus) {
-      lastStatus = status;
-      document.querySelectorAll(".statusWrapper").forEach((el) => el.classList.add("hide"));
-      byId(`statusWrapper${cap(status)}`)?.classList.remove("hide");
-    }
-
-    if (status === "offline") startClock();
-    else stopClock();
-  }
-
-  // Discord "offline" also covers invisible mode, phone-only and Discord simply
-  // being closed, so the line stays away from claims and just shows my clock.
-  function swedishClock() {
-    const parts = new Intl.DateTimeFormat("en-GB", {
-      timeZone: SWEDEN_TZ,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    }).formatToParts(new Date());
-
-    function part(type) {
-      const found = parts.find((p) => p.type === type);
-      return found?.value || "00";
-    }
-
-    // Rebuilt as a UTC date purely to read the day index, so the weekday is
-    // Sweden's rather than the visitor's.
-    const day = new Date(
-      Date.UTC(Number(part("year")), Number(part("month")) - 1, Number(part("day")))
-    ).getUTCDay();
-
-    return {
-      hour: Number(part("hour")),
-      time: part("hour") + ":" + part("minute"),
-      weekday: day >= 1 && day <= 5,
-    };
-  }
-
-  const HINT_ICONS = ["fa-bed", "fa-briefcase", "fa-clock", "fa-house"];
-
-  function offlineHint(hour, weekday) {
-    if (hour >= 23 || hour < 6) return { text: "in Sweden, probably asleep", icon: "fa-bed" };
-    if (weekday && hour >= 8 && hour < 17) return { text: "in Sweden, probably at work", icon: "fa-briefcase" };
-    if (hour < 18) return { text: "in Sweden, probably out", icon: "fa-clock" };
-    return { text: "in Sweden, probably home", icon: "fa-house" };
-  }
-
-  function renderOfflineStatus() {
-    const timeEl = byId("statusLocalTime");
-    const hintEl = byId("statusOfflineHint");
-    if (!timeEl || !hintEl) return;
-
-    const { hour, time, weekday } = swedishClock();
-    const hint = offlineHint(hour, weekday);
-
-    timeEl.textContent = time;
-
-    if (window.i18n) {
-      hintEl.textContent = window.i18n.t(hint.text);
-    } else {
-      hintEl.textContent = hint.text;
-    }
-
-    const icon = byId("statusOfflineIcon");
-    if (icon) {
-      for (const name of HINT_ICONS) {
-        icon.classList.toggle(name, name === hint.icon);
-      }
-    }
-  }
-
-  function startClock() {
-    renderOfflineStatus();
-    if (!clockTimer) clockTimer = setInterval(renderOfflineStatus, 30000);
-  }
-
-  function stopClock() {
-    clearInterval(clockTimer);
-    clockTimer = null;
   }
 
   function updateProgressBar(timestamps, prefix = "am") {
@@ -549,9 +550,27 @@
       });
     }
 
-    if (art.mzstatic) {
+    // With Reduce motion on, the animated rungs are never fetched at all, not
+    // just paused - the still HD cover takes their place where there is one.
+    const still = reduceMotion();
+
+    // Cider's animated original from the agent, after the still is already
+    // showing. There is no proxy to shrink it through, so it is the full file
+    // - the cost of having it move at all with Discord closed.
+    if (art.animated && !still) {
+      ladder.push({
+        url: art.animated,
+        label: "animated album cover (original)",
+      });
+    } else if (art.mzstatic) {
       ladder.push({
         url: art.mzstatic(UPGRADE_RES),
+        label: "high definition album cover (" + UPGRADE_RES + "px)",
+      });
+    } else if (art.direct && art.proxy && still) {
+      // Without "&animated=true" Discord's proxy hands back the first frame.
+      ladder.push({
+        url: art.proxy(UPGRADE_RES),
         label: "high definition album cover (" + UPGRADE_RES + "px)",
       });
     } else if (art.direct && art.proxy) {
@@ -1065,8 +1084,11 @@
   });
 
   document.addEventListener("visibilitychange", function () {
+    if (document.hidden) rememberCardHeight();
     if (tickTimer) updateTimes();
   });
+
+  window.addEventListener("pagehide", rememberCardHeight);
 
   // No point keeping a timer going when nothing on screen is counting.
   function syncTicker() {
@@ -1112,27 +1134,15 @@
   }
 
   function handleError(e) {
-    console.error("[Activity]", e);
+    console.error("[lanyard.js]", e);
     // Only the copy is replaced, writing to #errorMessage itself would blow
     // away the icon paragraph along with it.
     if (els.errorText) els.errorText.textContent = `An error occurred: ${e?.message || e}`;
-    // "error" is not a Discord status, so it can never collide with a real one,
-    // the next successful payload swaps the chip back on its own.
-    updateStatusWrapper("error");
     showActivityCard(false);
     show(els.error, true);
   }
 
   function initAccessibility() {
-    for (const el of document.querySelectorAll(".statusWrapper")) {
-      el.setAttribute("role", "status");
-      el.setAttribute("aria-live", "polite");
-    }
-
-    // The clock reruns every 30s; announcing it that often is noise, so this one
-    // opts out of the implicit live region role="status" would otherwise give it.
-    byId("statusWrapperOffline")?.setAttribute("aria-live", "off");
-
     els.activityLogoLarge?.setAttribute("alt", "Discord activity icon");
     els.amActivityLogoLarge?.setAttribute("alt", "Album art");
   }
@@ -1159,11 +1169,6 @@
   function isVisible(el) {
     if (!el) return false;
     return getComputedStyle(el).display !== "none";
-  }
-
-  function cap(text) {
-    if (!text) return "";
-    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   function clamp(value, min, max) {
