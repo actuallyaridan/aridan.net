@@ -291,6 +291,10 @@ html.reduce-transparency .fieldHintText {
 }
 
 .articleAdminNotice { min-height: 1.4em; margin: 0; }
+/* Under the New article button in the hero: take no room until there is
+   something to say, or the gap below the button outgrows the one above it. */
+.info .articleAdminNotice { min-height: 0; }
+.info .articleAdminNotice:not(:empty) { margin-top: 10px; }
 .articleAdminNotice.ok { color: var(--accent-text); }
 .articleAdminNotice.error { color: light-dark(#d70015, #ff6961); }
 

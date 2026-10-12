@@ -599,6 +599,24 @@ li>a:active, li>button.noUI:active {
     padding-top: 10px;
 }
 
+/* Page heroes (an icon tile over the title) used to be followed by an <hr>.
+   This gap stands in for it, and is the same gap the description leaves above
+   the hero's buttons, so the buttons sit evenly between the text and the
+   content. The description drops its own margin when it ends the hero, or the
+   two would stack. The landing page's banner hero has its own spacing. */
+.info:has(> .icon):not(.withBanner) {
+    --hero-gap: 32px;
+    margin-bottom: var(--hero-gap);
+}
+
+.info:has(> .icon):not(.withBanner) .description {
+    margin-bottom: var(--hero-gap);
+}
+
+.info:has(> .icon):not(.withBanner) .description:last-child {
+    margin-bottom: 0;
+}
+
 .info>div {
     display: flex;
     flex-direction: column;
@@ -1394,6 +1412,8 @@ li>a>i, li>button.noUI>i {
     background-position: center;
     border-radius: 12px;
     transition: background 0.5s ease-in-out;
+    /* The same gap the other pages' heroes leave (see .info above). */
+    margin-bottom: 32px;
 }
 
 .withBanner::before {

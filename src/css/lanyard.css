@@ -532,6 +532,15 @@ div#amTimeremaning>p {
     min-height: unset !important;
 }
 
+/* With no activity to show (and no room being held for one), the card and its
+   buttons are all display: none, but the wrapper's padding and margin and the
+   section's own margins still left a gap under the banner. Take the section
+   out entirely, so the banner's margin and the next section's can collapse
+   into the one gap. */
+html:not(.lanyard-reserve) div.section:has(> .discordWrapper > #lanyardDiscord[style*="none"]):not(:has(#lyricsBtn:not(.hide), #lanyardRefresh:not(.hide))) {
+    display: none;
+}
+
 /* The whole section rather than just the card, so the Lyrics and Refresh
    buttons under it are inside the held room too. The html prefix outranks the
    !important above. */
