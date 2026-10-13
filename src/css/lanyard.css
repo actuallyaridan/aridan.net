@@ -102,8 +102,11 @@
     margin-left: 12px;
 }
 
+/* Pointer events stay on so the hover title still shows. Dragging is off, but
+   the context menu (and iOS long-press) is left alone on purpose. */
 img.albumArt {
-    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
 }
 
 .discordWrapper,
