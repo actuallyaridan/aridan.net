@@ -213,6 +213,11 @@ function reserveLanyardSpace() {
     localStorage.removeItem('albumAccent');
 })();
 
+// Monochrome was dropped as a colour. Whoever picked it goes back to the default.
+if (localStorage.getItem('accent') === 'monochrome') {
+    localStorage.setItem('accent', DEFAULTS.accent);
+}
+
 applyRootSettings();
 applyAccessibilityPrefs();
 reserveLanyardSpace();

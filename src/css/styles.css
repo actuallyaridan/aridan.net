@@ -145,17 +145,6 @@
     --accent-fill-hover: #4645ab;
 }
 
-.color-monochrome {
-    --accent-color: #666666;
-    --accent-color-to-active: #6666669c;
-    --accent-color-hover: #4d4d4d;
-    --icon-color: #4d4d4d;
-    --accent-text: light-dark(#5c5c5c, #8f8f8f);
-    --accent-text-hover: light-dark(#4d4d4d, #8f8f8f);
-    --accent-fill: #666666;
-    --accent-fill-hover: #4d4d4d;
-}
-
 @property --accent-color {
     syntax: "<color>";
     inherits: true;

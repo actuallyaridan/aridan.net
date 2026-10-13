@@ -87,9 +87,6 @@
                 <input type="radio" id="purple" name="accent-color" value="purple">
                 <label for="purple" class="button">Purple<span class="purple"></span></label>
 
-                <input type="radio" id="monochrome" name="accent-color" value="monochrome">
-                <label for="monochrome" class="monochrome button">Monochrome</label>
-
             </div>
         </div>
         <div>
