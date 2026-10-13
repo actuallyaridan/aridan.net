@@ -7,6 +7,7 @@ const PAGES = [
     { path: "/", priority: "1.0", changefreq: "weekly" },
     { path: "/experience/", priority: "0.8", changefreq: "monthly" },
     { path: "/projects/", priority: "0.8", changefreq: "monthly" },
+    { path: "/hobbies/", priority: "0.6", changefreq: "monthly" },
     { path: "/articles/", priority: "0.8", changefreq: "weekly" },
     { path: "/pihole/", priority: "0.6", changefreq: "daily" },
     { path: "/contact/", priority: "0.6", changefreq: "monthly" },

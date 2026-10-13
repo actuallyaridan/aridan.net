@@ -1,7 +1,7 @@
 (function (global) {
     "use strict";
 
-    var VERSION = "6.1.2";
+    var VERSION = "6.1.3";
 
     function toggleMarkup(id, label) {
         return `
@@ -72,13 +72,16 @@
         <div>
             <${h} class="settingsGroupHeading" id="settingsColorHeading"><i class="fa-solid fa-fill-drip" aria-hidden="true"></i>Color</${h}>
             <div class="colorOptions options" role="radiogroup" aria-labelledby="settingsColorHeading">
+                <input type="radio" id="album" name="accent-color" value="album" checked>
+                <label for="album" class="button">Album art<span class="album"></span></label>
+
                 <input type="radio" id="red" name="accent-color" value="red">
                 <label for="red" class="button">Red<span class="red"></span></label>
 
                 <input type="radio" id="green" name="accent-color" value="green">
                 <label for="green" class="button">Green<span class="green"></span></label>
 
-                <input type="radio" id="blue" name="accent-color" value="blue" checked>
+                <input type="radio" id="blue" name="accent-color" value="blue">
                 <label for="blue" class="button">Blue<span class="blue"></span></label>
 
                 <input type="radio" id="purple" name="accent-color" value="purple">
@@ -90,7 +93,7 @@
             </div>
         </div>
         <div>
-            <${h} class="settingsGroupHeading"><i class="fa-solid fa-sliders" aria-hidden="true"></i>General</${h}>${toggleMarkup("autoUpdateActivity", "Automatically update activities")}${toggleMarkup("albumAccent", "Match accent color to album art")}${toggleMarkup("hideExplicit", "Hide explicit language")}
+            <${h} class="settingsGroupHeading"><i class="fa-solid fa-sliders" aria-hidden="true"></i>General</${h}>${toggleMarkup("autoUpdateActivity", "Automatically update activities")}${toggleMarkup("hideExplicit", "Hide explicit language")}
         </div>
         <div>
             <${h} class="settingsGroupHeading"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i>Performance</${h}>${toggleMarkup("upgradeArtwork", "Upgrade album art quality")}

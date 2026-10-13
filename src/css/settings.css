@@ -55,13 +55,16 @@ select {
     outline-offset: 2px;
 }
 
+/* Wraps rather than staying on one line: a long translation on a phone
+   would otherwise push the toggle off the edge of the screen. */
 .checkbox-wrapper-51 .title {
     margin-right: 10px;
-    flex-grow: 1;
-    white-space: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .checkbox-wrapper-51 .toggle {
+    flex-shrink: 0;
     position: relative;
     display: block;
     cursor: pointer;
@@ -241,6 +244,12 @@ input[type="radio"] {
 }
 .purple {
     background-color: #5856d6;
+}
+/* The current album's colour, set by albumAccent.js, or blue - what the
+   choice would give - when nothing is playing. */
+.album {
+    background-color: var(--album-swatch, #007aff);
+    transition: background-color .6s ease;
 }
 
 .colorOptions>label>span {

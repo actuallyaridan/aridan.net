@@ -16,10 +16,10 @@
     <meta property="og:title" content="Adnan Bukvic">
     <meta property="og:description" content="Adnan Bukvic - a Swedish tech enthusiast, web developer and IT technician. Hackintoshes, vintage iPod restorations, and whatever I happen to be listening to right now.">
     <meta property="og:url" content="https://aridan.net/">
-    <meta property="og:image" content="https://aridan.net/assets/uploads/images/banner.webp">
-    <meta property="og:image:width" content="1500">
-    <meta property="og:image:height" content="500">
-    <meta property="og:image:alt" content="The aridan.net banner.">
+    <meta property="og:image" content="https://aridan.net/assets/uploads/images/og-default.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Adnan Bukvic - tech enthusiast, web developer and IT technician from Sweden. aridan.net">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@actuallyaridan">
     <meta name="twitter:creator" content="@actuallyaridan">
@@ -98,6 +98,7 @@
         <ul class="notAList">
             <li><a href="/experience/">Experience</a></li>
             <li><a href="/projects/">Projects</a></li>
+            <li><a href="/hobbies/">Hobbies</a></li>
             <li><a href="/articles/">Articles</a></li>
             <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
             <li><a href="/pihole/">Pi-hole</a></li>
@@ -117,6 +118,7 @@
                         <li class="active"><a href="/" aria-current="page">aridan.net</a></li>
                         <li><a href="/experience/">Experience</a></li>
                         <li><a href="/projects/">Projects</a></li>
+                        <li><a href="/hobbies/">Hobbies</a></li>
                         <li><a href="/articles/">Articles</a></li>
                         <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                         <li><a href="/pihole/">Pi-hole</a></li>
@@ -273,56 +275,95 @@
                     <img class="photo" alt="Another selfie of me in a bus." src="/assets/uploads/images/on-bus.webp" width="1536" height="2048" loading="lazy" decoding="async">
                 </div>
             </div>
+
             <div class="info">
-                <h2 class="name">Hobbies</h2>
+                <h2 class="name">Need a tour?</h2>
             </div>
-
-            <div class="section">
-                <div>
-                    <p class="section-content">I have a computer that runs both Windows and macOS - it's a hackintosh. It
-                        runs the latest version of macOS great, with graphic acceleration, WiFi and Bluetooth. It works
-                        great, however, due to my graphics card being incompatible with macOS, DRM content, like Netflix,
-                        doesn't play in Safari, but does work properly in other browsers. <br>Here are the specs of it if
-                        you'd like to build something similar:</p>
-                    <ul class="specs">
-                        <li><i class="fa-solid fa-microchip" aria-hidden="true"></i>AMD Ryzen 5 3600</li>
-                        <li><i class="fa-solid fa-gamepad" aria-hidden="true"></i>Radeon RX 6700 XT</li>
-                        <li><i class="fa-solid fa-memory" aria-hidden="true"></i>16GB 3200MHz DDR4 RAM in dual channel</li>
-                        <li><i class="fa-solid fa-hard-drive" aria-hidden="true"></i>about 2TB of SSD storage</li>
-                        <li><i class="fa-solid fa-wifi" aria-hidden="true"></i>Fenvi T919 WiFi/Bluetooth</li>
-                        <li><i class="fa-brands fa-microsoft" aria-hidden="true"></i><i class="fa-brands fa-apple" aria-hidden="true"></i><i class="fa-brands fa-linux" aria-hidden="true"></i>Windows 11, macOS
-                            Sequoia, and CachyOS Linux</li>
-                    </ul>
+            <div class="siteTour">
+                <div class="section">
+                    <div>
+                        <div>
+                            <h2 class="section-title">This page</h2>
+                            <p class="section-content">The cards at the top show what I'm up to on my computer right now: the song I'm playing on Apple Music and whatever else I have open. While a song is playing, the Lyrics button turns the whole screen into its lyrics, synced to the music.</p>
+                        </div>
+                        <div class="infoButtons sectionButtons">
+                            <button type="button" class="button" id="tourLyricsBtn" disabled><i class="fa-solid fa-closed-captioning" aria-hidden="true"></i><span>Show lyrics</span></button>
+                        </div>
+                    </div>
                 </div>
-
-                 <!--<div class="photo-container">
-                    <img class="photo" alt="Me next to my desktop computer." src="/assets/uploads/images/with-pc.webp" width="1536" height="2048" loading="lazy" decoding="async">
-                </div>-->
+                <hr class="onMobile">
+                <div class="section">
+                    <div>
+                        <div>
+                            <h2 class="section-title">Experience</h2>
+                            <p class="section-content">Where I've worked so far: tech repair, IT support for a municipality and customer support at an IoT company.</p>
+                        </div>
+                        <div class="infoButtons sectionButtons">
+                            <a class="button" href="/experience/"><i class="fa-solid fa-briefcase" aria-hidden="true"></i>See where I've worked</a>
+                        </div>
+                    </div>
+                </div>
+                <hr class="onMobile">
+                <div class="section">
+                    <div>
+                        <div>
+                            <h2 class="section-title">Projects</h2>
+                            <p class="section-content">Things I've made or helped with, from translations to a Twitter clone and Windows 7 apps for Linux.</p>
+                        </div>
+                        <div class="infoButtons sectionButtons">
+                            <a class="button" href="/projects/"><i class="fa-solid fa-terminal" aria-hidden="true"></i>See what I've made</a>
+                        </div>
+                    </div>
+                </div>
+                <hr class="onMobile">
+                <div class="section">
+                    <div>
+                        <div>
+                            <h2 class="section-title">Hobbies</h2>
+                            <p class="section-content">My Hackintosh, and the iPods I've opened up and modded.</p>
+                        </div>
+                        <div class="infoButtons sectionButtons">
+                            <a class="button" href="/hobbies/"><i class="fa-solid fa-wrench" aria-hidden="true"></i>See my hobbies</a>
+                        </div>
+                    </div>
+                </div>
+                <hr class="onMobile">
+                <div class="section">
+                    <div>
+                        <div>
+                            <h2 class="section-title">Articles</h2>
+                            <p class="section-content">Write-ups about things I've done, like the lyrics on this page and my Pi-hole.</p>
+                        </div>
+                        <div class="infoButtons sectionButtons">
+                            <a class="button" href="/articles/"><i class="fa-solid fa-newspaper" aria-hidden="true"></i>Start reading</a>
+                        </div>
+                    </div>
+                </div>
+                <hr class="onMobile">
+                <div class="section">
+                    <div>
+                        <div>
+                            <h2 class="section-title">Pi-hole</h2>
+                            <p class="section-content">Live stats from the Raspberry Pi that blocks ads on my home network.</p>
+                        </div>
+                        <div class="infoButtons sectionButtons">
+                            <a class="button" href="/pihole/"><i class="fa-solid fa-chart-line" aria-hidden="true"></i>See the live stats</a>
+                        </div>
+                    </div>
+                </div>
+                <hr class="onMobile">
+                <div class="section">
+                    <div>
+                        <div>
+                            <h2 class="section-title">Contact</h2>
+                            <p class="section-content">Where to find me, and how to send me an email.</p>
+                        </div>
+                        <div class="infoButtons sectionButtons">
+                            <a class="button" href="/contact/"><i class="fa-solid fa-envelope" aria-hidden="true"></i>Get in touch</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="section">
-                <div>
-                    <p class="section-content">I enjoy collecting, repairing, and modifying vintage Apple products, like
-                        iPods. I open them, repair them if needed and then modify them with larger batteries, replace the
-                        internal spinning hard drive with an SD card and also flash custom firmware on them! It's a really
-                        fun hobby and being able to tinker with them is really calming.</p>
-                    <p class="section-content">I currently have a...</p>
-                    <ul class="specs">
-                        <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 5.5th Generation iPod Video with a 5000mAh
-                            battery and 128GB SD card storage, along with a transparent click wheel and top case</li>
-                        <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 2nd Generation iPod Mini with a new battery
-                            and 64GB of Compact Flash storage</li>
-                        <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 1st Generation iPod Touch</li>
-                        <li><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>a 3rd Generation iPod Touch</li>
-                    </ul>
-                </div>
-
-                <div class="photo-container">
-                    <img class="photo" alt="A third generation iPod Classic playing music."
-                        src="/assets/uploads/images/ipod.webp" width="1946" height="2153" loading="lazy" decoding="async">
-                </div>
-            </div>
-
         </main>
         <footer>
             <ul class="notAList footerSocial">

@@ -96,7 +96,6 @@ export async function onRequestGet(context) {
         .on('meta[property="og:description"]', new ContentSetter(description))
         .on('meta[property="og:url"]', new ContentSetter(url))
         .on('meta[property="og:image"]', new ContentSetter(image))
-        .on('meta[property="og:image:alt"]', new ContentSetter("Cover image for " + title))
         .on('link[rel="canonical"]', new AttributeSetter("href", url))
         .on("head", new HeadAppender(jsonLd(article, url)));
 
@@ -109,10 +108,12 @@ export async function onRequestGet(context) {
         );
     }
 
-    // og:image dimensions describe the fallback banner; drop them when an
-    // article supplies its own image of unknown size.
+    // The page's own og:image dimensions and alt describe the default card, so
+    // they only stay accurate when the article falls back to it. An article's
+    // own image is of unknown size, and gets an alt that names the article.
     if (article.meta.image) {
         rewriter = rewriter
+            .on('meta[property="og:image:alt"]', new ContentSetter("Cover image for " + title))
             .on('meta[property="og:image:width"]', { element: (el) => el.remove() })
             .on('meta[property="og:image:height"]', { element: (el) => el.remove() });
     }

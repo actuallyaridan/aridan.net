@@ -343,7 +343,7 @@ function toggleMenu() {
     }
 }
 
-// albumAccent.js puts the album's colour back when settings closes - whether
+// settings.js puts settings back on its main page when it closes - whether
 // the page slides back or the menu takes its place.
 function announceRevealClosed(layer) {
     window.dispatchEvent(new CustomEvent("reveal:close", {
@@ -497,6 +497,16 @@ function attachPill(list) {
 
     settlePill.push(settle);
     settle();
+
+    // Measured while the nav was hidden - the page opened at phone width and
+    // was then widened, or a tablet turned - the pill is left at zero width
+    // in the corner. Any change in the nav's size measures it again.
+    if ("ResizeObserver" in window) {
+        new ResizeObserver(function () {
+            if (pill.classList.contains("hovering")) return;
+            settle();
+        }).observe(host);
+    }
 }
 
 window.repositionNavPills = function () {

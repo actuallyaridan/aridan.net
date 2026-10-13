@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#f1f1f1">
+    <script src="/src/js/settings.js"></script>
+    <script src="/src/js/settingsPanel.js" defer></script>
+    <script src="/src/js/settingsModal.js" defer></script>
+    <meta name="description" content="Running macOS on hardware Apple never made, and bringing vintage iPods back to life with bigger batteries, SD card storage and custom firmware.">
+    <link rel="canonical" href="https://aridan.net/hobbies/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="aridan.net">
+    <meta property="og:title" content="Hobbies - aridan.net">
+    <meta property="og:description" content="Running macOS on hardware Apple never made, and bringing vintage iPods back to life with bigger batteries, SD card storage and custom firmware.">
+    <meta property="og:url" content="https://aridan.net/hobbies/">
+    <meta property="og:image" content="https://aridan.net/assets/uploads/images/og-default.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Adnan Bukvic - tech enthusiast, web developer and IT technician from Sweden. aridan.net">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@actuallyaridan">
+    <meta name="twitter:creator" content="@actuallyaridan">
+    <meta name="keywords"
+        content="aridan, actuallyaridan, adnan, bukvic, twitter, discord, lanyard, api, web, developer, front-end, back-end, it, technician, tech, enthusiast">
+    <meta name="author" content="Adnan Bukvic">
+    <meta name="robots" content="index, follow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <title>Hobbies - aridan.net</title>
+
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/src/css/styles.css">
+    <link rel="stylesheet" href="/src/css/settings.css">
+    <link rel="stylesheet" href="/src/css/lanyard.css">
+    <link rel="stylesheet" href="/src/css/pihole.css">
+    <script src="/src/js/general.js" defer></script>
+    <script src="/src/js/i18n.js" defer></script>
+
+    <script src="/src/js/lanyardClient.js" defer></script>
+    <script src="/src/js/albumAccent.js" defer></script>
+    <script src="/src/js/projectFilter.js" defer></script>
+    <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@17.0.3/dist/twemoji.min.js" integrity="sha384-Y5xukbGJwykbHHkTbLJykYLcBPFxrwipTbEh0puxhkz9CZ90raTPGe2Ks4vCxsYU" referrerpolicy="no-referrer"
+        crossorigin="anonymous"></script>
+    <link rel="alternate" type="application/rss+xml" title="aridan.net articles" href="/feed.xml">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/media/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/media/favicons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/media/favicons/icon-512.png">
+    <link rel="manifest" href="/assets/media/favicons/site.webmanifest">
+    <link rel="shortcut icon" href="/assets/media/favicons/favicon.ico">
+
+</head>
+
+<body>
+    <a class="skipLink" href="#mainContent">Skip to content</a>
+
+    <nav class="mobileMenu revealLayer" id="mobileMenuID" data-reveal="menu" aria-label="Main" tabindex="-1">
+        <button type="button" class="mobileMenuClose" title="Close menu" aria-label="Close menu" data-action="menu"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <ul class="notAList">
+            <li><a href="/experience/">Experience</a></li>
+            <li><a href="/projects/">Projects</a></li>
+            <li class="active"><a href="/hobbies/" aria-current="page">Hobbies</a></li>
+            <li><a href="/articles/">Articles</a></li>
+            <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+            <li><a href="/pihole/">Pi-hole</a></li>
+            <li><a href="/contact/">Contact</a></li>
+        </ul>
+        <ul class="notAList">
+            <li><button type="button" class="noUI" title="Settings" aria-label="Settings" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+            <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+            <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+        </ul>
+    </nav>
+    <div id="page">
+        <header id="desktop-header">
+            <div>
+                <nav aria-label="Main">
+                    <ul class="notAList">
+                        <li><a href="/">aridan.net</a></li>
+                        <li><a href="/experience/">Experience</a></li>
+                        <li><a href="/projects/">Projects</a></li>
+                        <li class="active"><a href="/hobbies/" aria-current="page">Hobbies</a></li>
+                        <li><a href="/articles/">Articles</a></li>
+                        <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
+                        <li><a href="/pihole/">Pi-hole</a></li>
+                        <li><a href="/contact/">Contact</a></li>
+                    </ul>
+                </nav>
+                <ul class="notAList">
+                    <li><button type="button" class="noUI" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" data-action="settings"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></li>
+                    <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                    <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                </ul>
+            </div>
+        </header>
+
+        <header id="mobile-header">
+            <div>
+                <ul class="notAList">
+                    <li><a href="/">aridan.net</a></li>
+                </ul>
+                <ul class="notAList">
+                    <li><button type="button" class="noUI" title="Menu" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuID" data-action="menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button></li>
+                </ul>
+            </div>
+        </header>
+        <main class="container" id="mainContent" tabindex="-1">
+            <div class="info">
+                <p class="icon"><i class="fa-solid fa-wrench icon-background" aria-hidden="true"></i></p>
+                <div>
+                    <h1 class="name">Hobbies</h1>
+                    <p class="description titleColor">What I do when I'm not at work: running macOS on hardware Apple never
+                        made, and bringing old iPods back to life.</p>
+                    <div class="infoButtons projectFilter" role="group" aria-label="Hobby">
+                        <button type="button" class="button" data-status="hackintosh" aria-pressed="true"><i class="fa-brands fa-apple" aria-hidden="true"></i>Hackintosh</button>
+                        <button type="button" class="button" data-status="computers" aria-pressed="false"><i class="fa-solid fa-desktop" aria-hidden="true"></i>Computers</button>
+                        <button type="button" class="button" data-status="ipods" aria-pressed="false"><i class="fa-solid fa-music" aria-hidden="true"></i>iPods</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" data-status="hackintosh">
+                <div>
+                    <h2 class="section-title">My Hackintosh</h2>
+                    <p class="section-content">My desktop is a Hackintosh - a PC I built from regular parts that also
+                        runs macOS. It has an AMD processor, which Apple has never used in a Mac, so getting macOS on it
+                        took some extra work. It works great though, and I can boot it into Windows 11, macOS Sequoia or
+                        CachyOS Linux, whichever I need.</p>
+                </div>
+            </div>
+                    <hr class="onMobile">
+            <div class="section" data-status="hackintosh">
+                <div>
+                    <h2 class="section-title">What works</h2>
+                    <p class="section-content">Pretty much everything - graphics acceleration, WiFi and Bluetooth all
+                        work. The one thing that doesn't is Netflix (and other DRM video) in Safari, because my graphics
+                        card isn't compatible with it. It plays fine in every other browser, so it's easy to live with.</p>
+                </div>
+            </div>
+                    <hr class="onMobile">
+            <div class="section" data-status="hackintosh">
+                <div>
+                    <h2 class="section-title">What's inside</h2>
+                    <p class="section-content">If you're curious, this is what's in it:</p>
+                    <div class="pi-grid hackGrid">
+                        <div class="pi-card">
+                            <i class="fa-solid fa-microchip fa-lg" aria-hidden="true"></i>
+                            <span class="pi-num">CPU</span>
+                            <span class="pi-label">AMD Ryzen 5 3600</span>
+                        </div>
+                        <div class="pi-card">
+                            <i class="fa-solid fa-display fa-lg" aria-hidden="true"></i>
+                            <span class="pi-num">GPU</span>
+                            <span class="pi-label">Radeon RX 6700 XT</span>
+                        </div>
+                        <div class="pi-card">
+                            <i class="fa-solid fa-memory fa-lg" aria-hidden="true"></i>
+                            <span class="pi-num">RAM</span>
+                            <span class="pi-label">16GB DDR4 at 3200MHz, dual channel</span>
+                        </div>
+                        <div class="pi-card">
+                            <i class="fa-solid fa-hard-drive fa-lg" aria-hidden="true"></i>
+                            <span class="pi-num">Storage</span>
+                            <span class="pi-label">About 2TB of SSDs</span>
+                        </div>
+                        <div class="pi-card pi-card-wide">
+                            <i class="fa-solid fa-wifi fa-lg" aria-hidden="true"></i>
+                            <span class="pi-num">WiFi</span>
+                            <span class="pi-label">Fenvi T919, with Bluetooth</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                    <hr class="onMobile">
+
+            <div class="section" data-status="computers">
+                <div>
+                    <h2 class="section-title">My computers</h2>
+                    <p class="section-content">This part is still being written. Content about my computers will be added soon, so check back later!</p>
+                </div>
+            </div>
+                    <hr class="onMobile">
+            <div class="section" data-status="ipods">
+                <div>
+                    <p class="section-content">I enjoy collecting, repairing, and modifying vintage Apple products, like
+                        iPods. I open them, repair them if needed and then modify them with larger batteries, replace the
+                        internal spinning hard drive with an SD card and also flash custom firmware on them! It's a really
+                        fun hobby and being able to tinker with them is really calming.</p>
+                </div>
+            </div>
+                    <hr class="onMobile">
+            <div class="section" data-status="ipods">
+                <div>
+                    <h2 class="section-title">iPod Video (5.5th generation)</h2>
+                    <p class="section-content">The last iPod Video before the Classic took over, from 2006. Mine has a see-through front, so you can watch the
+                        circuit board while the music plays. It also runs a customised firmware that makes it look more like the
+                        Classic's. It's not perfect, but it looks nicer and shows the album art while a song is playing.</p>
+                    <ul class="specs">
+                        <li><i class="fa-solid fa-battery-full" aria-hidden="true"></i>5000mAh battery</li>
+                        <li><i class="fa-solid fa-sd-card" aria-hidden="true"></i>128GB SD card in place of the hard drive</li>
+                        <li><i class="fa-solid fa-circle-dot" aria-hidden="true"></i>Black click wheel and transparent top case</li>
+                        <li><i class="fa-solid fa-palette" aria-hidden="true"></i>Custom firmware styled like the iPod Classic</li>
+                    </ul>
+                </div>
+                <div class="photo-container">
+                    <img class="photo cutout" alt="My iPod Video with a transparent front, showing the circuit board inside, playing a song."
+                        src="/assets/uploads/images/ipod-video.webp" width="600" height="999" loading="lazy" decoding="async">
+                </div>
+            </div>
+                    <hr class="onMobile">
+            <div class="section" data-status="ipods">
+                <div>
+                    <h2 class="section-title">iPod Mini (2nd generation)</h2>
+                    <p class="section-content">The small aluminium one, from 2005. Its tiny spinning hard drive is gone, swapped for flash storage that's
+                        silent and doesn't mind being dropped.</p>
+                    <ul class="specs">
+                        <li><i class="fa-solid fa-battery-full" aria-hidden="true"></i>New battery</li>
+                        <li><i class="fa-solid fa-sd-card" aria-hidden="true"></i>64GB of Compact Flash storage</li>
+                    </ul>
+                </div>
+                <div class="photo-container">
+                    <img class="photo cutout" alt="My silver iPod Mini, playing a song."
+                        src="/assets/uploads/images/ipod-mini.webp" width="600" height="1137" loading="lazy" decoding="async">
+                </div>
+            </div>
+        </main>
+        <footer>
+            <ul class="notAList footerSocial">
+                <li><a href="https://github.com/actuallyaridan" title="GitHub" aria-label="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://twitter.com/actuallyaridan" title="Twitter" aria-label="Twitter" target="_blank" rel="noopener"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a href="https://instagram.com/actuallyaridan" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+                <li><a href="mailto:adnan@aridan.net" title="Email" aria-label="Email"><i class="fa-solid fa-at" aria-hidden="true"></i></a></li>
+                <li><a href="/feed.xml" title="RSS feed" aria-label="RSS feed"><i class="fa-solid fa-rss" aria-hidden="true"></i></a></li>
+            </ul>
+            <p class="footerNote">
+                <span>&copy; <span id="footerYear">2026</span> Adnan Bukvic <span class="rightsNote">unless stated otherwise</span></span>
+                <a class="inline" href="https://github.com/actuallyaridan/aridan.net" title="Source on GitHub" target="_blank" rel="noopener">Source on GitHub</a>
+                <a class="inline" href="/privacy/" title="Privacy">Privacy</a>
+            </p>
+            <p class="footerNote embedNote">This website embeds content from other websites and services. Lyrics, album art, logos and trademarks belong to their respective owners.</p>
+        </footer>
+    </div>
+</body>
+
+</html>

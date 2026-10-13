@@ -99,7 +99,9 @@
     }
 }
 
-.color-blue {
+/* Album art falls back to blue whenever nothing is playing. */
+.color-blue,
+.color-album {
     --accent-color: #007aff;
     --accent-color-to-active: #007bff9c;
     --accent-color-hover: #005bb5;
@@ -510,7 +512,12 @@ header>div {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    width: 80vw;
+    /* 80vw is the look; fit-content lets the bar grow instead of letting the
+       nav spill out of it just above the mobile breakpoint, where 80vw is
+       narrower than the links (and longer in some languages). */
+    width: fit-content;
+    min-width: 80vw;
+    max-width: calc(100vw - 24px);
     height: 4em;
     background-color: var(--header-background-color);
     -webkit-backdrop-filter: blur(var(--blur-regular));
@@ -692,6 +699,14 @@ li>a:active, li>button.noUI:active {
     width: 100%;
     height: 100%;
 }
+
+/* A photo cut out of its background (the iPods on the Hobbies page) keeps
+   the usual frame, with room around it so it sits inside rather than
+   touching the edges. */
+.photo.cutout {
+    padding: 16px;
+}
+
 .section-title,
 h2 {
     font-size: 1.5em;
@@ -709,6 +724,12 @@ h2.name {
     font-size: 1em;
     color: var(--paragraph-color);
     line-height: 1.5;
+}
+
+/* Paragraphs have no margin of their own here, so a card with more than one
+   (the Hobbies page's Hackintosh story) would read as one block. */
+.section-content+.section-content {
+    margin-top: .75em;
 }
 
 div.section {
@@ -2071,13 +2092,6 @@ span.token{
     .mobileMenu {
         display: flex;
     }
-hr.onMobile {
-    display: block;
-    width: 80%;
-    margin: 20px auto;
-    border: 1px solid var(--border-color);
-}
-
     .photo-container {
         left: 0px;
         margin: 12px;
@@ -2249,10 +2263,93 @@ hr.onMobile {
     gap: 10px;
 }
 
-/* The project filter: two toggle buttons in the hero, joined into one
-   segmented control so they read as a single choice rather than two separate
-   actions. .infoButtons' gap is dropped and the inner corners squared off, so
-   only the outer ends keep the button's rounding. */
+/* The home page's tour of the site. One grid for every entry, so the
+   buttons can share a column that is as wide as the widest of them: each
+   entry, and the row inside it, pass the tour's columns down with subgrid.
+   The text keeps to half the tour's width, the way the experience page's
+   text does beside its photo. */
+.siteTour {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    column-gap: 20px;
+    width: min(60vw, 600px);
+    margin: 18px auto;
+    container-type: inline-size;
+}
+
+/* Margins don't collapse in a grid, so an entry's own would stack on top of
+   the divider's. The divider alone keeps the spacing it has elsewhere. */
+.siteTour>div.section {
+    margin: 0;
+}
+
+.siteTour>* {
+    grid-column: 1 / -1;
+}
+
+.siteTour>div.section,
+.siteTour>div.section>div {
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: center;
+}
+
+.siteTour>div.section>div {
+    grid-column: 1 / -1;
+}
+
+.siteTour>div.section>div>div:first-child {
+    max-width: 50cqi;
+}
+
+/* .infoButtons centres its contents, which would keep each button at its
+   own width; stretched, every button fills the shared column. */
+.infoButtons.sectionButtons {
+    display: grid;
+    justify-content: stretch;
+}
+
+.infoButtons.sectionButtons>.button {
+    justify-content: center;
+    text-align: center;
+}
+
+/* The lyrics button, while Nothing is playing. The same faded look as
+   the article editor's disabled buttons. */
+.infoButtons.sectionButtons>.button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+/* No room for a second column on a phone or a tablet held upright - the
+   same 966px where the rest of the site switches to its mobile layout. The
+   text takes the full width and the button drops under it, as wide as the
+   text: easy to hit with a thumb, and lined up with both edges of what it
+   belongs to. */
+@media (max-width: 966px) {
+    .siteTour {
+        width: 100%;
+        row-gap: 0;
+    }
+
+    .siteTour>div.section>div {
+        row-gap: 12px;
+    }
+
+    .siteTour>div.section>div>div:first-child {
+        grid-column: 1 / -1;
+        max-width: none;
+    }
+
+    .infoButtons.sectionButtons {
+        grid-column: 1 / -1;
+    }
+}
+
+/* The project filter: toggle buttons in the hero, joined into one segmented
+   control so they read as a single choice rather than separate actions.
+   .infoButtons' gap is dropped and the inner corners squared off, so only
+   the outer ends keep the button's rounding. */
 .projectFilter {
     gap: 0;
 }
@@ -2267,10 +2364,51 @@ hr.onMobile {
     border-bottom-left-radius: 0;
 }
 
+/* With three or more (the hobbies page), the ones in between have no outer
+   end at all. */
+.projectFilter .button:not(:first-child):not(:last-child) {
+    border-radius: 0;
+}
+
+/* Three of them with their icons don't fit a phone's width, and wrapping
+   would split the control in two. The labels say enough on their own, so
+   the icons go there - only for three or more; two still fit as they are. */
+@media (max-width: 600px) {
+    .projectFilter:has(> .button:nth-child(3)) {
+        flex-wrap: nowrap;
+    }
+
+    .projectFilter:has(> .button:nth-child(3))>.button {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .projectFilter:has(> .button:nth-child(3))>.button>i {
+        display: none;
+    }
+}
+
 /* Liquid Glass buttons have a 1px border each, so side by side they would
    make a 2px seam. Overlapping them by 1px keeps it a hairline. */
 .style-liquid-glass .projectFilter .button + .button {
     margin-left: -1px;
+}
+
+/* Only the chosen button casts a shadow of its own. Each of the others
+   casting one would spill onto its neighbour - with three, the middle one
+   ends up shaded by the button beside it whichever is chosen. The control
+   as a whole casts the buttons' usual shadow instead, so it still floats
+   like any other button rather than going flat. */
+.style-liquid-glass .projectFilter {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: min(43.25rem, 4.65rem + 36.5vw);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.style-liquid-glass .projectFilter .button:not([aria-pressed="true"]) {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* The press-in scale would pull each half away from the other and open a

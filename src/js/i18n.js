@@ -34,6 +34,7 @@
         "main .section > p",
         "main a.button",
         "main .pi-label",
+        "main .hackGrid .pi-num",
         "main .pi-stat-label",
         "main #lanyardRefresh",
         "main #lyricsBtn",
@@ -72,6 +73,7 @@
         // The mobile menu sits under the page, outside the header.
         ["#mobileMenuID [title]", "title"],
         ["#mobileMenuID [aria-label]", "aria-label"],
+        ["#mobileMenuID[aria-label]", "aria-label"],
         ["main .projectFilter[aria-label]", "aria-label"],
         ["footer [title]", "title"],
         ["footer [aria-label]", "aria-label"]

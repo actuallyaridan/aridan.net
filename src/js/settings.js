@@ -7,7 +7,7 @@ const THEME_COLORS = { light: '#f1f1f1', dark: '#121212' };
 
 const DEFAULTS = {
     theme: 'auto',
-    accentColor: 'blue',
+    accent: 'album',
     lyricsMode: 'immersive'
 };
 
@@ -21,7 +21,6 @@ const LANGUAGES = {
 
 const PREF_DEFAULT = {
     autoUpdateActivity: () => true,
-    albumAccent: () => true,
     hideExplicit: () => true,
     upgradeArtwork: () => true,
     reduceMotion: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -32,7 +31,7 @@ const PREF_DEFAULT = {
 // Which radio group in the settings panel holds which setting.
 const RADIO_SETTINGS = {
     'theme-color': 'theme',
-    'accent-color': 'accentColor'
+    'accent-color': 'accent'
 };
 
 function prefEnabled(key) {
@@ -117,7 +116,7 @@ function applyRootSettings() {
     }
 
     kept.push('theme-' + theme);
-    kept.push('color-' + setting('accentColor'));
+    kept.push('color-' + setting('accent'));
 
     // Liquid Glass is the only style now - Flat was removed - but the CSS is
     // still written against this class, so it is always there.
@@ -153,7 +152,7 @@ function syncThemeColor(theme) {
 // Painting albumAccent.js's cached variables back before the first frame is what
 // stops the accent snapping from blue to the album's colour on every navigation.
 function restoreAlbumAccent(theme) {
-    if (!prefEnabled('albumAccent')) return;
+    if (setting('accent') !== 'album') return;
 
     const raw = localStorage.getItem('albumAccentCache');
 
@@ -192,6 +191,27 @@ function reserveLanyardSpace() {
     root.style.setProperty('--lanyard-reserve', saved + 'px');
     root.classList.add('lanyard-reserve');
 }
+
+// Matching the album art used to be a toggle of its own, with a picked colour
+// underneath it for between songs. It is one of the colours now, under a new
+// key so an old saved colour can't be mistaken for a new pick. Whoever had
+// the toggle on, or never touched it, gets the album's colour.
+(function migrateAccent() {
+    if (localStorage.getItem('accent') !== null) return;
+
+    const oldColor = localStorage.getItem('accentColor');
+    const oldToggle = localStorage.getItem('albumAccent');
+    if (oldColor === null && oldToggle === null) return;
+
+    if (oldToggle === 'false') {
+        localStorage.setItem('accent', oldColor || 'blue');
+    } else {
+        localStorage.setItem('accent', 'album');
+    }
+
+    localStorage.removeItem('accentColor');
+    localStorage.removeItem('albumAccent');
+})();
 
 applyRootSettings();
 applyAccessibilityPrefs();

@@ -4,7 +4,7 @@
 export const SITE = "https://aridan.net";
 export const INDEX_URL = "/assets/content/articles/index.json";
 export const ARTICLE_DIR = "/assets/content/articles/";
-export const DEFAULT_IMAGE = SITE + "/assets/uploads/images/banner.webp";
+export const DEFAULT_IMAGE = SITE + "/assets/uploads/images/og-default.jpg";
 
 // env.ASSETS is bound on Cloudflare Pages; fall back to a normal fetch so the
 // same code keeps working if the functions ever run somewhere else.

@@ -1,6 +1,4 @@
 (function () {
-    const DEFAULT_STATUS = "ongoing";
-
     // The rules between sections, hidden along with the section they follow.
     function isSeparator(el) {
         if (el == null) return false;
@@ -62,11 +60,19 @@
             if (statuses.includes(status)) show(status);
         });
 
+        // Each page marks its own default as pressed in the markup (Ongoing on
+        // Projects, Hackintosh on Hobbies), so this file needs no list of them.
+        const pressed = buttons.find((button) => button.getAttribute("aria-pressed") === "true");
+        let defaultStatus = statuses[0];
+        if (pressed) {
+            defaultStatus = pressed.dataset.status;
+        }
+
         const fromUrl = location.hash.slice(1);
         if (statuses.includes(fromUrl)) {
             show(fromUrl);
         } else {
-            show(DEFAULT_STATUS);
+            show(defaultStatus);
         }
     }
 

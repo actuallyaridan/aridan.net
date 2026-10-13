@@ -25,6 +25,14 @@
   const nowArtist = document.getElementById("lyricsNowArtist");
   const nowBox = document.getElementById("lyricsNowPlaying");
 
+  // The home page's tour has its own way in, under "This page". Unlike the
+  // button by the Apple Music card it stays put when nothing is playing,
+  // greyed out and saying so, since the tour reads oddly with a gap in it.
+  const tourBtn = document.getElementById("tourLyricsBtn");
+
+  // Until Lanyard first answers, nothing is known either way.
+  let lanyardHeard = false;
+
   // The width transition on #lyricsNowPlaying in lyrics.css.
   const NOW_RESIZE_MS = 350;
   let nowResizeTimer = 0;
@@ -196,9 +204,16 @@
     return "immersive";
   }
 
-  function t(text) {
-    if (window.i18n) return window.i18n.t(text);
-    return text;
+  // Anything after the text fills its {0}, {1}... in order, the same as
+  // i18n.t() itself does.
+  function t(text, ...args) {
+    if (window.i18n) return window.i18n.t(text, ...args);
+
+    let filled = text;
+    for (let i = 0; i < args.length; i++) {
+      filled = filled.split("{" + i + "}").join(args[i]);
+    }
+    return filled;
   }
 
   let track = null;
@@ -1595,10 +1610,65 @@
     }, wait);
   }
 
+  // Hovering either lyrics button says which song it opens. Through shown(),
+  // like the overlay's own title, so "Hide explicit language" covers it too.
+  function songTooltip() {
+    if (!track) return "";
+    return t("Show lyrics for {0} by {1}", shown(track.title), shown(track.artist));
+  }
+
+  function setTooltip(button, text) {
+    if (text) {
+      button.title = text;
+    } else {
+      button.removeAttribute("title");
+    }
+  }
+
+  // Both buttons, whenever the song, the language or the filter changes.
+  // The one by the Apple Music card only needs its tooltip - it's hidden
+  // outright when nothing is playing - while the tour's also switches
+  // between its two labels.
+  function syncLyricsButtons() {
+    setTooltip(btn, songTooltip());
+
+    if (!tourBtn) return;
+
+    const label = tourBtn.querySelector("span");
+
+    // Not heard from Lanyard yet: still disabled, but without claiming
+    // nothing is playing - it may well be, a moment from now.
+    if (!lanyardHeard) {
+      tourBtn.disabled = true;
+      label.textContent = t("Show lyrics");
+      setTooltip(tourBtn, "");
+      return;
+    }
+
+    if (track) {
+      tourBtn.disabled = false;
+      label.textContent = t("Show lyrics");
+    } else {
+      tourBtn.disabled = true;
+      label.textContent = t("Nothing is playing");
+    }
+
+    setTooltip(tourBtn, songTooltip());
+  }
+
+  // The overlay's own settings listener further down only acts while the
+  // lyrics are open; the tooltips have to follow the filter at any time.
+  window.addEventListener("settings:change", (event) => {
+    if (event.detail?.key !== "hideExplicit") return;
+    syncLyricsButtons();
+  });
+
   window.Lanyard.subscribe((presence) => {
     const next = readTrack(window.Lanyard.appleMusic(presence));
     const changed = trackKey(next) !== trackKey(track);
     track = next;
+    lanyardHeard = true;
+    syncLyricsButtons();
 
     if (!track) {
       btn.classList.add("hide");
@@ -1614,6 +1684,7 @@
   });
 
   btn.addEventListener("click", openOverlay);
+  tourBtn?.addEventListener("click", openOverlay);
   closeBtn?.addEventListener("click", closeOverlay);
   fullscreenBtn?.addEventListener("click", toggleFullscreen);
 
@@ -1756,5 +1827,6 @@
     const key = statusEl?.dataset.key;
     if (key) statusEl.textContent = t(key);
     setNowPlaying();
+    syncLyricsButtons();
   });
 })();
