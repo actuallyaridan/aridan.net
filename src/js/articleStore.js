@@ -244,17 +244,24 @@
         return readArticle(dir, slug).then(function (text) {
             var meta = AF.parse(text).meta;
 
-            return {
+            var entry = {
                 slug: slug,
                 title: meta.title || "",
                 date: meta.date || "",
                 preview: meta.preview || ""
             };
+
+            // Only articles with a cover have one - see scripts/cover.js.
+            if (meta.image) {
+                entry.image = meta.image;
+            }
+
+            return entry;
         });
     }
 
     // index.json is what the live site reads, so it is rewritten after any
-    // change. It carries each card's title, date and preview too, so the
+    // change. It carries each card's title, date, preview and cover too, so the
     // article list is one fetch rather than one per article.
     function rebuildIndex(dir) {
         return listSlugs(dir).then(function (slugs) {

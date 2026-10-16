@@ -16,6 +16,21 @@
   const SLIDE_MS = 380;
   const SLIDE_EASE = "cubic-bezier(.25,.8,.3,1)";
 
+  // "3 minutes ago" only changes once a minute, so it is redrawn that often
+  // rather than on the per-second ticker, which is off while nothing plays.
+  const AGO_REFRESH_MS = 60000;
+
+  // Biggest first: the first unit the time fits at least one of is the one
+  // it is told in.
+  const AGO_UNITS = [
+    { unit: "year", seconds: 365 * 24 * 60 * 60 },
+    { unit: "month", seconds: 30 * 24 * 60 * 60 },
+    { unit: "week", seconds: 7 * 24 * 60 * 60 },
+    { unit: "day", seconds: 24 * 60 * 60 },
+    { unit: "hour", seconds: 60 * 60 },
+    { unit: "minute", seconds: 60 },
+  ];
+
   function byId(id) {
     if (!id) return null;
     return document.getElementById(id);
@@ -40,6 +55,7 @@
     amActivityName: byId("amActivityName"),
     amActivityState: byId("amActivityState"),
     amActivityDetails: byId("amActivityDetails"),
+    amLastPlayedAgo: byId("amLastPlayedAgo"),
 
     amProgressBar: byId("amProgressBar"),
     amProgressTrack: byId("amProgressTrack"),
@@ -65,6 +81,11 @@
   let lastAppleHref = "";
   let lastAppleTrack = null;
   let firstAnswerSeen = false;
+
+  // When the last song stopped, while the music card is showing it. 0 the
+  // rest of the time.
+  let lastPlayedAt = 0;
+  let agoTimer = 0;
 
   // Whether the card is open, or on its way open. The showActivity class
   // cannot say: it stays on while the card is closing, so it is still drawn.
@@ -109,6 +130,11 @@
   els.refresh?.addEventListener("click", onRefreshClick);
   window.i18n?.onChange(() => {
     applyAppleHref();
+
+    if (lastPlayedAt) {
+      setText(els.amActivityName, translate("Last played"));
+      updateLastPlayedAgo();
+    }
 
     if (lastAppleTrack) {
       refreshAppleMusicLink(
@@ -270,7 +296,8 @@
       // Empty but expanded, #loadedLanyard still contributes its 12px top margin
       // and nudges the page down, so it only opens once there is actually an
       // activity card inside it.
-      showActivityCard(activities.length > 0);
+      const last = window.Lanyard.lastPlayed(presence);
+      showActivityCard(activities.length > 0 || !!last);
       show(els.error, false);
 
       updateStripNav();
@@ -486,15 +513,22 @@
   }
 
   function updateActivityInfo(activities, status) {
+    // With nothing playing, the music card shows the last song instead.
+    const last = window.Lanyard.lastPlayed(presence);
+
     // Discord only reports activity while online, but the aridan-presence
     // agent reports it with Discord closed too, so either one opens this.
-    show(els.lanyardDiscord, status === "online" || activities.length > 0);
+    // So does a last song to show.
+    show(els.lanyardDiscord, status === "online" || activities.length > 0 || !!last);
 
-    // Nothing playing: the whole card collapses, and the collapse needs a height
+    // Nothing at all: the whole card collapses, and the collapse needs a height
     // to shrink from, so the last frame is left mounted rather than emptied out
     // first. #loadedLanyard's delayed visibility takes it out of the a11y tree
     // once the transition has finished.
-    if (!activities.length) return;
+    if (!activities.length && !last) {
+      setLastPlayedMode(false);
+      return;
+    }
 
     const appleMusic = window.Lanyard.appleMusic(presence);
     const others = activities.filter((a) => !window.Lanyard.isAppleMusic(a));
@@ -502,7 +536,10 @@
     animateActivityChange(() => {
       if (appleMusic) {
         updateAppleMusicInfo(appleMusic);
+      } else if (last) {
+        updateLastPlayedInfo(last);
       } else {
+        setLastPlayedMode(false);
         show(els.amCard, false);
       }
 
@@ -593,6 +630,7 @@
 
   function updateAppleMusicInfo(a) {
     show(els.amCard, true);
+    setLastPlayedMode(false);
 
     updateImage(els.amActivityLogoLarge, a, a.assets?.large_text);
 
@@ -603,15 +641,114 @@
     updateActivityTime(a.timestamps, "am");
     updateProgressBar(a.timestamps);
 
-    // The Apple Music lookup costs a few network round trips, so it only runs
-    // when the track itself has actually changed, not on every presence update.
+    refreshLinkIfNewTrack(a);
+  }
+
+  // The same card with the last song in it, a still record, and when it
+  // stopped where the progress bar was.
+  function updateLastPlayedInfo(last) {
+    const a = last.activity;
+
+    show(els.amCard, true);
+    setLastPlayedMode(true);
+    lastPlayedAt = last.at;
+
+    updateImage(els.amActivityLogoLarge, a, a.assets?.large_text);
+
+    setText(els.amActivityName, translate("Last played"));
+    setText(els.amActivityState, shown(artistOf(a.state)));
+    setText(els.amActivityDetails, shown(a.details));
+
+    updateLastPlayedAgo();
+    syncAgoTimer();
+
+    // Still worth a link: it is a song someone might want to hear.
+    refreshLinkIfNewTrack(a);
+  }
+
+  // The class swaps the progress bar for the "ago" line and stops the record
+  // spinning - see lanyard.css.
+  function setLastPlayedMode(yes) {
+    if (els.amCard) {
+      els.amCard.classList.toggle("lastPlayed", yes);
+    }
+
+    if (!yes) {
+      lastPlayedAt = 0;
+      syncAgoTimer();
+    }
+  }
+
+  function updateLastPlayedAgo() {
+    const el = els.amLastPlayedAgo;
+    if (!el) return;
+    if (!lastPlayedAt) return;
+
+    el.textContent = timeAgo(lastPlayedAt);
+
+    // The exact time, for anyone who hovers.
+    el.title = new Date(lastPlayedAt).toLocaleString(currentLanguage());
+  }
+
+  function syncAgoTimer() {
+    clearInterval(agoTimer);
+    agoTimer = 0;
+
+    if (!lastPlayedAt) return;
+    agoTimer = setInterval(updateLastPlayedAgo, AGO_REFRESH_MS);
+  }
+
+  // "3 hours ago", in whichever language the site is in.
+  function timeAgo(at) {
+    const elapsed = Math.max(0, (Date.now() - at) / 1000);
+    const format = relativeTimeFormat();
+
+    // numeric: "auto" turns 0 seconds into "now" rather than "in 0 seconds".
+    if (elapsed < 60) {
+      return format.format(0, "second");
+    }
+
+    for (const step of AGO_UNITS) {
+      if (elapsed >= step.seconds) {
+        const count = Math.floor(elapsed / step.seconds);
+        return format.format(-count, step.unit);
+      }
+    }
+
+    return format.format(0, "second");
+  }
+
+  function relativeTimeFormat() {
+    // numeric: "auto" says "yesterday" rather than "1 day ago".
+    const options = { numeric: "auto" };
+
+    try {
+      return new Intl.RelativeTimeFormat(currentLanguage(), options);
+    } catch {
+      return new Intl.RelativeTimeFormat("en", options);
+    }
+  }
+
+  function currentLanguage() {
+    if (window.i18n && window.i18n.lang) return window.i18n.lang;
+    return "en";
+  }
+
+  function translate(english) {
+    if (window.i18n) return window.i18n.t(english);
+    return english;
+  }
+
+  // The Apple Music lookup costs a few network round trips, so it only runs
+  // when the track itself has actually changed, not on every presence update.
+  function refreshLinkIfNewTrack(a) {
     const parts = [a.details, a.state, a.assets?.large_text, a.assets?.large_image];
     const trackKey = parts.join("|");
 
-    if (trackKey !== lastTrackKey) {
-      lastTrackKey = trackKey;
-      refreshAppleMusicLink(a.details, a.state, a.assets?.large_text, a.assets?.large_image);
-    }
+    if (trackKey === lastTrackKey) return;
+
+    lastTrackKey = trackKey;
+    refreshAppleMusicLink(a.details, a.state, a.assets?.large_text, a.assets?.large_image);
   }
 
   function updateProgressBar(timestamps, prefix = "am") {

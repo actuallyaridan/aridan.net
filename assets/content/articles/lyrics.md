@@ -2,6 +2,8 @@
 title: Making lyrics feel alive
 date: 2026-10-03
 preview: How the lyrics on my homepage go from a list of timestamps to something that feels like a lyric video.
+icon: fa-solid fa-closed-captioning
+image: /assets/uploads/images/articles/lyrics.jpg
 ---
 
 ## Wait, there are lyrics?

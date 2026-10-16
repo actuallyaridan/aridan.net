@@ -465,10 +465,6 @@ justify-content: center;
 font-size: 4em;
 }
 
-#mobile-header {
-    display: none;
-}
-
 ul {
     display: flex;
     flex-direction: column;
@@ -505,7 +501,11 @@ header>div {
        nav spill out of it just above the mobile breakpoint, where 80vw is
        narrower than the links (and longer in some languages). */
     width: fit-content;
-    min-width: 80vw;
+    /* 80% of the window on a big screen, 90% on a small one, and the same
+       either side of 966px, where the links fold away (see "One header,
+       phone to desktop" below) - so the bar, and aridan.net at its left
+       end, stay exactly where they are. 870px is 90% of 966px. */
+    min-width: max(80vw, min(90vw, 870px));
     max-width: calc(100vw - 24px);
     height: 4em;
     background-color: var(--header-background-color);
@@ -583,6 +583,48 @@ li>a:active, li>button.noUI:active {
 .container {
     max-width: 600px;
     width: 100%;
+}
+
+/* ---------- Fitting the page to the window ----------
+
+   No jumps between phone, tablet and desktop for the content: the margins
+   either side grow with the window, from 16px on a phone to 40px, and the
+   column keeps its full 600px for as long as there is room for it.
+
+   Parts of a page that change layout - a section's text and photo going
+   from side by side to one above the other, the tour, the article cards -
+   decide by the room the column actually has (`@container page` below),
+   not by the window. So a tablet gets the side-by-side layout whenever the
+   column is wide enough for it, instead of the squeezed phone one.
+
+   Only the header and the music card still switch at a window width. */
+:root {
+    --page-gutter: clamp(16px, 5vw, 40px);
+}
+
+main.container {
+    width: min(600px, 100% - 2 * var(--page-gutter));
+    container: page / inline-size;
+}
+
+footer>.footerNote {
+    max-width: min(600px, 100vw - 2 * var(--page-gutter));
+}
+
+/* Too narrow for text and a photo side by side: one above the other. */
+@container page (max-width: 460px) {
+    div.section {
+        flex-direction: column !important;
+        text-align: left;
+    }
+
+    /* div.section in front, to outrank the plain .photo-container rule
+       further down that offsets it by 3em beside the text. Margin above and
+       below only: the box is the column's full width already. */
+    div.section>.photo-container {
+        left: 0;
+        margin: 12px 0;
+    }
 }
 
 .info {
@@ -960,7 +1002,15 @@ html[data-reveal="settings"] {
    screen with a scroll position of its own, so it moves as one screen-sized
    card. Rounded corners or a transform on the whole scrolled page would land
    on the top of the document, far above what is on screen. general.js moves
-   the window's scroll position into the page and back again afterwards. */
+   the window's scroll position into the page and back again afterwards.
+
+   revealPreparing is the same, for the two frames before an open starts to
+   move (see openReveal() in general.js): the page is fixed and handed its
+   scroll position first, and its layer built (will-change), so the slide
+   does not have to do all of that on its own first frame. Safari, having
+   thrown its layers away after a while of nothing moving, would otherwise
+   start the slide late and stutter through it. */
+html.revealPreparing #page,
 html.revealOpen #page,
 html.revealClosing #page {
     position: fixed;
@@ -970,6 +1020,7 @@ html.revealClosing #page {
     /* Rounded by clip-path rather than border-radius, which also clips
        anything with a backdrop-filter inside the transformed page. */
     clip-path: inset(0 round 0);
+    will-change: transform;
 }
 
 html.revealOpen #page {
@@ -989,12 +1040,14 @@ html.revealOpen #page {
    - iOS scrolls the root, not body, and bounces it past either end even
      with nothing to scroll. overscroll-behavior stops the bounce; the
      settings layer still scrolls its own content. */
+html.revealPreparing,
 html.revealOpen,
 html.revealClosing {
     overflow: hidden;
     overscroll-behavior: none;
 }
 
+html.revealPreparing body,
 html.revealOpen body,
 html.revealClosing body {
     min-height: 0;
@@ -1054,7 +1107,7 @@ html.revealOpen body::before {
    native scroll view, and that keeps catching taps while hidden - over the
    right-hand side of the screen, where the menu button is, so the menu could
    not be opened again until a reload. */
-html:not(.revealOpen):not(.revealClosing) .revealLayer {
+html:not(.revealPreparing):not(.revealOpen):not(.revealClosing) .revealLayer {
     display: none;
 }
 
@@ -1176,20 +1229,14 @@ html:not(.revealOpen):not(.revealClosing) .revealLayer {
     margin: 0;
 }
 
-.style-liquid-glass #mobile-header>div>ul.notAList {
-    transform: translateX(-2px);
-}
-
-.style-liquid-glass .mobileMenu>ul>li,
-.style-liquid-glass header#mobile-header>div>ul.notAList>li {
+.style-liquid-glass .mobileMenu>ul>li {
     border-radius: min(43.25rem, 4.65rem + 36.5vw);
         -webkit-tap-highlight-color: transparent;
     tap-highlight-color: transparent;
 }
 
 .style-liquid-glass .mobileMenu>ul>li>a,
-.style-liquid-glass .mobileMenu>ul>li>button.noUI,
-.style-liquid-glass header#mobile-header>div>ul.notAList>li>a {
+.style-liquid-glass .mobileMenu>ul>li>button.noUI {
     border: 1px solid transparent;
     background-color: transparent;
     border-radius: min(43.25rem, 4.65rem + 36.5vw);
@@ -1198,16 +1245,14 @@ html:not(.revealOpen):not(.revealClosing) .revealLayer {
 }
 
 .style-liquid-glass .mobileMenu>ul>li>a:hover,
-.style-liquid-glass .mobileMenu>ul>li>button.noUI:hover,
-.style-liquid-glass header#mobile-header>div>ul.notAList>li>a:hover {
+.style-liquid-glass .mobileMenu>ul>li>button.noUI:hover {
     border-color: var(--liquid-glass-button-border);
     background-color: var(--liquid-glass-button-background);
     color: var(--header-text-color-hover);
 }
 
 .style-liquid-glass .mobileMenu>ul>li.active>a,
-.style-liquid-glass .mobileMenu>ul>li.active>button.noUI,
-.style-liquid-glass header#mobile-header>div>ul.notAList>li.active>a {
+.style-liquid-glass .mobileMenu>ul>li.active>button.noUI {
     border: 1px solid var(--liquid-glass-button-border);
     background-color: var(--liquid-glass-button-slected);
     border-radius: min(43.25rem, 4.65rem + 36.5vw);
@@ -1415,9 +1460,56 @@ li>a>i, li>button.noUI>i {
     border-bottom: var(--accent-color) 2px solid;
 }
 
+/* The GitHub counts on the projects page count up to their live value
+   (getGitHubStats.js), so every digit is the same width and they change in
+   place instead of shuffling sideways. */
+[id^="stars-"],
+[id^="forks-"] {
+    font-variant-numeric: tabular-nums;
+}
+
+/* The homepage's "a Swedish ___": the words roll up through the gap like a
+   departure board (startTitleShuffle in general.js). They are stacked in one
+   grid cell, so each can be measured while hidden, and the box is sized to
+   whichever is showing - its width animates, and the underline, which is the
+   box's rather than each word's, stretches and shrinks with it. */
+.roleRoller {
+    display: inline-grid;
+    /* One column exactly as wide as the box. Left to size itself, it took
+       the widest word's width, and a shorter word was centred in that and
+       pushed partly out of the box. */
+    grid-template-columns: minmax(0, 1fr);
+    vertical-align: top;
+    overflow: hidden;
+    transition: width .45s cubic-bezier(.2, .8, .2, 1);
+}
+
+.description .roleRoller>span {
+    grid-area: 1 / 1;
+    justify-self: start;
+    width: max-content;
+    border-bottom: none;
+    visibility: hidden;
+}
+
+.description .roleRoller>span.showing {
+    visibility: visible;
+}
+
+html.reduce-motion .roleRoller {
+    transition: none;
+}
+
+/* Under the banner, a tiny blurred copy of it (written by
+   scripts/placeholders.py), so a soft version is there from the first frame
+   and the real one paints over it when it arrives. Two layers of one
+   background: the first listed is on top. */
 .withBanner {
     position: relative;
-    background-image: url(/assets/uploads/images/banner.webp);
+    background-image:
+        url(/assets/uploads/images/banner.webp),
+        var(--placeholder-banner);
+    background-color: #1a1a1a;
     background-size: cover;
     background-position: center;
     border-radius: 12px;
@@ -1783,10 +1875,10 @@ html.reduce-motion .articlePreview:active {
     backdrop-filter: none;
 }
 
-/* On a phone there isn't the width for a column of its own, so the arrow
+/* Without the width for a column of its own, the arrow
    drops into the bottom-right corner, on the date's line. Out of the grid,
    so the title and preview keep the card's full width. */
-@media (max-width: 600px) {
+@container page (max-width: 440px) {
     .section.articlePreview {
         grid-template-columns: 1fr;
         padding: 16px;
@@ -1851,6 +1943,19 @@ html.reduce-motion .articlePreview:active {
 
 .article-content {
     line-height: 1.6;
+}
+
+/* Under an article: the newer and older ones, as article list cards (see
+   renderPager in displayArticle.js). Room enough above that they read as
+   "what next" rather than the article's last paragraph. */
+.articlePager {
+    margin-top: 36px;
+}
+
+/* Flush with the article's text, rather than inset the way the list's are. */
+.articlePager>.section.articlePreview {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .article-content img {
@@ -2035,26 +2140,6 @@ span.token{
 }
 
 @media screen and (max-width: 966px) {
-    header>div {
-        width: 90vw;
-    }
-
-    div.section {
-        flex-direction: column !important;
-        text-align: left;
-    }
-
-    main {
-        padding: 10vw;
-        padding-top: 0;
-        padding-bottom: 0;
-    }
-
-    /* main is at most 600px wide here too, less 10vw of padding each side. */
-    footer>.footerNote {
-        max-width: calc(min(600px, 100vw) - 20vw);
-    }
-
     section {
         height: fit-content;
         padding-top: 10vw;
@@ -2070,20 +2155,8 @@ span.token{
         text-align: center;
     }
 
-    #desktop-header {
-        display: none;
-    }
-
-    #mobile-header {
-        display: flex;
-    }
-
     .mobileMenu {
         display: flex;
-    }
-    .photo-container {
-        left: 0px;
-        margin: 12px;
     }
 
     section>div>div.photo-container {
@@ -2261,7 +2334,7 @@ span.token{
     display: grid;
     grid-template-columns: minmax(0, 1fr) max-content;
     column-gap: 20px;
-    width: min(60vw, 600px);
+    width: 100%;
     margin: 18px auto;
     container-type: inline-size;
 }
@@ -2315,9 +2388,8 @@ span.token{
    text takes the full width and the button drops under it, as wide as the
    text: easy to hit with a thumb, and lined up with both edges of what it
    belongs to. */
-@media (max-width: 966px) {
+@container page (max-width: 460px) {
     .siteTour {
-        width: 100%;
         row-gap: 0;
     }
 
@@ -2359,10 +2431,10 @@ span.token{
     border-radius: 0;
 }
 
-/* Three of them with their icons don't fit a phone's width, and wrapping
+/* Three of them with their icons don't fit a narrow column, and wrapping
    would split the control in two. The labels say enough on their own, so
    the icons go there - only for three or more; two still fit as they are. */
-@media (max-width: 600px) {
+@container page (max-width: 440px) {
     .projectFilter:has(> .button:nth-child(3)) {
         flex-wrap: nowrap;
     }
@@ -2421,3 +2493,356 @@ span.token{
     color: white;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
+
+/* ---------- One header, phone to desktop ----------
+
+   There is one header at every size. Below 966px its page links and its
+   icons fold away - they are all in the sidebar - and a menu button opens
+   up at the right end to reach it. aridan.net never moves: the bar is the
+   same width either side of the switch (header>div above), and it is the
+   first thing in it.
+
+   Folding: each item fades first, then closes up to nothing, and is hidden
+   for real once it has (visibility, so it can't be tabbed to). Opening is
+   the same backwards - it makes room first, then fades in, so nothing
+   shows on top of its neighbours while the room is still being made. The
+   lists' own gaps close too, or the folded items would still leave them. */
+#desktop-header nav li:not(:first-child),
+#desktop-header>div>ul>li {
+    min-width: 0;
+    max-width: 10em;
+    transition:
+        max-width .35s cubic-bezier(.2, .8, .2, 1),
+        opacity .2s ease .15s,
+        visibility 0s;
+}
+
+#desktop-header ul.notAList {
+    transition: gap .35s cubic-bezier(.2, .8, .2, 1);
+}
+
+/* The menu button, folded on a big screen. */
+#desktop-header>div>ul>li.headerMenu {
+    max-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        max-width .35s cubic-bezier(.2, .8, .2, 1) .1s,
+        opacity .15s ease,
+        visibility 0s .45s;
+}
+
+@media (max-width: 966px) {
+    #desktop-header nav li:not(:first-child),
+    #desktop-header>div>ul>li:not(.headerMenu) {
+        max-width: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            max-width .35s cubic-bezier(.2, .8, .2, 1) .1s,
+            opacity .15s ease,
+            visibility 0s .45s;
+    }
+
+    #desktop-header ul.notAList {
+        gap: 0;
+    }
+
+    #desktop-header>div>ul>li.headerMenu {
+        max-width: 10em;
+        opacity: 1;
+        visibility: visible;
+        transition:
+            max-width .35s cubic-bezier(.2, .8, .2, 1),
+            opacity .2s ease .15s,
+            visibility 0s;
+    }
+}
+
+html.reduce-motion #desktop-header li,
+html.reduce-motion #desktop-header ul.notAList {
+    transition: none !important;
+}
+
+/* ---------- Placeholders while things load ----------
+
+   Grey shapes standing in for what is on its way - the music card on the
+   homepage, the article list, an article - so the space it will take is
+   there from the start instead of a spinner or nothing.
+
+   .skeleton goes on the block, .skeletonBar on each shape inside it. The
+   shine sweeps across the whole window rather than each shape on its own
+   (background-attachment: fixed), so every bar catches it at the same time,
+   the way light moving over one surface would. */
+:root {
+    --skeleton-base: color-mix(in srgb, var(--paragraph-color) 13%, transparent);
+    --skeleton-shine: color-mix(in srgb, var(--paragraph-color) 24%, transparent);
+}
+
+.skeleton .skeletonBar,
+.full-article:not(.isLoaded) #articleTitle:empty::before,
+.full-article:not(.isLoaded) #articlePreview:empty::before,
+.full-article:not(.isLoaded) #articlePreview:empty::after {
+    display: block;
+    border-radius: 6px;
+    background-color: var(--skeleton-base);
+    background-image: linear-gradient(
+        100deg,
+        transparent 35%,
+        var(--skeleton-shine) 50%,
+        transparent 65%
+    );
+    background-size: 200vw 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    animation: skeletonShine 1.6s linear infinite;
+}
+
+@keyframes skeletonShine {
+    from {
+        background-position: 100vw 0;
+    }
+
+    to {
+        background-position: -100vw 0;
+    }
+}
+
+html.reduce-motion .skeleton .skeletonBar,
+html.reduce-motion .full-article:not(.isLoaded) #articleTitle:empty::before,
+html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::before,
+html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::after {
+    animation: none;
+    background-image: none;
+}
+
+/* The article list's: three cards shaped like the real ones (see
+   .section.articlePreview), in the box previewArticles.js shows while the
+   list loads and hides once it is in. */
+/* #loading also holds the music card's spinner on pages with lanyard.css,
+   whose rule for it centres everything - these are laid out like the text
+   they stand in for instead. */
+#loading>.articleSkeletons {
+    display: block;
+    text-align: left;
+}
+
+.articleSkeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 12px 0;
+    padding: 18px;
+    border-radius: 12px;
+    background-color: var(--card-background-color);
+}
+
+.style-liquid-glass .articleSkeleton {
+    background-color: var(--liquid-glass-button-background);
+    border: 1px solid var(--liquid-glass-button-border);
+}
+
+.articleSkeleton .skeletonTitle {
+    width: 55%;
+    height: 20px;
+}
+
+.articleSkeleton .skeletonLine {
+    width: 92%;
+    height: 13px;
+}
+
+.articleSkeleton .skeletonLine.short {
+    width: 64%;
+}
+
+.articleSkeleton .skeletonDate {
+    width: 90px;
+    height: 12px;
+    margin-top: 4px;
+}
+
+/* An article's title and preview, empty until it loads (displayArticle.js
+   fills them in, and adds .isLoaded): bars in their place, as tall as the
+   lines they stand in for, so the heading is its full height from the start
+   and nothing under it moves down when the words arrive. The preview is
+   hidden until it has something to say, so it is shown here while empty -
+   most previews run to two lines. An error message fills the title, so the
+   bars go then as well. */
+.full-article:not(.isLoaded) #articleTitle:empty::before,
+.full-article:not(.isLoaded) #articlePreview:empty::before,
+.full-article:not(.isLoaded) #articlePreview:empty::after {
+    content: "";
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* The hero centres its contents and shrinks each to fit, which for an
+   empty one is nothing - so they are stretched to the full width while
+   empty, for the bars to be centred in it. */
+.full-article:not(.isLoaded) #articleTitle:empty,
+.full-article:not(.isLoaded) #articlePreview:empty {
+    align-self: stretch;
+}
+
+/* One line of the title: .85em of bar in a line about 1.45em tall. */
+.full-article:not(.isLoaded) #articleTitle:empty::before {
+    width: 60%;
+    height: .85em;
+    margin-top: .3em;
+    margin-bottom: .3em;
+}
+
+.full-article:not(.isLoaded):has(#articleTitle:empty) #articlePreview:empty {
+    display: block;
+}
+
+.full-article:not(.isLoaded) #articlePreview:empty::before {
+    width: 85%;
+    height: 13px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.full-article:not(.isLoaded) #articlePreview:empty::after {
+    width: 55%;
+    height: 13px;
+    margin-bottom: 5px;
+}
+
+/* An article's own: a few paragraphs' worth of lines under the byline. */
+#loading>.articleBodySkeleton {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.articleBodySkeleton {
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 0 24px;
+}
+
+.articleBodySkeleton .skeletonHeading {
+    width: 40%;
+    height: 22px;
+    margin: 6px 0 4px;
+}
+
+.articleBodySkeleton .skeletonLine {
+    width: 100%;
+    height: 13px;
+}
+
+.articleBodySkeleton .skeletonLine.short {
+    width: 70%;
+    margin-bottom: 14px;
+}
+
+/* ---------- Images still on their way ----------
+
+   Every image on the site has a tiny blurred copy of itself, written below
+   by scripts/placeholders.py, set as its background - so from the first
+   frame there is a soft version of the picture, and the real one paints
+   over it when it arrives.
+
+   Meanwhile the alt text is hidden: Firefox draws it in the image's place
+   until the image loads, which flashed up on every page in development (the
+   dev server makes the browser check every image again before reusing it).
+   Only its colour - screen readers still read it.
+
+   general.js marks each image once it has loaded or failed:
+
+     .imgLoaded   the preview goes, so it can't show through a logo's
+                  transparent parts or around a picture that doesn't fill
+                  its box
+     .imgFailed   the alt text comes back, as the only thing left to show
+
+   Both outrank the generated rules ([src] plus a class). */
+img[src] {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: transparent;
+}
+
+img.imgLoaded[src] {
+    background-image: none;
+}
+
+img.imgFailed[src] {
+    color: var(--paragraph-color);
+}
+
+/* generated:placeholders
+   Written by scripts/placeholders.py: change the images, then run it
+   again, rather than editing in here. */
+:root {
+    --placeholder-banner: url(data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACQAwCdASoYAAgAPt1cpkyopSOiMAgBEBuJaQAAXpNB4PwOKXcAAP7sCzXiLDUXGmpwYhSUN4A930HCpGL6kKSNNYgeDQAA);
+}
+
+img[src="/assets/uploads/images/minifinder.webp"] {
+    aspect-ratio: 200 / 200;
+    background-image: url(data:image/webp;base64,UklGRqIAAABXRUJQVlA4IJYAAACwBACdASoYABgAPt1ipk6opaMiKA1REBuJaQAALnUkRkH3cY3oOCLslFPKWHAAAP7uetQrJdomme6+DIMMdKAcWB1PoYDXxS/4V5kgoqUuGu9DsGzT79jvA6rd6UT2+ZWSGxDL/jpWaXh+qvyZO8ze8HHSAf2o77ycEs1VvQ87FoVhLLRL2wHZ6aXDZn3TI9VnyIxAAAA=);
+}
+
+img[src="/assets/uploads/images/tingsryd.webp"] {
+    aspect-ratio: 225 / 225;
+    background-image: url(data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAACwBACdASoYABgAPtVaokyoJSMiN/VYAQAaiWwAsOwQ7+D2zUqFhgqiyTgKMcAAAP72Av/Odms/00sDb0z0EeSspRjTauU+DPCRVfojrILvXC2+hXVRu+9jyZiUzJUhptm/RH97QmAyT8jH6iJnLKEMdFvPYJrcHI5VxCgs5150AA==);
+}
+
+img[src="/assets/uploads/images/itcare.webp"] {
+    aspect-ratio: 198 / 198;
+    background-image: url(data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAABwBACdASoYABgAPt1mp1AopaMiqAqpEBuJYgDE2BEc9NB71R+sEE5lH/TGwAD+2KFyVY0onkfZSLB3fzl60ZavJxuR4mthNC61/r7zMYpLk6Bs3+fs6C6IGSBTIwmnvSfgToX07E8C85iRJ/rKNdTEKEuX5isF1Bmarrf0Um8sKbxAkAA=);
+}
+
+img[src="/assets/uploads/images/vaxjo.webp"] {
+    aspect-ratio: 224 / 224;
+    background-image: url(data:image/webp;base64,UklGRogAAABXRUJQVlA4IHwAAACQBACdASoYABgAPt1mq1EopSOiqAgBEBuJaQAALnYtCfYfd+5eIyTZMrUJXwAA/vTTy5n1DEXyesOkhqigAOQdkgzzd0TtfySOAAUt5cq5wvBzQbTLlMieiieXPAoiMtHUw8fAxBmTeogKv4b/nlGFlb45tyPe+o5GaAAA);
+}
+
+img[src="/assets/uploads/images/ipod-video.webp"] {
+    aspect-ratio: 600 / 999;
+    background-image: url(data:image/webp;base64,UklGRs4AAABXRUJQVlA4WAoAAAAQAAAADQAAFwAAQUxQSEMAAAABYBRJkiL5x86WGbXca7vjTkFETMBl2rqHx7+wL1gNWPJYJALhLaExqzCjCfWF1ZgjrMGcxbz7T2AClgQmtzDHcsYDAFZQOCBkAAAAkAMAnQEqDgAYAD7dWqZMqKUjojAIARAbiWcAAFr2hQjQIA8mAAD8MM3Y9o9FvOoZQOiBC7vl124zZJ0mRTuVdVyopbQ5iFN5hKdwGV0Ky6yK88ma59aRd7uz9D+QIN9V4gAAAA==);
+}
+
+img[src="/assets/uploads/images/ipod-mini.webp"] {
+    aspect-ratio: 600 / 1137;
+    background-image: url(data:image/webp;base64,UklGRroAAABXRUJQVlA4WAoAAAAQAAAADAAAFwAAQUxQSDkAAAABYBRJjhv+PO7lhEVZOjR+WaFMICIm4PHs4W9WNcWSIk7hBA3gHyiH1Ac5LHCKJIWcYsph7oj9bQsAVlA4IFoAAADQAwCdASoNABgAPt1ep00opSOiMAgBEBuJYwC7ACG7jFwN4yuuuAAA9rkiZimweKNGr3BWRiZ1D5Pls5jYjI2siZzIT+O3mwcJWWjLDPqpjXeSCuDY0MYAAAA=);
+}
+
+img[src="/assets/uploads/images/image.webp"] {
+    aspect-ratio: 400 / 400;
+    background-image: url(data:image/webp;base64,UklGRsIAAABXRUJQVlA4ILYAAACwBQCdASoYABgAPt1mq1EopSOiqAgBEBuJQBOmUAnGkoA8ACmt5wKyhTUHO7VbFwRioDZw7EAA/k3vqlzR2Qw8H/HeELI1TfZwDREM+FE6QfNnwsgGC5tBDFu7UVGCxNfxpSBm7UpZODA3byAYMlbX5MOkHNI0mppAHsu5wF0VhKo++8cn3yezVQXnlzLr1KqjMsVf12DDY7uXQwGgdpgi2zakrDpgFMO2beDPzu71aaU0bBUCAA==);
+}
+
+img[src="/assets/uploads/images/on-bus.webp"] {
+    aspect-ratio: 1536 / 2048;
+    background-image: url(data:image/webp;base64,UklGRqoAAABXRUJQVlA4IJ4AAABwBQCdASoSABgAPt1aqU8opKOiMBgIARAbiWMAvdAQKbDmid2Gm7Cjo0Nt8GHG7woGvLWQAPyg0uE/Aa5M04C/LiONlykaSsSMWV9bNN8vUuMvWnCPnaIUdj8akVoIscY2drycs2ZkFW4JBkSS8U43ZN7+6/vMce6crhO0Rr01RvLT0qdArnAlI1c/xAjZIWI/p/HLZy0avotBAoAAAA==);
+}
+
+img[src="/assets/uploads/images/wsl.webp"] {
+    aspect-ratio: 400 / 400;
+    background-image: url(data:image/webp;base64,UklGRgQBAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSHwAAAANcGvbtuns/Rjb6Pz/3+PSdnKfX06VOiImwColScAhACJuZZzdWqCmuF+eY2Uqxa2uQdOwmhycOLzley8oRacxKjGO1h3nXg4dhXwrjdiWDQ2ijkMw4PxAKjoI8hf9C1kaH1BEMz6Q1Swp3VRCpCP0POUtmc8trTuU+P8BVlA4IGIAAACQBACdASoYABgAPt1kqE+opSOiKAqpEBuJaQDN/BEcjqkTZbZQhnAVufvKjygA/q3fKbod92i1UcnqyRBu5YaZYk2+IrLZk/EWlU7A/6VbZU648xMgslqF4YKosGmRwAAAAA==);
+}
+
+img[src="https://raw.githubusercontent.com/actuallyaridan/NeoFreeBird/88812c269efad0a5f8ab51f9830f3e007995fda2/Branding/Icon.jpg"] {
+    aspect-ratio: 1024 / 1024;
+    background-image: url(data:image/webp;base64,UklGRpgAAABXRUJQVlA4IIwAAACQBQCdASoYABgAPt1kqlEopSOiqAgBEBuJbACdMoR4T4B9gHEA7gG2YAGHPe5CXvDxIpgNgABK1HRz+qETg0FIzu4IZuCcP9J7OJuOd/9+ArfzJ6m8aboe+sCvis2d3++XZw1KPP5C5aYJ6aRzH/hgQkzCl7rDRCNqUnQY+tuPkdQU+BROoAqEeJ38AA==);
+}
+
+img[src="/assets/uploads/images/chirp.webp"] {
+    aspect-ratio: 400 / 400;
+    background-image: url(data:image/webp;base64,UklGRnAAAABXRUJQVlA4IGQAAABwBACdASoYABgAPt1mq1EopSOiqAgBEBuJaAAALnXvmnBw9eXPOq1DlDoAAAD+9oL/XDLwhtHzfrrH170+3vw0aR0Z3E0fXX4sZIXru2WEaCkjncOvWrgNAYY+zyboskG9C7wA);
+}
+
+img[src="/assets/media/favicons/android-chrome-512x512.png"] {
+    aspect-ratio: 512 / 512;
+    background-image: url(data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAADQBACdASoYABgAPt1oq1EopaOiqAgBEBuJaQAALjFhC0t0n8Wns+VXgCFik5tKAAD+8p/9DacZif30JeWIKmN3bDL0FEPhcyYiBoxHSvtJVu5nSnJu9G6tdFaU24s7g+f87lLSb63AQcj256fbN9FWOAAAAA==);
+}
+
+img[src="https://raw.githubusercontent.com/dimdenGD/OldTwitter/refs/heads/master/images/logo512.png"] {
+    aspect-ratio: 512 / 512;
+    background-image: url(data:image/webp;base64,UklGRkwBAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSEoAAAABcGPbttIMAGds7jBI9x5i0/Ckf1LyypQRMQG6V9+JD9K9cpRwRxbEzemIRam9s/AHpBj/TiD2kPrOJENDcSMJvEZ2uf6O/ZZEB1ZQOCDcAAAA0AUAnQEqGAAYAD7dYqZOqKWjIigNURAbiWwAnTKEcCaAAaouyEy13rJr9Oim+9qgXAVxD+IB8AD5YeFMWEJZF97BnBl/Eju9iLzr7/LOmEaob0X562uvvgj6JRIfzcRUQzX0cS5TLIUJXVHyxrlJRu3djWTG/o5UUBn82CUvAPRRS17O17a6Et+yIWmOGuXCI1C98iNuBPR7U0eydN7xnlvmV8JWhDLQpH4sed+TftNM++7G9kH4rAEEEJK2kqTfgHd+Dh9q799BicudhKkHwBZ5a5lOgvgspYAAAA==);
+}
+/* /generated:placeholders */

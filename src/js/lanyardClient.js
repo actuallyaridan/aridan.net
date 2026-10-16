@@ -401,6 +401,18 @@
   // Cider names its activity "Apple Music" but does not always mark it as
   // listening, which is why isAppleMusic() is asked as well as the type.
   function merge(lanyard, agent) {
+    const merged = mergeActivities(lanyard, agent);
+
+    // Only the agent remembers the last song, so it is carried over whatever
+    // Discord says.
+    if (agent && agent.last_played) {
+      return { ...merged, last_played: agent.last_played };
+    }
+
+    return merged;
+  }
+
+  function mergeActivities(lanyard, agent) {
     const base = lanyard || {};
     const fromDiscord = base.activities || [];
     const own = agent?.activities || [];
@@ -447,6 +459,20 @@
     const activities = presence?.activities || [];
     const found = activities.find(isAppleMusic);
     return found || null;
+  }
+
+  // The last song played, for the music card to show while nothing is - or
+  // null while something is. { activity, at }, with `at` when it stopped.
+  // The activity has no timestamps, since that play is over.
+  function lastPlayed(presence) {
+    if (!presence) return null;
+    if (appleMusic(presence)) return null;
+
+    const last = presence.last_played;
+    if (!last || !last.activity) return null;
+    if (!last.at) return null;
+
+    return last;
   }
 
   /* Three kinds of image reference come back:
@@ -600,6 +626,7 @@
     refresh,
     isAppleMusic,
     appleMusic,
+    lastPlayed,
     artwork,
   };
 

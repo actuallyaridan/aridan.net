@@ -1,7 +1,7 @@
 (function (global) {
     "use strict";
 
-    var VERSION = "6.1.3";
+    var VERSION = "6.1.4";
 
     function toggleMarkup(id, label) {
         return `

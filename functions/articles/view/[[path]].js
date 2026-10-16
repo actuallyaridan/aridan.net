@@ -1,4 +1,4 @@
-import { DEFAULT_IMAGE, SITE, articleUrl, loadArticle, toDate } from "../../_lib/articles.js";
+import { DEFAULT_IMAGE, SITE, articleImage, articleUrl, loadArticle, toDate } from "../../_lib/articles.js";
 
 // The article page is rendered client-side from ?article=<slug>, so the static
 // HTML carries placeholder metadata and every shared link previewed the same.
@@ -46,7 +46,7 @@ function jsonLd(article, url) {
         headline: article.meta.title || "Untitled article",
         url,
         mainEntityOfPage: { "@type": "WebPage", "@id": url },
-        image: article.meta.image || DEFAULT_IMAGE,
+        image: articleImage(article.meta),
         author: { "@type": "Person", name: "Adnan Bukvic", url: SITE + "/" },
         publisher: { "@type": "Person", name: "Adnan Bukvic", url: SITE + "/" },
         inLanguage: "en"
@@ -86,7 +86,7 @@ export async function onRequestGet(context) {
     const fullTitle = title + " - aridan.net";
     const description = article.meta.preview || "An article on aridan.net.";
     const url = articleUrl(article.slug);
-    const image = article.meta.image || DEFAULT_IMAGE;
+    const image = articleImage(article.meta);
     const date = toDate(article.meta.date);
 
     let rewriter = new HTMLRewriter()
@@ -111,7 +111,7 @@ export async function onRequestGet(context) {
     // The page's own og:image dimensions and alt describe the default card, so
     // they only stay accurate when the article falls back to it. An article's
     // own image is of unknown size, and gets an alt that names the article.
-    if (article.meta.image) {
+    if (image !== DEFAULT_IMAGE) {
         rewriter = rewriter
             .on('meta[property="og:image:alt"]', new ContentSetter("Cover image for " + title))
             .on('meta[property="og:image:width"]', { element: (el) => el.remove() })

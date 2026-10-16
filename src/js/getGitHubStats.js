@@ -6,13 +6,48 @@ function showRateLimitNotice() {
     if (el) el.style.display = "flex";
 }
 
+// Counts from the number written in the page to the live one, so a change
+// since the page was last edited ticks up in front of you. The page's own
+// number is only ever a whole one - "371", never "1.6K" - and anything else
+// counts from 0.
+function showCount(el, value) {
+    if (!el) return;
+
+    if (!window.countTo) {
+        el.textContent = formatGitHubCount(value);
+        return;
+    }
+
+    let from = 0;
+    const written = el.textContent.trim();
+    if (/^\d+$/.test(written)) {
+        from = Number(written);
+    }
+
+    window.countTo(el, value, formatGitHubCount, {
+        from: from,
+        whole: true,
+        during: function (n) {
+            return formatGitHubCount(n, true);
+        }
+    });
+}
+
 // 1600 reads as 1.6K, the way GitHub shows it. Rounded down, so a repo is
 // never shown with more stars than it has.
-function formatGitHubCount(n) {
+// `steady` keeps the decimal even when it is a 0 - "2.0K" rather than "2K" -
+// for the numbers on the way while one counts up, which would otherwise
+// change length every few frames and make the number jump sideways.
+function formatGitHubCount(n, steady) {
     if (n < 1000) return String(n);
 
+    const options = { maximumFractionDigits: 1 };
+    if (steady) {
+        options.minimumFractionDigits = 1;
+    }
+
     const floored = Math.floor(n / 100) / 10;
-    return floored.toLocaleString(undefined, { maximumFractionDigits: 1 }) + "K";
+    return floored.toLocaleString(undefined, options) + "K";
 }
 
 async function updateGitHubRepoStats(repos) {
@@ -38,8 +73,8 @@ async function updateGitHubRepoStats(repos) {
             const starsEl = document.getElementById("stars-" + owner + "-" + repoName);
             const forksEl = document.getElementById("forks-" + owner + "-" + repoName);
 
-            if (starsEl) starsEl.textContent = formatGitHubCount(data.stargazers_count);
-            if (forksEl) forksEl.textContent = formatGitHubCount(data.forks_count);
+            showCount(starsEl, data.stargazers_count);
+            showCount(forksEl, data.forks_count);
         } catch (error) {
             console.error("Failed to fetch stats for " + repo + ":", error);
         }
@@ -78,8 +113,8 @@ async function updateGitHubGroupStats(groupId, repos) {
     const starsEl = document.getElementById("stars-" + groupId);
     const forksEl = document.getElementById("forks-" + groupId);
 
-    if (starsEl) starsEl.textContent = formatGitHubCount(stars);
-    if (forksEl) forksEl.textContent = formatGitHubCount(forks);
+    showCount(starsEl, stars);
+    showCount(forksEl, forks);
 }
 
 updateGitHubGroupStats("wsl", [

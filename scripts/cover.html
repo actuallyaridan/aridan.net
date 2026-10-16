@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- The picture an article is shared with, drawn at 1200x630 by
+     scripts/cover.js. Made to match the site's own share image
+     (og-default.jpg): the banner, dimmed, a ringed circle on the left and the
+     words beside it. Everything comes in through the query string. -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
+    <link rel="stylesheet" href="cover.css">
+    <script src="cover-fill.js" defer></script>
+</head>
+
+<body>
+    <div class="cover">
+        <div class="badge"><i id="icon" class="fa-solid fa-newspaper" aria-hidden="true"></i></div>
+        <div class="words">
+            <h1 id="title"></h1>
+            <p id="preview"></p>
+            <p class="site">aridan.net/articles</p>
+        </div>
+    </div>
+</body>
+
+</html>

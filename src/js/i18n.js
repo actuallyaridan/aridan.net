@@ -26,7 +26,7 @@
         "main h2.section-title",
         "main .visuallyHidden",
         "main .description.titleColor",
-        "main .description.white > span",
+        "main .description.white > .roleRoller > span",
         "main p.section-content",
         "main ul.specs > li",
         "main .legal .article-content > h2",

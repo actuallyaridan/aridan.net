@@ -3,6 +3,14 @@
 
     var AF = window.ArticleFormat;
 
+    // A comfortable reading pace for the kind of writing on here. The number
+    // is only ever a rough guide, so it is rounded up to whole minutes.
+    var WORDS_PER_MINUTE = 200;
+
+    // An article's own icon, as Font Awesome classes - "fa-brands
+    // fa-raspberry-pi". Checked, since it comes from the front matter.
+    var ICON_CLASSES = /^fa-[a-z]+( fa-[a-z0-9-]+)+$/;
+
     function setMeta(attr, key, value) {
         var selector = "meta[" + attr + '="' + key + '"]';
         var el = document.head.querySelector(selector);
@@ -44,34 +52,190 @@
         previewEl.hidden = !preview;
     }
 
+    // The newspaper, unless the article has an icon of its own.
+    function setIcon(classes) {
+        var icon = document.getElementById("articleIcon");
+        if (!icon) return;
+        if (!classes) return;
+        if (!ICON_CLASSES.test(classes)) return;
+
+        icon.className = classes + " icon-background";
+    }
+
     // The hero is already in the page, so only its text is written here;
     // replacing it would make it flash while the body loads.
     function renderArticle(meta, bodyHtml) {
         var preview = meta.preview || "";
         setHero(meta.title || "Untitled article", preview);
-
-        var rawDate = AF.escapeHtml(meta.date || "");
-        var isoDate = AF.formatDate(meta.date) || "";
-        var shownDate = AF.escapeHtml(AF.localDate(isoDate));
-
-        var byline = document.getElementById("articleByline");
-        byline.innerHTML = `<li><i class="fa-regular fa-calendar" aria-hidden="true"></i><time datetime="${rawDate}" data-iso="${AF.escapeHtml(isoDate)}">${shownDate}</time></li>`;
-        byline.hidden = false;
+        setIcon(meta.icon);
 
         // Already HTML, produced by marked, so it must not be escaped.
         var content = document.querySelector(".full-article .article-content");
         content.innerHTML = bodyHtml;
         if (window.markExternalLinks) window.markExternalLinks(content);
+
+        // After the body, since the reading time is counted from it.
+        var rawDate = AF.escapeHtml(meta.date || "");
+        var isoDate = AF.formatDate(meta.date) || "";
+        var shownDate = AF.escapeHtml(AF.localDate(isoDate));
+        var minutes = readingMinutes(content);
+
+        var byline = document.getElementById("articleByline");
+        byline.innerHTML = `<li><i class="fa-regular fa-calendar" aria-hidden="true"></i><time datetime="${rawDate}" data-iso="${AF.escapeHtml(isoDate)}">${shownDate}</time></li>` +
+            `<li><i class="fa-regular fa-clock" aria-hidden="true"></i><span data-minutes="${minutes}">${AF.escapeHtml(minutesLabel(minutes))}</span></li>`;
+        byline.hidden = false;
+    }
+
+    // Counted from what is on the page rather than the Markdown, so link
+    // addresses and formatting marks are not counted as words.
+    function readingMinutes(content) {
+        var words = content.textContent.trim().split(/\s+/);
+
+        var count = 0;
+        for (var i = 0; i < words.length; i++) {
+            if (words[i]) count++;
+        }
+
+        var minutes = Math.ceil(count / WORDS_PER_MINUTE);
+        if (minutes < 1) minutes = 1;
+
+        return minutes;
+    }
+
+    function minutesLabel(minutes) {
+        return translate("{0} min read", minutes);
+    }
+
+    function translate(english, value) {
+        if (window.i18n) return window.i18n.t(english, value);
+        return english.split("{0}").join(value);
+    }
+
+    /* ---------- Newer and older ----------
+
+       Under the article, a card for the one written after it and the one
+       before, in the same order as the article list. Built like the list's
+       cards, so they look and behave the same. */
+
+    function renderPager(slug) {
+        fetch(AF.INDEX_URL, { cache: "no-cache" })
+            .then(function (res) {
+                if (!res.ok) throw new Error("http " + res.status);
+                return res.json();
+            })
+            .then(function (list) {
+                var entries = pagerEntries(list);
+
+                var index = -1;
+                for (var i = 0; i < entries.length; i++) {
+                    if (entries[i].slug === slug) index = i;
+                }
+
+                // Not in the list - a draft opened by its address, say - so
+                // there is nothing to be newer or older than.
+                if (index === -1) return;
+
+                var cards = [];
+
+                // Newest first, so the one before this in the list is newer.
+                if (index > 0) {
+                    cards.push(pagerCard(entries[index - 1], "Newer"));
+                }
+
+                if (index < entries.length - 1) {
+                    cards.push(pagerCard(entries[index + 1], "Older"));
+                }
+
+                if (!cards.length) return;
+
+                var nav = document.createElement("nav");
+                nav.className = "articlePager";
+                nav.setAttribute("aria-label", translate("More articles"));
+
+                for (var c = 0; c < cards.length; c++) {
+                    nav.appendChild(cards[c]);
+                }
+
+                document.querySelector(".full-article").appendChild(nav);
+            })
+            .catch(function (err) {
+                // Only an extra, so the article stays up without it.
+                console.error("Could not load the other articles:", err);
+            });
+    }
+
+    // Bare slugs in index.json have nothing to show on a card, so only full
+    // entries are used. Sorted the way the article list sorts them.
+    function pagerEntries(list) {
+        var entries = [];
+        if (!Array.isArray(list)) return entries;
+
+        for (var i = 0; i < list.length; i++) {
+            var entry = list[i];
+            if (!entry || typeof entry !== "object") continue;
+            if (!AF.isValidSlug(entry.slug)) continue;
+            entries.push(entry);
+        }
+
+        // The dates are YYYY-MM-DD, so plain text comparison is date order.
+        entries.sort(function (a, b) {
+            return String(b.date || "").localeCompare(String(a.date || ""));
+        });
+
+        return entries;
+    }
+
+    function pagerCard(entry, label) {
+        var title = AF.escapeHtml(entry.title || "Untitled article");
+        var preview = AF.escapeHtml(entry.preview || "");
+        var href = AF.escapeHtml("/articles/view/index.html?article=" + encodeURIComponent(entry.slug));
+
+        var icon = "fa-solid fa-arrow-up";
+        if (label === "Older") {
+            icon = "fa-solid fa-arrow-down";
+        }
+
+        var el = document.createElement("div");
+        el.className = "section articlePreview";
+
+        el.innerHTML = `
+            <div class="preview">
+                <h2 class="section-title"><a class="articleLink" href="${href}">${title}</a></h2>
+                <p class="section-content previewContent">${preview}</p>
+                <ul class="articleMeta">
+                    <li><i class="${icon}" aria-hidden="true"></i><span data-label="${label}">${AF.escapeHtml(translate(label))}</span></li>
+                </ul>
+            </div>
+            <div class="readMore">
+                <span class="button backButton articleArrow" aria-hidden="true">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </span>
+            </div>`;
+
+        return el;
     }
 
     // Written again when the language changes, like the dates in the list.
-    function relabelDate() {
+    function relabel() {
         document.querySelectorAll(".articleByline time[data-iso]").forEach(function (el) {
             el.textContent = AF.localDate(el.dataset.iso);
         });
+
+        document.querySelectorAll(".articleByline [data-minutes]").forEach(function (el) {
+            el.textContent = minutesLabel(el.dataset.minutes);
+        });
+
+        document.querySelectorAll(".articlePager [data-label]").forEach(function (el) {
+            el.textContent = translate(el.dataset.label);
+        });
+
+        var pager = document.querySelector(".articlePager");
+        if (pager) {
+            pager.setAttribute("aria-label", translate("More articles"));
+        }
     }
 
-    if (window.i18n) window.i18n.onChange(relabelDate);
+    if (window.i18n) window.i18n.onChange(relabel);
 
     // Reuses the hero too, with the icon swapped, rather than drawing a new one.
     function renderError(heading, detail) {
@@ -133,6 +297,8 @@
 
                 if (window.Prism) Prism.highlightAll();
                 if (window.parseEmoji) window.parseEmoji(article);
+
+                renderPager(slug);
 
                 var event = new CustomEvent("article:rendered", {
                     detail: { slug: slug }

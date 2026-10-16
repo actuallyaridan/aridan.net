@@ -3,18 +3,21 @@
         "slug": "liquid-glass",
         "title": "Hello, Liquid Glass",
         "date": "2026-03-30",
-        "preview": "If you've been following Apple's software updates, you've probably heard of Liquid Glass."
+        "preview": "If you've been following Apple's software updates, you've probably heard of Liquid Glass.",
+        "image": "/assets/uploads/images/articles/liquid-glass.jpg"
     },
     {
         "slug": "lyrics",
         "title": "Making lyrics feel alive",
         "date": "2026-10-03",
-        "preview": "How the lyrics on my homepage go from a list of timestamps to something that feels like a lyric video."
+        "preview": "How the lyrics on my homepage go from a list of timestamps to something that feels like a lyric video.",
+        "image": "/assets/uploads/images/articles/lyrics.jpg"
     },
     {
         "slug": "pihole",
         "title": "Block ads on your home network with a Raspberry Pi",
         "date": "2026-08-18",
-        "preview": "Tired of ads? Don't want to be tracked on your own network? There's a solution!"
+        "preview": "Tired of ads? Don't want to be tracked on your own network? There's a solution!",
+        "image": "/assets/uploads/images/articles/pihole.jpg"
     }
 ]

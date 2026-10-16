@@ -22,7 +22,9 @@
   grid-column: span 2;
 }
 
-@media screen and (max-width: 966px) {
+/* Down to one column (the grid fits as many 150px ones as it can), a card
+   two wide would add a second column of its own. */
+@container page (max-width: 340px) {
   .pi-card-wide {
     grid-column: span 1;
   }
@@ -109,3 +111,11 @@
 }
 
 html.reduce-motion .pi-loading { animation: none; }
+
+/* Every digit the same width, so a number counting up (window.countTo in
+   general.js) changes in place instead of shuffling sideways - and so does
+   the "updated 5 min ago" under the stats as it ticks over. */
+.pi-num,
+#pi-updated {
+  font-variant-numeric: tabular-nums;
+}

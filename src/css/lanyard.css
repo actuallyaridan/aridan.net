@@ -235,6 +235,14 @@ div#discord::-webkit-scrollbar {
   }
 }
 
+/* The card starts out on the loading spinner (index.html), which turns by
+   itself - turning it as well would be two spins at once. The cover only
+   starts turning once it is an actual cover; lanyard.js never puts the
+   spinner back after that. */
+#amActivityLogoLarge[src$="spinner.gif"] {
+  animation: none;
+}
+
 #activityLogoSmall,
 #amActivityLogoSmall {
     border-radius: 25%;
@@ -500,6 +508,27 @@ border: 1px solid var(--liquid-glass-button-border);
     flex: 1;
 }
 
+/* With nothing playing, the music card shows the last song instead (see
+   updateLastPlayedInfo in lanyard.js): the record stops where it is, and the
+   progress bar makes way for when it stopped. */
+#amLastPlayedAgo {
+    display: none;
+    margin-top: 0.5em;
+    font-size: 0.9em;
+}
+
+#amLanyardDiscord.lastPlayed #amLastPlayedAgo {
+    display: block;
+}
+
+#amLanyardDiscord.lastPlayed #amProgressTrack {
+    display: none;
+}
+
+#amLanyardDiscord.lastPlayed #amActivityLogoLarge {
+    animation-play-state: paused;
+}
+
 div#timeremaning,
 div#Timeremaning,
 div#amTimeremaning {
@@ -608,4 +637,103 @@ html.reduce-motion .progress-bar {
     align-items: center;
     justify-content: center;
     width: 100%;
+}
+/* ---------- Placeholders while things load ----------
+
+   The music card's placeholder (the shared look is in styles.css). When the
+   last visit ended with something playing, settings.js holds the card's room
+   open before anything has loaded (lanyard-reserve, above). This stands in
+   that room until the card arrives - shaped like the Apple Music card, with
+   the Lyrics button under it, measured off the real ones.
+
+   It sits over the room rather than in the layout, where the card will be,
+   so when the room is let go (slideCard() in lanyard.js) it fades away
+   while the card comes into focus in the same place, with no gap between. */
+.discordWrapper {
+    position: relative;
+}
+
+.lanyardSkeleton {
+    position: absolute;
+    /* The wrapper's padding, #loadedLanyard's margin and the card's own. */
+    top: 36px;
+    left: 50%;
+    translate: -50% 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s ease, visibility 0s .3s;
+}
+
+html.lanyard-reserve .lanyardSkeleton {
+    opacity: 1;
+    visibility: visible;
+    transition: none;
+}
+
+.lanyardSkeletonCard {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 250px;
+    height: 310px;
+    padding: 12px;
+    border-radius: 12px;
+    background-color: var(--card-background-color);
+}
+
+.style-liquid-glass .lanyardSkeletonCard {
+    background-color: var(--liquid-glass-button-background);
+    border: 1px solid var(--liquid-glass-button-border);
+}
+
+.lanyardSkeleton .skeletonHeading {
+    width: 110px;
+    height: 16px;
+    margin-top: 3px;
+}
+
+/* 96px, like the cover: measured mid-spin, the cover's box is wider. */
+.lanyardSkeleton .skeletonArt {
+    align-self: center;
+    width: 96px;
+    height: 96px;
+    margin-top: 28px;
+    border-radius: 50%;
+}
+
+.lanyardSkeleton .skeletonTitle {
+    width: 70%;
+    height: 15px;
+    margin-top: 22px;
+}
+
+.lanyardSkeleton .skeletonArtist {
+    width: 45%;
+    height: 13px;
+    margin-top: 15px;
+}
+
+.lanyardSkeleton .skeletonProgress {
+    width: 100%;
+    height: 5px;
+    margin-top: 13px;
+}
+
+.lanyardSkeleton .skeletonBadge {
+    align-self: center;
+    width: 141px;
+    height: 41px;
+    margin-top: 14px;
+    border-radius: 8px;
+}
+
+.lanyardSkeleton .skeletonButton {
+    width: 105px;
+    height: 45px;
+    margin-top: 24px;
+    border-radius: 999px;
 }

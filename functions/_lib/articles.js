@@ -76,6 +76,27 @@ export async function loadAllArticles(env, request) {
         .sort((a, b) => String(b.meta.date || "").localeCompare(String(a.meta.date || "")));
 }
 
+// An article's cover, as the full address a share card needs. Front matter
+// gives it as a path on this site - scripts/cover.js writes
+// /assets/uploads/images/articles/<slug>.jpg - but a full https:// address
+// works too. Anything else, or none, is the site's own picture.
+export function articleImage(meta) {
+    if (!meta) return DEFAULT_IMAGE;
+    if (typeof meta.image !== "string") return DEFAULT_IMAGE;
+
+    const image = meta.image;
+
+    if (image.startsWith("/") && !image.startsWith("//")) {
+        return SITE + image;
+    }
+
+    if (image.startsWith("https://")) {
+        return image;
+    }
+
+    return DEFAULT_IMAGE;
+}
+
 export function articleUrl(slug) {
     return SITE + "/articles/view/index.html?article=" + encodeURIComponent(slug);
 }

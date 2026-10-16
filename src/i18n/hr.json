@@ -55,6 +55,7 @@
   "Next activity": "Sljedeća aktivnost",
   "remaining": "preostalo",
   "elapsed": "proteklo",
+  "Last played": "Zadnje slušano",
   "Listen on Apple Music": "Slušaj na Apple Musicu",
   "A black button with the Apple Music logo and text that says 'Listen on Apple Music'.": "Crni gumb s logotipom Apple Musica i tekstom \"Slušaj na Apple Musicu\".",
 
@@ -345,5 +346,10 @@
   "Available: {0}": "Dostupno: {0}",
   "No CDN components found.": "Nisu pronađene CDN komponente.",
   "Checking...": "Provjera...",
-  "Couldn't check versions: {0}": "Provjera verzija nije uspjela: {0}"
+  "Couldn't check versions: {0}": "Provjera verzija nije uspjela: {0}",
+
+  "{0} min read": "{0} min čitanja",
+  "Newer": "Novije",
+  "Older": "Starije",
+  "More articles": "Više članaka"
 }

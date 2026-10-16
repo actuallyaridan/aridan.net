@@ -57,7 +57,10 @@ function isPiholeLocalHost() {
 const PIHOLE_IS_LOCAL = isPiholeLocalHost();
 
 // Rounded down, hence the "+", so the headline is never larger than the truth.
-function abbreviatePiholeNumber(n) {
+// `steady` keeps the one decimal even when it is a 0 - "121.0K+" rather than
+// "121K+" - for the numbers on the way while one is counting up, which
+// would otherwise change length every few frames (see countTo in general.js).
+function abbreviatePiholeNumber(n, steady) {
   const value = Number(n) || 0;
 
   if (value < 1000) return value.toLocaleString();
@@ -75,7 +78,12 @@ function abbreviatePiholeNumber(n) {
 
   const floored = Math.floor(scaled * 10) / 10;
 
-  const text = floored.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  const options = { maximumFractionDigits: 1 };
+  if (steady) {
+    options.minimumFractionDigits = 1;
+  }
+
+  const text = floored.toLocaleString(undefined, options);
   return text + suffix + "+";
 }
 
@@ -127,30 +135,71 @@ function renderPiholeStats(data, { example = false } = {}) {
     if (fullTitle != null) el.title = fullTitle;
   }
 
+  // The same as setStat, but counting up to the number (window.countTo in
+  // general.js) - from 0 the first time, and from the last value on each
+  // refresh after. `whole` keeps counts whole on the way up.
+  // The big numbers keep their decimal while they count - see
+  // abbreviatePiholeNumber.
+  function countStat(id, value, format, fullTitle, whole) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (fullTitle != null) el.title = fullTitle;
+
+    if (!window.countTo) {
+      el.textContent = format(Number(value));
+      return;
+    }
+
+    const options = { whole: whole };
+    if (format === abbreviatePiholeNumber) {
+      options.during = function (n) {
+        return abbreviatePiholeNumber(n, true);
+      };
+    }
+
+    window.countTo(el, value, format, options);
+  }
+
   function full(n) {
     return Number(n).toLocaleString();
   }
-  setStat("pi-total", abbreviatePiholeNumber(data.total), full(data.total));
-  setStat("pi-blocked", abbreviatePiholeNumber(data.blocked), full(data.blocked));
-  setStat("pi-percent", `${Number(data.percent).toFixed(1)}%`);
-  setStat("pi-domains", abbreviatePiholeNumber(data.domains_on_lists), full(data.domains_on_lists));
-  setStat("pi-clients", abbreviatePiholeNumber(data.clients), full(data.clients));
+
+  function oneDecimal(n) {
+    return Number(n).toFixed(1);
+  }
+
+  function percentOneDecimal(n) {
+    return oneDecimal(n) + "%";
+  }
+
+  function percentWhole(n) {
+    return Math.round(Number(n)) + "%";
+  }
+
+  countStat("pi-total", data.total, abbreviatePiholeNumber, full(data.total), true);
+  countStat("pi-blocked", data.blocked, abbreviatePiholeNumber, full(data.blocked), true);
+  countStat("pi-percent", data.percent, percentOneDecimal);
+  countStat("pi-domains", data.domains_on_lists, abbreviatePiholeNumber, full(data.domains_on_lists), true);
+  countStat("pi-clients", data.clients, abbreviatePiholeNumber, full(data.clients), true);
 
   if (data.frequency != null) {
     // The API reports queries per second; the card shows per minute.
     const perMinute = Math.round(Number(data.frequency) * 60);
-    setStat("pi-qpm", perMinute.toLocaleString(), "live rate, same as the Pi-hole dashboard");
+    countStat("pi-qpm", perMinute, full, "live rate, same as the Pi-hole dashboard", true);
   }
   if (data.cached_percent != null) {
-    setStat("pi-cached", Number(data.cached_percent).toFixed(1) + "%");
+    countStat("pi-cached", data.cached_percent, percentOneDecimal);
   }
 
   if (data.temp_c != null) {
-    setStat("pi-temp", Number(data.temp_c).toFixed(1) + "\u00b0C");
+    countStat("pi-temp", data.temp_c, function (n) {
+      return oneDecimal(n) + "\u00b0C";
+    });
   }
 
   if (data.cpu_percent != null) {
-    setStat("pi-cpu", Number(data.cpu_percent).toFixed(1) + "%");
+    countStat("pi-cpu", data.cpu_percent, percentOneDecimal);
   }
 
   if (data.ram_percent != null) {
@@ -158,7 +207,7 @@ function renderPiholeStats(data, { example = false } = {}) {
     if (data.ram_total_gb != null) {
       hover = usedOfTotal(data.ram_used_gb, data.ram_total_gb);
     }
-    setStat("pi-ram", Math.round(Number(data.ram_percent)) + "%", hover);
+    countStat("pi-ram", data.ram_percent, percentWhole, hover);
   }
 
   if (data.disk_percent != null) {
@@ -166,7 +215,7 @@ function renderPiholeStats(data, { example = false } = {}) {
     if (data.disk_total_gb != null) {
       hover = usedOfTotal(data.disk_used_gb, data.disk_total_gb);
     }
-    setStat("pi-disk", Math.round(Number(data.disk_percent)) + "%", hover);
+    countStat("pi-disk", data.disk_percent, percentWhole, hover);
   }
   if (data.uptime_seconds != null) setStat("pi-uptime", formatUptime(data.uptime_seconds));
 

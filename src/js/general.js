@@ -25,32 +25,223 @@ window.markExternalLinks = function (root) {
     }
 };
 
+/* Numbers that count up to their value instead of just appearing - the
+   Pi-hole stats and the GitHub stars and forks.
+
+     window.countTo(el, value, format, options)
+
+   `format` turns a number into what the element shows, and is the same
+   function the caller would otherwise use, so the last frame is exactly the
+   text it always was. In between it is handed the numbers on the way.
+
+   It counts from wherever the element last counted to, so a refresh ticks
+   from the old value to the new one. The first time, it starts from
+   options.from, or 0. options.whole rounds the numbers in between, for a
+   format that would otherwise show decimals mid-count.
+
+   options.during, if given, formats the numbers in between instead of
+   `format` - for a format whose length jumps about from one number to the
+   next (one that drops a ".0", say). The text is centred, so every change
+   in its length moves the whole number sideways, which flashes. */
+const COUNT_MS = 900;
+
+window.countTo = function (el, value, format, options) {
+    if (!el) return;
+
+    const target = Number(value);
+    const settings = options || {};
+
+    let from = 0;
+    if (el.dataset.countValue !== undefined) {
+        from = Number(el.dataset.countValue);
+    } else if (settings.from !== undefined) {
+        from = Number(settings.from);
+    }
+
+    el.dataset.countValue = String(target);
+
+    // A newer count on the same element takes over from one still running.
+    const token = {};
+    el.countToken = token;
+
+    // Nothing to count, or nobody to see it: straight to the end. A hidden
+    // tab would not draw the frames anyway.
+    let instant = false;
+    if (from === target) instant = true;
+    if (!Number.isFinite(from) || !Number.isFinite(target)) instant = true;
+    if (document.hidden) instant = true;
+    if (document.documentElement.classList.contains("reduce-motion")) instant = true;
+
+    if (instant) {
+        el.textContent = format(target);
+        return;
+    }
+
+    const start = performance.now();
+
+    function frame(now) {
+        if (el.countToken !== token) return;
+
+        // A frame's timestamp is when the frame began, which can be a moment
+        // before the count was started - that would count backwards first.
+        let progress = (now - start) / COUNT_MS;
+        if (progress < 0) progress = 0;
+        if (progress > 1) progress = 1;
+
+        // Ease out: quick at first, slowing into the final number.
+        const eased = 1 - Math.pow(1 - progress, 3);
+
+        if (progress >= 1) {
+            el.textContent = format(target);
+            return;
+        }
+
+        let current = from + (target - from) * eased;
+        if (settings.whole) {
+            current = Math.round(current);
+        }
+
+        if (settings.during) {
+            el.textContent = settings.during(current);
+        } else {
+            el.textContent = format(current);
+        }
+
+        requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+};
+
+// How long each word stays, and how long one takes to roll into its place.
+const ROLE_HOLD_MS = 2500;
+const ROLE_ROLL_MS = 450;
+const ROLE_EASE = "cubic-bezier(.2, .8, .2, 1)";
+
 function startTitleShuffle() {
-    const spans = [...document.querySelectorAll(".description span")];
+    const roller = document.querySelector(".roleRoller");
+    if (!roller) return;
+
+    const spans = [...roller.children];
     if (!spans.length) return;
 
     let queue = [];
+    let showing = null;
 
-    function next() {
+    // Every word once, in a random order, then again in a new one. A new
+    // round never starts with the word the last one ended on, or it would
+    // look like nothing happened.
+    function pick() {
         if (queue.length === 0) {
             queue = spans.slice();
             queue.sort(() => Math.random() - 0.5);
         }
 
-        const showing = queue.pop();
+        let chosen = queue.pop();
 
+        if (chosen === showing && spans.length > 1) {
+            queue.unshift(chosen);
+            chosen = queue.pop();
+        }
+
+        return chosen;
+    }
+
+    // The box takes the width of the word in it. Measured each time rather
+    // than once, since switching language changes every word's width.
+    // `snap` is for corrections rather than rolls - the font arriving, the
+    // language changing - which should just be right, not slide there.
+    function fitTo(span, snap) {
+        const width = span.offsetWidth + "px";
+
+        if (!snap) {
+            roller.style.width = width;
+            return;
+        }
+
+        roller.style.transition = "none";
+        roller.style.width = width;
+
+        // Read back, so the width is applied before the transition returns.
+        void roller.offsetWidth;
+        roller.style.transition = "";
+    }
+
+    function next() {
+        // A background tab freezes animations but not this timer, so rolls
+        // would pile up behind each other and all play at once on the way
+        // back. Nobody is watching, so nothing needs to change.
+        if (document.hidden) return;
+
+        const leaving = showing;
+        const arriving = pick();
+
+        // Anything still rolling from last time is put straight where it was
+        // going, so there are only ever two words in the box.
         for (const span of spans) {
-            if (span === showing) {
-                span.style.display = "inline";
-            } else {
-                span.style.display = "none";
+            for (const animation of span.getAnimations()) {
+                animation.finish();
+            }
+
+            if (span !== arriving && span !== leaving) {
+                span.classList.remove("showing");
             }
         }
+
+        const first = !leaving;
+
+        showing = arriving;
+        arriving.classList.add("showing");
+        fitTo(arriving, first);
+
+        if (!leaving) return;
+        if (document.documentElement.classList.contains("reduce-motion")) {
+            leaving.classList.remove("showing");
+            return;
+        }
+
+        const timing = { duration: ROLE_ROLL_MS, easing: ROLE_EASE };
+
+        arriving.animate(
+            [
+                { transform: "translateY(100%)", opacity: 0 },
+                { transform: "none", opacity: 1 }
+            ],
+            timing
+        );
+
+        const out = leaving.animate(
+            [
+                { transform: "none", opacity: 1 },
+                { transform: "translateY(-100%)", opacity: 0 }
+            ],
+            timing
+        );
+
+        out.onfinish = function () {
+            // Still the one leaving, not picked again in the meantime.
+            if (leaving !== showing) leaving.classList.remove("showing");
+        };
     }
 
     next();
+
+    // A word changes size after it was measured when the web font arrives
+    // (on a first visit the first word is measured in the fallback font, and
+    // stayed clipped until the next roll), or when the language changes.
+    // Either way the box follows the word that is showing.
+    if ("ResizeObserver" in window) {
+        const observer = new ResizeObserver(function () {
+            if (showing) fitTo(showing, true);
+        });
+
+        for (const span of spans) {
+            observer.observe(span);
+        }
+    }
+
     if (!document.documentElement.classList.contains("reduce-motion")) {
-        setInterval(next, 2000);
+        setInterval(next, ROLE_HOLD_MS);
     }
 }
 
@@ -130,6 +321,10 @@ let revealParent = null;
 let revealParentFocus = null;
 let revealScrollY = 0;
 let revealSettleTimer = 0;
+
+// Bumped by every open and close, so an open still getting ready (see
+// openReveal) can tell it has been overtaken and leave the page alone.
+let revealToken = 0;
 
 // What lockOutside() made inert, so only those are handed back.
 let revealLocked = [];
@@ -241,12 +436,35 @@ function openReveal(layer) {
     } else {
         delete root.dataset.reveal;
     }
-    root.classList.remove("revealClosing");
-    root.classList.add("revealOpen");
 
-    // Fixed now, so the page is its own scroller - put it where the window
-    // was, so it is picked up exactly as it looked.
-    if (!switching) page.scrollTop = revealScrollY;
+    revealToken++;
+    const token = revealToken;
+
+    if (switching || root.classList.contains("revealClosing")) {
+        // Already a card on the screen, with its layer: it just moves.
+        root.classList.remove("revealClosing");
+        root.classList.add("revealOpen");
+    } else {
+        // From the page at rest, the slide is started two frames after the
+        // page has been made a card (revealPreparing in styles.css): one for
+        // the browser to lay it out fixed and draw its layer, one to show
+        // it, so the slide's first frame has nothing left to do but move.
+        root.classList.add("revealPreparing");
+
+        // Fixed now, so the page is its own scroller - put it where the
+        // window was, so it is picked up exactly as it looked.
+        page.scrollTop = revealScrollY;
+
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                // Closed again, or another layer opened, in the meantime.
+                if (revealToken !== token) return;
+
+                root.classList.add("revealOpen");
+                root.classList.remove("revealPreparing");
+            });
+        });
+    }
 
     // The page is only a preview at the edge now. Inert, taps on it fall
     // through to the layer underneath, which is what closes it (see the
@@ -271,6 +489,8 @@ function closeReveal() {
 
     announceRevealClosed(closing);
 
+    revealToken++;
+    root.classList.remove("revealPreparing");
     root.classList.remove("revealOpen");
     root.classList.add("revealClosing");
     unlockOutside();
@@ -283,7 +503,7 @@ function closeReveal() {
     // a layer that has just been hidden.
     let back = revealOpener;
     if (!back || !page.contains(back)) {
-        back = document.querySelector('#mobile-header [aria-controls="mobileMenuID"]');
+        back = document.querySelector('#desktop-header [aria-controls="mobileMenuID"]');
     }
     if (back) back.focus({ preventScroll: true });
     revealOpener = null;
@@ -472,15 +692,44 @@ function attachPill(list) {
         if (!inner) return;
         const hostBox = host.getBoundingClientRect();
         const innerBox = inner.getBoundingClientRect();
+
+        // Hidden until now, it appears where it belongs, rather than
+        // sliding there from wherever it was last.
+        const appearing = pill.style.opacity !== "1";
+        if (appearing) {
+            pill.style.transition = "opacity .2s ease";
+        }
+
         pill.style.width = innerBox.width + "px";
         pill.style.left = innerBox.left - hostBox.left + "px";
+
+        if (appearing) {
+            // Read back, so the place is applied before the slide returns.
+            void pill.offsetWidth;
+            pill.style.transition = "";
+        }
+
         pill.style.opacity = "1";
+    }
+
+    // Below 966px the header's links fold away (see "One header, phone to
+    // desktop" in styles.css). The pill goes as soon as the current one
+    // starts to fade, and only comes back once it has fully faded back in.
+    function isShowing(li) {
+        const style = getComputedStyle(li);
+        if (style.visibility === "hidden") return false;
+        if (parseFloat(style.opacity) < 1) return false;
+        return li.getBoundingClientRect().width > 1;
     }
 
     function settle() {
         const active = host.querySelector("li.active");
-        if (active) moveTo(active);
-        else pill.style.opacity = "0";
+
+        if (active && isShowing(active)) {
+            moveTo(active);
+        } else {
+            pill.style.opacity = "0";
+        }
     }
 
     for (const li of list.querySelectorAll("li")) {
@@ -497,6 +746,25 @@ function attachPill(list) {
 
     settlePill.push(settle);
     settle();
+
+    // The folding is a CSS transition, which can finish without the nav
+    // changing size again - fading back in is the last thing it does - so
+    // its end is a cue to look again too.
+    list.addEventListener("transitionend", function (e) {
+        if (e.target.parentElement !== list) return;
+        if (pill.classList.contains("hovering")) return;
+        settle();
+    });
+
+    // And the moment the current one starts fading either way, the pill
+    // fades with it: out alongside it when it folds, and kept out until it
+    // has finished coming back when it unfolds.
+    list.addEventListener("transitionrun", function (e) {
+        if (e.propertyName !== "opacity") return;
+        if (!e.target.classList.contains("active")) return;
+        if (e.target.parentElement !== list) return;
+        pill.style.opacity = "0";
+    });
 
     // Measured while the nav was hidden - the page opened at phone width and
     // was then widened, or a tablet turned - the pill is left at zero width
@@ -565,8 +833,172 @@ function initServiceWorker() {
     }
 }
 
+/* ---------- Layout changes, animated ----------
+
+   The content fits itself to the room it has (see "Fitting the page to the
+   window" in styles.css), and at a few widths part of it changes layout - a
+   section's photo going from beside its text to under it, the tour's
+   buttons dropping below their text. Resizing across one of those, the
+   blocks that jump slide from where they were to where they now are,
+   instead of teleporting.
+
+   Each block's place is kept relative to <main>, and only a sudden change
+   counts: text rewrapping as the window narrows moves things a line at a
+   time, which is under MORPH_JUMP. Places are read from the layout
+   (offsetLeft and offsetTop) rather than from what is on screen, so a slide
+   still under way never looks like another jump. */
+
+// What can move as one block. Nothing in here sits inside another of them
+// except the tour's rows, which are handled below.
+const MORPH_SELECTOR = [
+    "div.section > *",
+    ".siteTour div.section > div > *",
+    ".articlePreview > *",
+    ".pi-grid > *"
+].join(", ");
+
+const MORPH_JUMP = 24;
+const MORPH_MS = 420;
+const MORPH_EASE = "cubic-bezier(.2, .8, .2, 1)";
+
+// Where the element sits in the layout, measured up through its offset
+// parents to `root`.
+function layoutPosition(el, root) {
+    let x = 0;
+    let y = 0;
+    let node = el;
+
+    while (node && node !== root) {
+        x += node.offsetLeft;
+        y += node.offsetTop;
+        node = node.offsetParent;
+    }
+
+    return { x: x, y: y };
+}
+
+function initLayoutMorph() {
+    const main = document.querySelector("main");
+    if (!main) return;
+
+    const page = document.getElementById("page");
+
+    let last = new Map();
+
+    function snapshot() {
+        const places = new Map();
+        const origin = layoutPosition(main, page);
+
+        for (const el of main.querySelectorAll(MORPH_SELECTOR)) {
+            // Not laid out at all - display: none somewhere above it.
+            if (el.offsetParent === null) continue;
+
+            const at = layoutPosition(el, page);
+            places.set(el, { x: at.x - origin.x, y: at.y - origin.y });
+        }
+
+        return places;
+    }
+
+    function slide(el, dx, dy) {
+        for (const animation of el.getAnimations()) {
+            if (animation.id === "layoutMorph") animation.cancel();
+        }
+
+        // `translate` rather than `transform`, so it adds to whatever
+        // transform the element already has - a button pressed in, say.
+        const animation = el.animate(
+            [
+                { translate: dx + "px " + dy + "px" },
+                { translate: "0 0" }
+            ],
+            { duration: MORPH_MS, easing: MORPH_EASE }
+        );
+        animation.id = "layoutMorph";
+    }
+
+    function onResize() {
+        const now = snapshot();
+
+        let animate = true;
+        if (document.hidden) animate = false;
+        if (document.documentElement.classList.contains("reduce-motion")) animate = false;
+
+        if (animate) {
+            const sliding = [];
+
+            for (const [el, place] of now) {
+                const before = last.get(el);
+                if (!before) continue;
+
+                const dx = before.x - place.x;
+                const dy = before.y - place.y;
+                if (Math.abs(dx) < MORPH_JUMP && Math.abs(dy) < MORPH_JUMP) continue;
+
+                // Inside a block that is already sliding, it moves with it.
+                let carried = false;
+                for (const outer of sliding) {
+                    if (outer.contains(el)) carried = true;
+                }
+                if (carried) continue;
+
+                slide(el, dx, dy);
+                sliding.push(el);
+            }
+        }
+
+        last = now;
+    }
+
+    last = snapshot();
+    window.addEventListener("resize", onResize);
+
+    // The content changes without a resize too - images arriving, the
+    // article list filling in, a filter switched. Kept up to date, so the
+    // next resize compares against where things really were.
+    if ("ResizeObserver" in window) {
+        new ResizeObserver(function () {
+            last = snapshot();
+        }).observe(main);
+    }
+}
+
+/* Each image is marked once it has loaded or failed (see "Images still on
+   their way" in styles.css): loaded, its blurred preview is taken away;
+   failed, its alt text shows again. Neither event bubbles, so they are
+   caught on the way down instead. */
+function markImage(img) {
+    if (!img.complete) return;
+    if (!img.getAttribute("src")) return;
+
+    if (img.naturalWidth > 0) {
+        img.classList.remove("imgFailed");
+        img.classList.add("imgLoaded");
+    } else {
+        img.classList.remove("imgLoaded");
+        img.classList.add("imgFailed");
+    }
+}
+
+document.addEventListener("load", function (e) {
+    if (e.target instanceof HTMLImageElement) markImage(e.target);
+}, true);
+
+document.addEventListener("error", function (e) {
+    if (e.target instanceof HTMLImageElement) markImage(e.target);
+}, true);
+
+// Any that finished before this file ran.
+function markImagesAlreadyDone() {
+    for (const img of document.images) {
+        markImage(img);
+    }
+}
+
 function init() {
     startTitleShuffle();
+    markImagesAlreadyDone();
+    initLayoutMorph();
     window.markExternalLinks(document);
 
     const year = document.getElementById("footerYear");

@@ -2,6 +2,8 @@
 title: Block ads on your home network with a Raspberry Pi
 date: 2026-08-18
 preview: Tired of ads? Don't want to be tracked on your own network? There's a solution!
+icon: fa-brands fa-raspberry-pi
+image: /assets/uploads/images/articles/pihole.jpg
 ---
 
 ## A pi- what?

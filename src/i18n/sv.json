@@ -55,6 +55,7 @@
   "Next activity": "Nästa aktivitet",
   "remaining": "kvar",
   "elapsed": "förflutet",
+  "Last played": "Senast spelad",
   "Listen on Apple Music": "Lyssna på Apple Music",
   "A black button with the Apple Music logo and text that says 'Listen on Apple Music'.": "En svart knapp med Apple Music-logotypen och texten \"Lyssna på Apple Music\".",
 
@@ -345,5 +346,10 @@
   "Available: {0}": "Tillgänglig: {0}",
   "No CDN components found.": "Inga CDN-komponenter hittades.",
   "Checking...": "Kontrollerar...",
-  "Couldn't check versions: {0}": "Kunde inte kontrollera versioner: {0}"
+  "Couldn't check versions: {0}": "Kunde inte kontrollera versioner: {0}",
+
+  "{0} min read": "{0} min läsning",
+  "Newer": "Nyare",
+  "Older": "Äldre",
+  "More articles": "Fler artiklar"
 }
