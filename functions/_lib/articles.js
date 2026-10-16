@@ -98,7 +98,7 @@ export function articleImage(meta) {
 }
 
 export function articleUrl(slug) {
-    return SITE + "/articles/view/index.html?article=" + encodeURIComponent(slug);
+    return SITE + "/articles/view/?article=" + encodeURIComponent(slug);
 }
 
 export function escapeXml(value) {

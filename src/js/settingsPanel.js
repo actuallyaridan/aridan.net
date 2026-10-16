@@ -113,6 +113,7 @@
     <div class="modalButtons">${withDone ? `
         <button type="button" class="button primary" data-action="settings">Done</button>` : ""}
         <button type="button" class="button dangerZone destructive">Reset</button>
+        <span class="visuallyHidden resetStatus" role="status"></span>
     </div>
 </div>`;
     }

@@ -1503,7 +1503,50 @@
     rafId = 0;
   }
 
-  function openOverlay() {
+  // Everything beside the overlay - the page, the menu and settings layers
+  // under it, the skip link - is made inert while it is open. Tab is already
+  // kept inside by the keydown handler below, but a screen reader's own
+  // cursor ignores that and could still reach a link behind the lyrics.
+  // Like lockOutside() in general.js, anything already inert for its own
+  // reasons is left alone, and only what was locked here is handed back.
+  let inertLocked = [];
+
+  function lockPage() {
+    unlockPage();
+
+    for (const el of document.body.children) {
+      if (el === overlay) continue;
+      if (el.inert) continue;
+
+      el.inert = true;
+      inertLocked.push(el);
+    }
+  }
+
+  function unlockPage() {
+    for (const el of inertLocked) {
+      el.inert = false;
+    }
+    inertLocked = [];
+  }
+
+  // The button that opened the overlay, if it can still take focus, or else
+  // the other lyrics button, or else the page itself - anything but leaving
+  // focus inside an overlay about to be display:none, which drops it back to
+  // the top of the document.
+  function focusBack() {
+    const candidates = [opener, btn, document.getElementById("mainContent")];
+
+    for (const el of candidates) {
+      if (!el) continue;
+      if (!document.contains(el)) continue;
+
+      el.focus({ preventScroll: true });
+      if (document.activeElement === el) return;
+    }
+  }
+
+  function openOverlay(event) {
     if (!track || overlayOpen) return;
 
     if (closeTimeoutId) {
@@ -1527,7 +1570,11 @@
       document.documentElement.classList.add("lyricsOpen");
     }, fadeIn);
 
-    opener = document.activeElement;
+    // The button that was pressed, not document.activeElement: Safari, and
+    // Firefox on a Mac, do not focus a button when it is clicked, so the
+    // active element would only be <body>.
+    opener = event?.currentTarget || document.activeElement;
+    lockPage();
 
     // pointerleave does not fire for a pointer that was over the bar when the
     // overlay was hidden, so the flag could otherwise be left stuck on.
@@ -1596,7 +1643,8 @@
     // For lanyard.js, whose card stood still while it was covered.
     window.dispatchEvent(new CustomEvent("lyrics:close"));
 
-    if (opener && document.contains(opener)) opener.focus();
+    unlockPage();
+    focusBack();
     opener = null;
 
     // display:none cannot be animated, so it is only applied after the fade.

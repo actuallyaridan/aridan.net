@@ -165,10 +165,16 @@ html.reduce-motion .checkbox-wrapper-51 input[type="checkbox"]:checked+.toggle:a
     transform: translateX(18px);
 }
 
+/* A subpage slides in from the side (slideIn() in settings.js), and for the
+   length of that it pokes out past the panel - which made the settings layer,
+   or the whole /settings page, scroll sideways. clip, not hidden: it does not
+   make the panel a scroller of its own, so nothing inside can be scrolled
+   sideways either, and the vertical overflow is left alone. */
 .settingsPanel {
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow-x: clip;
 }
 
 #settingsInline {
@@ -516,3 +522,10 @@ html.reduce-transparency .settingsSheetHeader::before {
     color: var(--secondary-title-color);
 }
 
+
+/* Reset's first press: the stronger red its hover already uses, held, so it
+   is clear the next press does something. See wireResetButton in settings.js. */
+.style-liquid-glass .dangerZone.armed {
+    background: rgba(249, 76, 87, 0.28);
+    border-color: rgba(249, 76, 87, 0.5);
+}

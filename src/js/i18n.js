@@ -312,6 +312,11 @@
             return text;
         },
         get lang() { return currentLang; },
+        // For Reset in settings.js. Not saved: the saved language has been
+        // removed, and English is what no saved language means.
+        setLanguage(lang) {
+            setLanguage(lang, false);
+        },
         onChange(fn) {
             listeners.push(fn);
             if (current || currentLang === "en") fn(currentLang);

@@ -381,7 +381,7 @@ html.reduce-motion .skipLink {
     transition: none;
 }
 
-/* Jost.ttf is a variable font with every weight from 100 to 900 in it, and
+/* Jost.woff2 is a variable font with every weight from 100 to 900 in it, and
    the range has to be declared. Without it the face counts as regular (400)
    only, and Safari fakes anything bolder by drawing the text twice, slightly
    offset - which on big text, like the immersive lyrics, shows as a second
@@ -390,7 +390,7 @@ html.reduce-motion .skipLink {
     font-family: Jost;
     font-display: swap;
     font-weight: 100 900;
-    src: url(/src/fonts/Jost.ttf);
+    src: url(/src/fonts/Jost.woff2) format("woff2");
 }
 
 body,
@@ -2817,8 +2817,8 @@ img[src="/assets/uploads/images/image.webp"] {
 }
 
 img[src="/assets/uploads/images/on-bus.webp"] {
-    aspect-ratio: 1536 / 2048;
-    background-image: url(data:image/webp;base64,UklGRqoAAABXRUJQVlA4IJ4AAABwBQCdASoSABgAPt1aqU8opKOiMBgIARAbiWMAvdAQKbDmid2Gm7Cjo0Nt8GHG7woGvLWQAPyg0uE/Aa5M04C/LiONlykaSsSMWV9bNN8vUuMvWnCPnaIUdj8akVoIscY2drycs2ZkFW4JBkSS8U43ZN7+6/vMce6crhO0Rr01RvLT0qdArnAlI1c/xAjZIWI/p/HLZy0avotBAoAAAA==);
+    aspect-ratio: 600 / 800;
+    background-image: url(data:image/webp;base64,UklGRqYAAABXRUJQVlA4IJoAAABQBQCdASoSABgAPt1aqU6opKOiMBgIARAbiWMAuwAQKbDmifqaFV46MrTjcojgOv7WHlAA/KDS4T8BrkzTgL8uI42XKRpKtQ5yQJZDokS/bdWjSQ9+gHzXKzRAbBMXgK73quESMvaz8xQ3G49f0zTiamTe/uv7zHINUjtalGp4OB3udQxxxbqywVoaeh5o5s9tPtjr1UU6QvAA);
 }
 
 img[src="/assets/uploads/images/wsl.webp"] {

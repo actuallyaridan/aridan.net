@@ -4,7 +4,7 @@
     var AF = window.ArticleFormat;
 
     function articleUrl(slug) {
-        return "/articles/view/index.html?article=" + encodeURIComponent(slug);
+        return "/articles/view/?article=" + encodeURIComponent(slug);
     }
 
     function card(article) {

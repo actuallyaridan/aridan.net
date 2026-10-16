@@ -188,7 +188,7 @@
     function pagerCard(entry, label) {
         var title = AF.escapeHtml(entry.title || "Untitled article");
         var preview = AF.escapeHtml(entry.preview || "");
-        var href = AF.escapeHtml("/articles/view/index.html?article=" + encodeURIComponent(entry.slug));
+        var href = AF.escapeHtml("/articles/view/?article=" + encodeURIComponent(entry.slug));
 
         var icon = "fa-solid fa-arrow-up";
         if (label === "Older") {

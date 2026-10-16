@@ -13,7 +13,7 @@
     var retranslate = [];
 
     function editUrl(slug) {
-        return "/articles/edit/index.html?article=" + encodeURIComponent(slug);
+        return "/articles/edit/?article=" + encodeURIComponent(slug);
     }
 
     function button(className, title, icon) {

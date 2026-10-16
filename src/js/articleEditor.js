@@ -24,7 +24,7 @@
     var el = {};
 
     function viewUrl(slug) {
-        return "/articles/view/index.html?article=" + encodeURIComponent(slug);
+        return "/articles/view/?article=" + encodeURIComponent(slug);
     }
 
     // The body is a plain Markdown textarea. (It was a Toast UI rich editor

@@ -325,37 +325,117 @@ onSettingsPanel(function wirePanel() {
     }
 
     const resetButton = document.querySelector('.dangerZone');
+    const resetStatus = document.querySelector('.settingsPanel .resetStatus');
+
+    function resetEverything() {
+        // Deleted rather than written back as defaults, so prefEnabled reads
+        // them as "never touched" and asks the operating system again.
+        for (const key of Object.keys(DEFAULTS)) {
+            localStorage.removeItem(key);
+        }
+        for (const key of Object.keys(PREF_DEFAULT)) {
+            localStorage.removeItem(key);
+        }
+
+        // The language is not in DEFAULTS - i18n.js owns it - but a reset
+        // that left someone in Swedish would not be much of a reset.
+        localStorage.removeItem('lang');
+        if (window.i18n) window.i18n.setLanguage('en');
+
+        syncControls();
+        applyRootSettings();
+        applyAccessibilityPrefs();
+
+        for (const key of Object.keys(PREF_DEFAULT)) {
+            announceChange(key, prefEnabled(key));
+        }
+        for (const key of Object.keys(DEFAULTS)) {
+            announceChange(key, setting(key));
+        }
+    }
 
     if (resetButton) {
-        resetButton.addEventListener('click', function () {
-            if (!confirm('Are you sure you want to reset all settings to default?')) return;
-
-            // Deleted rather than written back as defaults, so prefEnabled reads
-            // them as "never touched" and asks the operating system again.
-            for (const key of Object.keys(DEFAULTS)) {
-                localStorage.removeItem(key);
-            }
-            for (const key of Object.keys(PREF_DEFAULT)) {
-                localStorage.removeItem(key);
-            }
-
-            syncControls();
-            applyRootSettings();
-            applyAccessibilityPrefs();
-
-            for (const key of Object.keys(PREF_DEFAULT)) {
-                announceChange(key, prefEnabled(key));
-            }
-            for (const key of Object.keys(DEFAULTS)) {
-                announceChange(key, setting(key));
-            }
-        });
+        wireResetButton(resetButton, resetStatus, resetEverything);
     }
 
     wireSubpages(document.querySelector('.settingsPanel'));
 
     syncControls();
 });
+
+/* ---------- Reset ----------
+ * Reset asks before it does anything, but inside the panel rather than with
+ * confirm(), whose wording the browser owns and which is always in English.
+ * The first press arms the button - it turns a stronger red and says to press
+ * again - and the second resets. Left alone, or with focus moved away, it
+ * goes back to being a plain Reset button.
+ */
+const RESET_ARMED_MS = 4000;
+
+function wireResetButton(button, status, reset) {
+    let armedTimer = 0;
+
+    function t(text) {
+        if (window.i18n) return window.i18n.t(text);
+        return text;
+    }
+
+    function say(text) {
+        if (status) status.textContent = text;
+    }
+
+    function isArmed() {
+        return button.classList.contains('armed');
+    }
+
+    // Subscribed on the first press, not when this is wired up: the panel is
+    // wired before i18n.js has loaded. A language change rewrites the
+    // button's text from the English markup, which would leave it red but
+    // saying Reset.
+    let watchingLanguage = false;
+
+    function arm() {
+        if (!watchingLanguage && window.i18n) {
+            window.i18n.onChange(disarm);
+            watchingLanguage = true;
+        }
+
+        button.classList.add('armed');
+        button.textContent = t('Press again to reset');
+        say(t('Press again to reset'));
+
+        window.clearTimeout(armedTimer);
+        armedTimer = window.setTimeout(disarm, RESET_ARMED_MS);
+    }
+
+    function disarm() {
+        window.clearTimeout(armedTimer);
+        armedTimer = 0;
+
+        if (!isArmed()) return;
+
+        button.classList.remove('armed');
+        button.textContent = t('Reset');
+    }
+
+    button.addEventListener('click', function () {
+        if (!isArmed()) {
+            arm();
+            return;
+        }
+
+        disarm();
+        reset();
+
+        // After the reset, so it is read out in the language reset to.
+        say(t('Settings reset'));
+    });
+
+    button.addEventListener('blur', disarm);
+
+    // The layer closing is as good as walking away from it.
+    window.addEventListener('reveal:close', disarm);
+}
 
 // The heading a subpage takes over, so it looks the same as the settings it
 // came from: the "Settings" heading at the top of the settings layer, or the
@@ -387,14 +467,20 @@ function headerOf(panel) {
     return null;
 }
 
-// Both back buttons are only shown while a subpage is open, and labelled
-// then - see retitle() - since the translations may not have arrived yet
-// when they are made.
+// Both back buttons are only shown while a subpage is open. They are
+// labelled from the start, so there is never a moment when one exists
+// without a name, and labelled again by syncBack() when shown - by then the
+// translations have arrived, and on the main page it may lead to the menu.
 function backButton(className) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = className;
     button.hidden = true;
+
+    let label = 'Back to Settings';
+    if (window.i18n) label = window.i18n.t(label);
+    button.title = label;
+    button.setAttribute('aria-label', label);
 
     const icon = document.createElement('i');
     icon.className = 'fa-solid fa-arrow-left';
@@ -459,6 +545,34 @@ function retitle(header, page) {
     }
 }
 
+// How a page comes in when it is switched to: from the right going into a
+// subpage, from the left coming back out of one, the way a phone's Settings
+// app pushes and pops its pages. The same curve as the page sliding aside
+// for the layer (#page in styles.css), only shorter and a shorter way.
+const PAGE_SLIDE_MS = 300;
+const PAGE_SLIDE_PX = 32;
+const PAGE_SLIDE_EASE = 'cubic-bezier(.2, .8, .2, 1)';
+
+// Only the page coming in moves. The one leaving is hidden straight away, as
+// it was before: two pages up at once would mean two scrollers, and on iOS a
+// hidden scroller left in the layout keeps catching taps.
+function slideIn(el, direction) {
+    if (!el) return;
+    if (document.documentElement.classList.contains('reduce-motion')) return;
+    if (typeof el.animate !== 'function') return;
+
+    let from = PAGE_SLIDE_PX;
+    if (direction === 'back') from = -PAGE_SLIDE_PX;
+
+    el.animate(
+        [
+            { transform: 'translateX(' + from + 'px)', opacity: 0 },
+            { transform: 'none', opacity: 1 }
+        ],
+        { duration: PAGE_SLIDE_MS, easing: PAGE_SLIDE_EASE }
+    );
+}
+
 /* ---------- Subpages ----------
  * A row like "Component versions" opens a page of its own in place of the
  * settings, with a back button, the way a phone's Settings app opens Wi-Fi.
@@ -470,6 +584,7 @@ function wireSubpages(panel) {
 
     const header = headerOf(panel);
 
+    // Returns the page now showing, for showPage to slide in.
     function setPage(name) {
         panel.dataset.page = name;
 
@@ -481,6 +596,8 @@ function wireSubpages(panel) {
 
         retitle(header, shown);
         syncBack();
+
+        return shown;
     }
 
     // Settings opened from the phone menu leads back to it, so on its main
@@ -510,8 +627,16 @@ function wireSubpages(panel) {
     // focusTarget is also what is scrolled to: the back button on the way in,
     // so the new page is seen from its top, and the row on the way out, so the
     // settings are back where they were left.
+    // The title moves with the page, since it changes with it - "Settings"
+    // to "Component versions" and back.
     function showPage(name, focusTarget) {
-        setPage(name);
+        let direction = 'forward';
+        if (name === 'main') direction = 'back';
+
+        const shown = setPage(name);
+
+        slideIn(shown, direction);
+        if (header) slideIn(header.title, direction);
 
         if (focusTarget) {
             focusTarget.scrollIntoView({ block: 'nearest' });
