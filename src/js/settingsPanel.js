@@ -1,7 +1,7 @@
 (function (global) {
     "use strict";
 
-    var VERSION = "6.1.5.1";
+    var VERSION = "6.1.6";
 
     function toggleMarkup(id, label) {
         return `
@@ -102,7 +102,7 @@
             <${h} class="settingsGroupHeading"><i class="fa-solid fa-bug" aria-hidden="true"></i>Developer options</${h}>${toggleMarkup("debugMode", "Debug mode")}${navRowMarkup("versions", "Component versions")}
         </div>
     </div>
-    <p class="modalDescription">version ${VERSION}</p>
+    <p class="modalDescription settingsVersion">version ${VERSION}</p>
     </div>
     <div class="settingsPage" data-page="versions" data-icon="fa-code-compare" hidden>
     <div class="modalSettings settingsSubpage">

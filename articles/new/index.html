@@ -106,12 +106,19 @@
                     </div>
                 </div>
 
-                <span id="editorFolderBar" data-state="empty">
-                    <i class="fa-solid fa-circle-exclamation" id="editorFolderIcon" aria-hidden="true"></i>
+                <!-- Starts as "loading", with bars in place of the icon, the text
+                     and the button until articleEditor.js knows which folder was
+                     saved last - see "Placeholders while things load" in
+                     styles.css. -->
+                <span id="editorFolderBar" class="skeleton" data-state="loading">
+                    <i class="fa-solid fa-folder" id="editorFolderIcon" aria-hidden="true"></i>
                     <div class="lds-ring smallLoader" id="editorFolderLoader" aria-hidden="true"><div></div><div></div><div></div><div></div></div>
+                    <span class="skeletonBar folderSkeletonIcon" aria-hidden="true"></span>
                     <p role="status" aria-live="polite"><span id="editorFolderState">No folder selected yet.</span></p>
+                    <span class="skeletonBar folderSkeletonText" aria-hidden="true"></span>
                     <button type="button" class="button" id="editorPickFolder"
                         title="Pick assets/content/articles/">Select folder</button>
+                    <span class="skeletonBar folderSkeletonButton" aria-hidden="true"></span>
                 </span>
             </div>
             

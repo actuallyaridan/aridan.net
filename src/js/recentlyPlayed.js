@@ -26,6 +26,13 @@
     // does not say "now" about a song from an hour ago.
     const AGO_REFRESH_MS = 60 * 1000;
 
+    // Hovering a song from longer ago than this for a moment swaps its time
+    // for a Member Berry's "'member?" - see member() below.
+    const MEMBER_AFTER_MS = 24 * 60 * 60 * 1000;
+    const MEMBER_HOVER_MS = 1200;
+    const MEMBER_LINE = "'member?";
+    const MEMBER_GIF = "/assets/uploads/images/member.gif";
+
     // Placeholder rows while the first list loads. About what a few songs in
     // an evening come to, so the dialog opens close to the height it ends up.
     const SKELETON_ROWS = 5;
@@ -338,8 +345,48 @@
         when.textContent = whenText(when);
         link.appendChild(when);
 
+        if (Date.now() - track.at > MEMBER_AFTER_MS) {
+            member(link);
+        }
+
         item.appendChild(link);
         return item;
+    }
+
+    // Member Berries for the older songs: hover one for a moment and its
+    // cover turns into the berries and its time into "'member?", until the
+    // pointer leaves. Hover only, and hidden from screen readers - the time
+    // is what the row really says.
+    function member(link) {
+        const line = document.createElement("span");
+        line.className = "recentMember subtitleColor";
+        line.textContent = MEMBER_LINE;
+        line.setAttribute("aria-hidden", "true");
+        link.appendChild(line);
+
+        // The gif is small, but still only asked for once someone actually
+        // lingers on a row - the first time, the browser has it after that.
+        const berries = document.createElement("img");
+        berries.className = "recentArt recentBerries";
+        berries.alt = "";
+        berries.width = ART_SIZE;
+        berries.height = ART_SIZE;
+        link.appendChild(berries);
+
+        let hoverTimer = 0;
+
+        link.addEventListener("mouseenter", function () {
+            window.clearTimeout(hoverTimer);
+            hoverTimer = window.setTimeout(function () {
+                if (!berries.src) berries.src = MEMBER_GIF;
+                link.classList.add("membering");
+            }, MEMBER_HOVER_MS);
+        });
+
+        link.addEventListener("mouseleave", function () {
+            window.clearTimeout(hoverTimer);
+            link.classList.remove("membering");
+        });
     }
 
     // Through Discord's proxy or Apple's own sizing, never a full-size file:

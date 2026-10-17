@@ -2581,8 +2581,9 @@ html.reduce-motion #desktop-header ul.notAList {
 /* ---------- Placeholders while things load ----------
 
    Grey shapes standing in for what is on its way - the music card on the
-   homepage, the article list, an article, the Pi-hole stats, Component
-   versions in Settings - so the space it will take is
+   homepage, the article list, an article, the article editor (editor.css),
+   the Pi-hole stats, Component versions in Settings - so the space it will
+   take is
    there from the start instead of a spinner or nothing.
 
    .skeleton goes on the block, .skeletonBar on each shape inside it. The
@@ -2865,3 +2866,13 @@ img[src="https://raw.githubusercontent.com/dimdenGD/OldTwitter/refs/heads/master
     background-image: url(data:image/webp;base64,UklGRkwBAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSEoAAAABcGPbttIMAGds7jBI9x5i0/Ckf1LyypQRMQG6V9+JD9K9cpRwRxbEzemIRam9s/AHpBj/TiD2kPrOJENDcSMJvEZ2uf6O/ZZEB1ZQOCDcAAAA0AUAnQEqGAAYAD7dYqZOqKWjIigNURAbiWwAnTKEcCaAAaouyEy13rJr9Oim+9qgXAVxD+IB8AD5YeFMWEJZF97BnBl/Eju9iLzr7/LOmEaob0X562uvvgj6JRIfzcRUQzX0cS5TLIUJXVHyxrlJRu3djWTG/o5UUBn82CUvAPRRS17O17a6Et+yIWmOGuXCI1C98iNuBPR7U0eydN7xnlvmV8JWhDLQpH4sed+TftNM++7G9kH4rAEEEJK2kqTfgHd+Dh9q799BicudhKkHwBZ5a5lOgvgspYAAAA==);
 }
 /* /generated:placeholders */
+
+/* Cartman on the offline page, between the text and the button home. */
+.offlineCartman {
+    display: block;
+    width: 240px;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto 32px;
+    border-radius: 16px;
+}

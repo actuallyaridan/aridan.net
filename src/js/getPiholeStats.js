@@ -342,6 +342,29 @@ async function updatePiholeStats() {
   }
 }
 
+// Hovering the blocked-queries card gets a word from Mr. Mackey.
+const MACKEY_LINE = "But they're all bad, 'mkay.";
+const MACKEY_GIF = "/assets/uploads/images/mkay.gif";
+
+// One play of the clip is 2.07s. Ended a little early so it never shows
+// starting over - see RANDY_SHOWN_MS in settings.js.
+const MACKEY_SHOWN_MS = 1800;
+
+function wireMackey() {
+  const number = document.getElementById("pi-blocked");
+  if (!number) return;
+  if (typeof speechBubble !== "function") return;
+
+  const card = number.closest(".pi-card");
+  const bubble = speechBubble(card, { centered: true, gifWidth: 240 });
+
+  onHover(card, function () {
+    bubble.showGif(MACKEY_GIF, MACKEY_LINE, MACKEY_SHOWN_MS);
+  }, bubble.hide);
+}
+
+wireMackey();
+
 const FIVE_MINUTES = 5 * 60 * 1000;
 
 updatePiholeStats();

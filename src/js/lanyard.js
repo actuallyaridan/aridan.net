@@ -97,6 +97,15 @@
   // see animateActivityChange(). The strip's arrows wait for these.
   let cardsMoving = 0;
 
+  // Randy as Lorde, on hovering Lorde's name - see initLorde().
+  const LORDE_GIF = "/assets/uploads/images/iamlorde.gif";
+  const LORDE_LINE = "I am Lorde, ya ya ya";
+
+  // One play is 5s, ended a little early so it never shows starting over.
+  const LORDE_SHOWN_MS = 4700;
+
+  let lordeBubble = null;
+
   function log(...parts) {
     debug.log(...parts);
   }
@@ -118,6 +127,7 @@
 
   initAccessibility();
   initStripNav();
+  initLorde();
   syncRefreshButton();
 
   window.Lanyard.subscribe((data) => {
@@ -671,6 +681,7 @@
     setText(els.amActivityName, a.name);
     setText(els.amActivityState, shown(artistOf(a.state)));
     setText(els.amActivityDetails, shown(a.details));
+    markArtist(a);
 
     updateActivityTime(a.timestamps, "am");
     updateProgressBar(a.timestamps);
@@ -692,6 +703,7 @@
     setText(els.amActivityName, translate("Last played"));
     setText(els.amActivityState, shown(artistOf(a.state)));
     setText(els.amActivityDetails, shown(a.details));
+    markArtist(a);
 
     updateLastPlayedAgo();
     syncAgoTimer();
@@ -699,6 +711,55 @@
     // Still worth a link: it is a song someone might want to hear.
     refreshLinkIfNewTrack(a);
   }
+
+  // A couple of artists get a little extra on the card's heading - see
+  // [data-artist] in lanyard.css. Taylor Swift gets a 13, her lucky number,
+  // and hovering Lorde's name gets Randy as Lorde - see initLorde().
+  // Any credited artist counts, so a feature does too.
+  function markArtist(a) {
+    if (!els.amCard) return;
+
+    const artists = splitArtists(a.state).map((name) => name.toLowerCase());
+
+    if (artists.includes("lorde")) {
+      els.amCard.dataset.artist = "lorde";
+      return;
+    }
+
+    if (lordeBubble) lordeBubble.hide();
+
+    if (artists.includes("taylor swift")) {
+      els.amCard.dataset.artist = "taylor";
+    } else {
+      delete els.amCard.dataset.artist;
+    }
+  }
+
+  // Randy as Lorde, from the clip, while the pointer is on the artist's name
+  // and a Lorde song is on. The bubble floats on the page rather than in the
+  // card, which the strip of activities would cut off.
+  function initLorde() {
+    const name = els.amActivityState;
+    if (!name) return;
+    if (typeof speechBubble !== "function") return;
+
+    // Under the name itself, not the middle of the line it's on - in the
+    // last-played layout, the name sits on the left of a wide line.
+    function nameBox() {
+      const range = document.createRange();
+      range.selectNodeContents(name);
+      return range.getBoundingClientRect();
+    }
+
+    lordeBubble = speechBubble(name, { floating: true, gifWidth: 150, box: nameBox });
+
+    onHover(name, () => {
+      if (els.amCard?.dataset.artist !== "lorde") return;
+      lordeBubble.showGif(LORDE_GIF, LORDE_LINE, LORDE_SHOWN_MS);
+    }, lordeBubble.hide);
+  }
+
+
 
   // The class swaps the progress bar for the "ago" line and stops the record
   // spinning - see lanyard.css.

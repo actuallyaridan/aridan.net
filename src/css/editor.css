@@ -115,6 +115,44 @@ body.editorPage main.container {
     }
 }
 
+/* Loading: until articleEditor.js has looked up the folder saved last time,
+   bars stand in for the icon, the text and the button, each the size of
+   what it replaces so the bar is its full height from the start. */
+#editorFolderBar .skeletonBar {
+    display: none;
+    flex: 0 0 auto;
+}
+
+#editorFolderBar[data-state="loading"] .skeletonBar {
+    display: block;
+}
+
+#editorFolderBar[data-state="loading"] #editorFolderIcon,
+#editorFolderBar[data-state="loading"] p,
+#editorFolderBar[data-state="loading"] .button {
+    display: none;
+}
+
+#editorFolderBar .folderSkeletonIcon {
+    width: 1.25em;
+    height: 1.25em;
+    border-radius: 50%;
+}
+
+#editorFolderBar .folderSkeletonText {
+    flex: 1 1 auto;
+    max-width: 55%;
+    height: 13px;
+    margin-right: auto;
+}
+
+/* As tall as the button, and as wide as "Select folder". */
+#editorFolderBar .folderSkeletonButton {
+    width: 107px;
+    height: 34px;
+    border-radius: 999px;
+}
+
 .section.editorForm,
 .section.editorPreview {
     display: flex;
@@ -196,6 +234,39 @@ body.editorPage main.container {
 }
 
 .editorField textarea { resize: vertical; }
+
+/* The form's shape on the Edit page, in the box articleEditor.js shows
+   while the article loads: a label and a field-sized bar for each field.
+   lanyard.css centres whatever is in #loading, so it is stretched back. */
+#loading>.editorSkeleton {
+    align-items: stretch;
+}
+
+.editorSkeletonField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.editorSkeleton .skeletonLabel {
+    width: 80px;
+    height: 15px;
+    margin: 4px 0;
+}
+
+.editorSkeleton .skeletonInput {
+    height: 45px;
+    border-radius: 12px;
+}
+
+.editorSkeleton .skeletonInput.summary {
+    height: 91px;
+}
+
+.editorSkeleton .skeletonInput.body {
+    /* The body textarea's 18 rows. */
+    height: 436px;
+}
 
 /* ---------- Field hints ----------
 
@@ -448,4 +519,15 @@ html.reduce-transparency .articleMenuList {
 .articleMenuList>.articleDelete:disabled {
     cursor: not-allowed;
     opacity: .45;
+}
+
+/* Cartman, in place of the folder bar and the form on the live site - see
+   respectMyAuthority() in articleEditor.js. */
+.authoritah {
+    display: block;
+    width: 320px;
+    max-width: 100%;
+    height: auto;
+    margin: 32px auto 0;
+    border-radius: 16px;
 }

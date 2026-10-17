@@ -39,6 +39,12 @@
     };
 
     var currentDir = null;
+
+    // False until the folder saved last time has been looked up, which is
+    // async - the bar shows skeleton bars until then rather than saying
+    // "No folder selected yet" and changing its mind a moment later.
+    var folderKnown = false;
+
     var statusMessage = "";
     var statusKind = "";
 
@@ -69,8 +75,10 @@
 
     // What the folder bar is saying, which picks its icon and colour in
     // editor.css. Only an error is red. While busy, the site's loading ring
-    // (#editorFolderLoader) shows instead of an icon.
+    // (#editorFolderLoader) shows instead of an icon, and while loading,
+    // skeleton bars stand in for the whole bar.
     var FOLDER_ICONS = {
+        loading: "fa-folder",
         empty: "fa-circle-exclamation",
         suspect: "fa-circle-exclamation",
         ready: "fa-folder",
@@ -85,6 +93,7 @@
         if (statusKind === "ok") return "ok";
         if (statusMessage) return "busy";
         if (!Store.isSupported()) return "unsupported";
+        if (!folderKnown) return "loading";
         if (!currentDir) return "empty";
         if (strays.length) return "suspect";
         return "ready";
@@ -223,6 +232,7 @@
     }
 
     function setFolderState(dir) {
+        folderKnown = true;
         currentDir = dir;
         strays = [];
         renderFolderBar();
@@ -463,6 +473,38 @@
         });
     }
 
+    // The editor is only linked to on my own machine (see articleAdmin.js),
+    // so anyone here on the live site came by typing the address in. They
+    // get Cartman instead of the editor: the folder bar, the loader and the
+    // form make way for him, and every button but the way back is switched
+    // off. Gives back whether it locked, so init() can stop there.
+    var AUTHORITY_LINE = "Respect my authoritah!";
+    var AUTHORITY_GIF = "/assets/uploads/images/authoritah.webp";
+
+    function respectMyAuthority() {
+        if (Store.isLocalHost()) return false;
+
+        var cartman = document.createElement("img");
+        cartman.className = "authoritah";
+        cartman.src = AUTHORITY_GIF;
+        cartman.width = 500;
+        cartman.height = 384;
+        cartman.alt = "Cartman: " + AUTHORITY_LINE;
+
+        if (el.folderBar) el.folderBar.replaceWith(cartman);
+        el.folderBar = null;
+
+        showSpinner(false);
+        if (el.layout) el.layout.classList.add("hide");
+
+        var buttons = [el.save, el.download, el.remove, document.querySelector(".articleMenuButton")];
+        buttons.forEach(function (button) {
+            disablePermanently(button, AUTHORITY_LINE);
+        });
+
+        return true;
+    }
+
     function init() {
         el = {
             form: document.getElementById("editorForm"),
@@ -482,6 +524,8 @@
             remove: document.getElementById("deleteArticle")
         };
         if (!el.form || !el.title) return;
+
+        if (respectMyAuthority()) return;
 
 
         el.form.addEventListener("input", markDirty);

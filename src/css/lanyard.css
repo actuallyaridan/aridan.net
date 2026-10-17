@@ -969,6 +969,34 @@ a.recentLink:focus-visible {
     white-space: nowrap;
 }
 
+/* "'member?", in place of the time while an older song is hovered, and
+   the Member Berries in place of its cover - see member() in
+   recentlyPlayed.js. */
+.recentMember {
+    grid-area: when;
+    display: none;
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
+.membering .recentMember {
+    display: block;
+}
+
+.membering .recentWhen,
+.membering .recentArt:not(.recentBerries) {
+    display: none;
+}
+
+/* The berries take the cover's place - see member() in recentlyPlayed.js. */
+.recentBerries {
+    display: none;
+}
+
+.membering .recentBerries {
+    display: block;
+}
+
 /* The placeholder rows, while the first list loads. The bars sit about where
    the text's own lines will, and the cover keeps its own rounder corners
    rather than taking the bars' 6px. */
@@ -1013,4 +1041,23 @@ a.recentLink:focus-visible {
     .recentArtist {
         align-self: auto;
     }
+}
+
+/* Taylor Swift's 13 on the music card's heading, from markArtist() in
+   lanyard.js. Generated content, so screen readers skip it and the heading's
+   own text is left alone for lanyard.js to keep setting. */
+/* Drawn on in marker, the way she wrote it on her hand. */
+#amLanyardDiscord[data-artist="taylor"] #amActivityName::after {
+    content: "13";
+    display: inline-block;
+    margin-left: 0.45em;
+    padding: 0 0.4em;
+    border-radius: 999px;
+    background: var(--accent-fill);
+    color: #fff;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1.5;
+    vertical-align: 0.1em;
+    rotate: -6deg;
 }

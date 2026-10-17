@@ -742,3 +742,333 @@ function loadVersionCheck() {
 
     return versionCheckLoading;
 }
+
+/* ---------- Speech bubbles ----------
+ * The lines the easter eggs say, in a bubble hanging off whatever set them
+ * off - see .speechBubble in settings.css. Here, in the one script every page
+ * has, so the pages' own scripts can use it too and they all look the same.
+ *
+ * Gives back show(text, ms), showGif(url, line, ms) and hide(). The options:
+ *   centered  hang from the middle of the anchor rather than its right
+ *   start     hang from its left, wherever the caller lines it up
+ *   floating  put the bubble on <body> and line it up under the anchor when
+ *             shown, for an anchor inside something that would clip it
+ *   box       for a floating one, a function giving the box to line it up
+ *             under, when that isn't the anchor's own
+ *   gifWidth  how wide a gif is shown, in pixels
+ */
+
+// Gifs are fetched once per page and kept as blobs: every showing gets its
+// own blob: URL, which makes the browser start the clip from the top instead
+// of carrying on from wherever the last showing left it. A query string would
+// do that too, but would download the whole thing again each time.
+const gifBlobs = new Map();
+
+function loadGif(url) {
+    if (gifBlobs.has(url)) return gifBlobs.get(url);
+
+    const loading = fetch(url).then(function (response) {
+        if (!response.ok) throw new Error(url + ': ' + response.status);
+        return response.blob();
+    });
+
+    // Lets a failed fetch be tried again next time.
+    loading.catch(function () {
+        gifBlobs.delete(url);
+    });
+
+    gifBlobs.set(url, loading);
+    return loading;
+}
+
+// Room left between a floating bubble and the edge of the screen.
+const BUBBLE_GUTTER = 16;
+
+// How long the pointer has to stay on something before a hover egg goes
+// off, so one only passing over it on its way somewhere else doesn't.
+const HOVER_DELAY_MS = 300;
+
+// The easter eggs set off by hovering: start() once the pointer has stayed
+// on element a moment, stop() as soon as it leaves. On a phone, a tap counts
+// as the pointer arriving, and a tap anywhere else as it leaving.
+function onHover(element, start, stop) {
+    let timer = 0;
+
+    element.addEventListener('mouseenter', function () {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(start, HOVER_DELAY_MS);
+    });
+
+    element.addEventListener('mouseleave', function () {
+        window.clearTimeout(timer);
+        timer = 0;
+        stop();
+    });
+}
+
+function speechBubble(anchor, options) {
+    const opts = options || {};
+
+    // A span rather than a <p>, since the anchor can be a <p> itself.
+    const bubble = document.createElement('span');
+    bubble.className = 'speechBubble';
+    if (opts.centered) bubble.classList.add('centered');
+    if (opts.start) bubble.classList.add('start');
+    if (opts.floating) bubble.classList.add('floating');
+    bubble.setAttribute('role', 'status');
+    bubble.hidden = true;
+
+    if (opts.floating) {
+        document.body.appendChild(bubble);
+    } else {
+        anchor.classList.add('bubbleAnchor');
+        anchor.appendChild(bubble);
+    }
+
+    let hideTimer = 0;
+    let clipUrl = '';
+
+    // Bumped by every show and hide, so a gif that finishes loading after
+    // the bubble was already hidden again doesn't pop up late.
+    let showing = 0;
+
+    function hide() {
+        showing++;
+
+        window.clearTimeout(hideTimer);
+        hideTimer = 0;
+
+        bubble.hidden = true;
+        bubble.classList.remove('gif');
+        bubble.style.removeProperty('width');
+        bubble.replaceChildren();
+
+        if (clipUrl) {
+            URL.revokeObjectURL(clipUrl);
+            clipUrl = '';
+        }
+    }
+
+    // Under the anchor, as close to its middle as the screen allows, with
+    // the tail pointing at the middle either way.
+    function placeFloating() {
+        let box = anchor.getBoundingClientRect();
+        if (opts.box) box = opts.box();
+
+        const middle = box.left + box.width / 2;
+        const width = bubble.offsetWidth;
+
+        let left = middle - width / 2;
+        left = Math.min(left, window.innerWidth - BUBBLE_GUTTER - width);
+        left = Math.max(left, BUBBLE_GUTTER);
+
+        bubble.style.left = (left + window.scrollX) + 'px';
+        bubble.style.top = (box.bottom + window.scrollY) + 'px';
+        bubble.style.setProperty('--tail', (middle - left) + 'px');
+    }
+
+    function reveal(ms) {
+        bubble.hidden = false;
+        if (opts.floating) placeFloating();
+
+        if (ms) hideTimer = window.setTimeout(hide, ms);
+    }
+
+    // ms left out, or 0, keeps it up until hide(). Shown again while it is
+    // already up, it starts over - read out again, and its full time again.
+    function show(text, ms) {
+        hide();
+
+        // Hidden and shown in the same frame would not play the pop-in.
+        void bubble.offsetWidth;
+
+        bubble.textContent = text;
+        reveal(ms);
+    }
+
+    // The clip, with the line it says as text for screen readers only - the
+    // clips all have it in their subtitles already. Only shown once the gif
+    // has loaded, so a slow connection never shows an empty bubble.
+    async function showGif(url, line, ms) {
+        hide();
+        const thisShowing = showing;
+
+        let blob;
+        try {
+            blob = await loadGif(url);
+        } catch (err) {
+            console.error('[speechBubble]', err);
+            return;
+        }
+
+        if (thisShowing !== showing) return;
+
+        const clip = document.createElement('img');
+        clip.alt = '';
+
+        // The load event rather than decode(), which can sit unanswered in
+        // a tab the browser is holding back - the bubble would never show.
+        const loaded = new Promise(function (resolve, reject) {
+            clip.onload = resolve;
+            clip.onerror = reject;
+        });
+
+        clipUrl = URL.createObjectURL(blob);
+        clip.src = clipUrl;
+
+        try {
+            await loaded;
+        } catch {
+            return;
+        }
+
+        if (thisShowing !== showing) return;
+
+        const said = document.createElement('span');
+        said.className = 'visuallyHidden';
+        said.textContent = line;
+
+        bubble.classList.add('gif');
+        if (opts.gifWidth) bubble.style.width = opts.gifWidth + 'px';
+        bubble.replaceChildren(clip, said);
+
+        reveal(ms);
+    }
+
+    // In the settings layer or the menu, the layer closing means nobody is
+    // looking at it any more.
+    if (anchor.closest('.revealLayer')) {
+        window.addEventListener('reveal:close', hide);
+    }
+
+    // Lined up with the anchor when it was shown, so it would be left
+    // pointing at nothing.
+    if (opts.floating) {
+        window.addEventListener('resize', hide);
+    }
+
+    return { element: bubble, show: show, showGif: showGif, hide: hide };
+}
+
+/* ---------- Randy ----------
+ * Turning "Hide explicit language" back on gets a word from Randy Marsh -
+ * that's the moment he's being censored. Only when it's switched on by hand:
+ * the filter is on by default, and Reset turning it on isn't anyone's doing.
+ * Left in English on purpose: it's a quote, and it doesn't work translated.
+ */
+const RANDY_QUOTE = "I'm sorry, I thought this was America!";
+const RANDY_GIF = '/assets/uploads/images/randy.gif';
+
+// One play of randy.gif is 4.19s. Taken down a little before that: the clip
+// starts playing as soon as it has loaded, a moment before it is on screen,
+// and a timer is never exactly on time, so ending right at 4.19s showed it
+// starting over before it went away.
+const RANDY_SHOWN_MS = 3900;
+
+onSettingsPanel(function wireRandy() {
+    const toggle = document.querySelector('.settingsPanel #hideExplicit');
+    if (!toggle) return;
+
+    // The toggle's own row, so Randy shows up right under the switch that
+    // set him off.
+    const row = toggle.closest('.checkbox-wrapper-51').parentElement;
+    const bubble = speechBubble(row, { gifWidth: 240 });
+
+    // Runs after wirePanel's listener on the same toggle - it was added
+    // first - so the "settings:change" below has already hidden Randy by
+    // the time this shows him again.
+    toggle.addEventListener('change', function () {
+        if (toggle.checked) {
+            bubble.showGif(RANDY_GIF, RANDY_QUOTE, RANDY_SHOWN_MS);
+            return;
+        }
+
+        bubble.hide();
+
+        // The gif is over a megabyte, so it is only fetched once someone
+        // turns the filter off - the one way to then turn it back on.
+        loadGif(RANDY_GIF).catch(function () {});
+    });
+
+    // Reset turns the filter back on without a change event, which should
+    // not set Randy off.
+    window.addEventListener('settings:change', function (event) {
+        if (event.detail.key !== 'hideExplicit') return;
+        bubble.hide();
+    });
+});
+
+/* ---------- Taylor's Version ----------
+ * Tapping the version number at the bottom of Settings three times in a row
+ * re-records it: "version 6.1.6 (Taylor's Version)". Three more taps and it
+ * goes back. Not saved anywhere - it lasts until the page is left.
+ */
+const TAYLORS_VERSION = " (Taylor's Version)";
+const TAYLORS_TAPS = 3;
+
+// Taps further apart than this don't count as in a row.
+const TAYLORS_TAP_GAP_MS = 600;
+
+onSettingsPanel(function wireTaylorsVersion() {
+    const line = document.querySelector('.settingsPanel .settingsVersion');
+    if (!line) return;
+
+    const original = line.textContent;
+    let taps = 0;
+    let lastTapAt = 0;
+
+    line.addEventListener('click', function () {
+        const now = Date.now();
+
+        if (now - lastTapAt > TAYLORS_TAP_GAP_MS) taps = 0;
+        lastTapAt = now;
+        taps++;
+
+        if (taps < TAYLORS_TAPS) return;
+        taps = 0;
+
+        if (line.textContent === original) {
+            line.textContent = original + TAYLORS_VERSION;
+        } else {
+            line.textContent = original;
+        }
+    });
+});
+
+/* ---------- Look what you made me do ----------
+ * The first switch to the dark theme on a visit gets a line from the
+ * reputation era, under the Dark button. Only the first, and only when it's
+ * picked by hand - following the system into dark mode isn't anyone's doing.
+ */
+const REPUTATION_LINE = "Look what you made me do";
+const REPUTATION_SHOWN_MS = 2500;
+
+let reputationShown = false;
+
+onSettingsPanel(function wireReputation() {
+    const dark = document.querySelector('.settingsPanel input[name="theme-color"][value="dark"]');
+    if (!dark) return;
+
+    const options = dark.closest('.themeOptions');
+    const darkLabel = options.querySelector('label[for="dark"]');
+
+    const bubble = speechBubble(options, { start: true });
+
+    dark.addEventListener('change', function () {
+        if (!dark.checked) return;
+        if (reputationShown) return;
+        reputationShown = true;
+
+        // Lined up with the Dark button, wherever the buttons wrapped to.
+        bubble.element.style.left = darkLabel.offsetLeft + 'px';
+        bubble.element.style.top = (darkLabel.offsetTop + darkLabel.offsetHeight) + 'px';
+
+        bubble.show(REPUTATION_LINE, REPUTATION_SHOWN_MS);
+    });
+
+    // Switched away again before it's gone, it goes too.
+    for (const radio of options.querySelectorAll('input[name="theme-color"]')) {
+        if (radio === dark) continue;
+        radio.addEventListener('change', bubble.hide);
+    }
+});
