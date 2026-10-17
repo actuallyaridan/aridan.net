@@ -1,10 +1,9 @@
-const GITHUB_API = "https://api.github.com/repos/";
-
-// GitHub allows 60 unauthenticated requests an hour per address.
-function showRateLimitNotice() {
-    const el = document.getElementById("rateLimitGitHub");
-    if (el) el.style.display = "flex";
-}
+// The counts come from /api/github, which asks GitHub on the site's behalf and
+// remembers the answer - see functions/api/github.js. Which repos each number
+// is for is written on the element itself, in data-github-stars or
+// data-github-forks; a card for a group of repos lists them all, separated by
+// commas, and shows the total.
+const GITHUB_STATS_URL = "/api/github";
 
 // Counts from the number written in the page to the live one, so a change
 // since the page was last edited ticks up in front of you. The page's own
@@ -50,82 +49,50 @@ function formatGitHubCount(n, steady) {
     return floored.toLocaleString(undefined, options) + "K";
 }
 
-async function updateGitHubRepoStats(repos) {
-    for (const repo of repos) {
-        const [owner, repoName] = repo.split('/');
-        const url = GITHUB_API + owner + "/" + repoName;
+// The total for a comma-separated list of repos, or null if any of them is
+// missing - a group shows its old number rather than a total that is short.
+function totalFor(list, repos, field) {
+    let total = 0;
 
-        try {
-            const response = await fetch(url);
+    for (const part of list.split(",")) {
+        const counts = repos[part.trim()];
+        if (!counts) return null;
 
-            if (response.status === 403) {
-                showRateLimitNotice();
-                debug.warn("Rate limited by GitHub API when fetching " + repo);
-                break;
-            }
+        total += counts[field];
+    }
 
-            if (!response.ok) {
-                throw new Error("GitHub API error: " + response.status);
-            }
+    return total;
+}
 
-            const data = await response.json();
+function fillCounts(repos, attribute, field) {
+    for (const el of document.querySelectorAll("[" + attribute + "]")) {
+        const total = totalFor(el.getAttribute(attribute), repos, field);
+        if (total === null) continue;
 
-            const starsEl = document.getElementById("stars-" + owner + "-" + repoName);
-            const forksEl = document.getElementById("forks-" + owner + "-" + repoName);
-
-            showCount(starsEl, data.stargazers_count);
-            showCount(forksEl, data.forks_count);
-        } catch (error) {
-            console.error("Failed to fetch stats for " + repo + ":", error);
-        }
+        showCount(el, total);
     }
 }
 
-// One card for several repos. Any failure abandons the group, so no half totals.
-async function updateGitHubGroupStats(groupId, repos) {
-    let stars = 0;
-    let forks = 0;
-
-    for (const repo of repos) {
-        try {
-            const response = await fetch(GITHUB_API + repo);
-
-            if (response.status === 403) {
-                showRateLimitNotice();
-                debug.warn("Rate limited by GitHub API when fetching " + repo);
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error("GitHub API error: " + response.status);
-            }
-
-            const data = await response.json();
-
-            stars += data.stargazers_count;
-            forks += data.forks_count;
-        } catch (error) {
-            console.error("Failed to fetch stats for " + repo + ":", error);
-            return;
+// If this fails the page keeps the numbers written into it, which were right
+// when it was last edited. That is close enough not to need a warning.
+async function updateGitHubStats() {
+    let data;
+    try {
+        const response = await fetch(GITHUB_STATS_URL);
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
         }
+
+        data = await response.json();
+    } catch (error) {
+        debug.warn("Could not load GitHub stats:", error);
+        return;
     }
 
-    const starsEl = document.getElementById("stars-" + groupId);
-    const forksEl = document.getElementById("forks-" + groupId);
+    if (!data || !data.repos) return;
 
-    showCount(starsEl, stars);
-    showCount(forksEl, forks);
+    fillCounts(data.repos, "data-github-stars", "stars");
+    fillCounts(data.repos, "data-github-forks", "forks");
 }
 
-updateGitHubGroupStats("wsl", [
-    "actuallyaridan/linux-devmgmt",
-    "actuallyaridan/linux-control",
-    "actuallyaridan/linux-minesweeper",
-]);
-
-updateGitHubRepoStats([
-    "actuallyaridan/NeoFreeBird",
-    "dimdenGD/OldTwitter",
-    "actuallyaridan/aridan.net",
-    "actuallyaridan/chirp",
-]);
+updateGitHubStats();

@@ -6,7 +6,7 @@
 // registration - no reload, however hard, re-reads it. Only a byte-different
 // sw.js installs a new worker, and that changed etag is also what gets the file
 // past Cloudflare's edge cache so the new header is the one it installs under.
-const VERSION = "v9";
+const VERSION = "v10";
 const CACHE = "aridan-" + VERSION;
 
 // Extensionless on purpose: Pages 308s /offline.html to /offline, and a response
@@ -66,7 +66,7 @@ function cdnRequest(url) {
 }
 
 // Live data and author tooling must never be served from cache:
-//   /api/            - Pi-hole stats, the whole point is that they are current
+//   /api/            - Pi-hole stats and GitHub counts, the whole point is that they are current
 //   /assets/content/ - article markdown the local editor reads back after writes
 //   /articles/new/, /articles/edit/ - local-only editor screens
 //   /__presence/     - the local presence Worker, only there in development

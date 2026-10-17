@@ -2088,14 +2088,6 @@ span.token{
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Sits as far below the hero buttons as anything under the New article
-   button on Articles, which has the admin bar's empty status line
-   (.articleAdminNotice, 1.4em tall) between them. */
-#rateLimitGitHub{
-    display: none;
-    margin-top: calc(10px + 1.4em);
-}
-
 .warn>i {
     margin-right: 0px;
 }

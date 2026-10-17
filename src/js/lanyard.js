@@ -1029,7 +1029,7 @@
   // that store's default, so a Croatian reader would land in Swedish. Ask for
   // English instead.
   function appleUiLanguage(store) {
-    const siteLang = window.i18n?.lang || localStorage.getItem("lang") || "en";
+    const siteLang = window.i18n?.lang || preferredLanguage();
     const wanted = APPLE_UI_LANGUAGES[siteLang] || DEFAULT_APPLE_UI_LANGUAGE;
 
     if (wanted === DEFAULT_APPLE_UI_LANGUAGE) return DEFAULT_APPLE_UI_LANGUAGE;

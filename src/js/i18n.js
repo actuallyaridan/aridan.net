@@ -39,6 +39,7 @@
         "main .pi-stat-label",
         "main #lanyardRefresh",
         "main #lyricsBtn",
+        "main #recentBtn",
         "main #Remaining",
         "main #Elapsed",
         "main .warn:not(#editorFolderBar) p",
@@ -314,7 +315,7 @@
         },
         get lang() { return currentLang; },
         // For Reset in settings.js. Not saved: the saved language has been
-        // removed, and English is what no saved language means.
+        // removed, so the browser's language is followed again.
         setLanguage(lang) {
             setLanguage(lang, false);
         },
@@ -331,5 +332,12 @@
         picker.addEventListener("change", () => setLanguage(picker.value, true));
     });
 
-    setLanguage(localStorage.getItem("lang") || "en", false);
+    // Someone who has never picked one follows the browser, including when
+    // they change its language with the page open.
+    window.addEventListener("languagechange", () => {
+        if (localStorage.getItem("lang")) return;
+        setLanguage(browserLanguage(), false);
+    });
+
+    setLanguage(preferredLanguage(), false);
 })();

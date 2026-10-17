@@ -569,7 +569,7 @@ div#amTimeremaning>p {
    section's own margins still left a gap under the banner. Take the section
    out entirely, so the banner's margin and the next section's can collapse
    into the one gap. */
-html:not(.lanyard-reserve) div.section:has(> .discordWrapper > #lanyardDiscord[style*="none"]):not(:has(#lyricsBtn:not(.hide), #lanyardRefresh:not(.hide))) {
+html:not(.lanyard-reserve) div.section:has(> .discordWrapper > #lanyardDiscord[style*="none"]):not(:has(#lyricsBtn:not(.hide), #recentBtn:not(.hide), #lanyardRefresh:not(.hide))) {
     display: none;
 }
 
@@ -582,7 +582,7 @@ html.lanyard-reserve .discordWrapper {
 
 /* Arrives with the card on load, so it comes into focus alongside it rather
    than popping in sharp underneath a card that is still blurred. */
-.discordWrapper:has(#loadedLanyard.revealing) #lyricsBtn {
+.discordWrapper:has(#loadedLanyard.revealing) .cardButtons {
     animation: lanyard-focus-in .32s cubic-bezier(.2, .7, .3, 1) both;
 }
 
@@ -615,6 +615,32 @@ html.reduce-motion .progress-bar {
 #apple-link img {
     height: 41px;
     width: auto;
+}
+
+/* Lyrics and Recently played, side by side under the card. They wrap onto
+   two lines on a narrow phone rather than squeezing their labels. */
+.cardButtons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+/* Both hidden - nothing playing and nothing played - so no gap is left. */
+.cardButtons:not(:has(> .button:not(.hide))) {
+    display: none;
+}
+
+#recentBtn {
+    margin: 0;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+#recentBtn.hide {
+    display: none;
 }
 
 #lanyardRefresh {
@@ -736,4 +762,137 @@ html.lanyard-reserve .lanyardSkeleton {
     height: 45px;
     margin-top: 24px;
     border-radius: 999px;
+}
+
+/* ---------- Recently played ----------
+
+   The dialog borrows .emailDialog's frame, backdrop and opening animation
+   (styles.css), so the two read as the same kind of thing. Only the list is
+   its own. */
+
+.recentDialog {
+    width: min(460px, calc(100vw - 32px));
+}
+
+.recentStatus {
+    margin: 12px 0 0;
+}
+
+.recentStatus[hidden] {
+    display: none;
+}
+
+/* Twenty rows do not fit on a phone, so the list scrolls inside the dialog
+   and the buttons stay in sight. */
+.recentList {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    width: 100%;
+    max-height: min(420px, 55vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    text-align: left;
+}
+
+.recentList:empty {
+    display: none;
+}
+
+/* Cover, then title over artist, then the time on the right. */
+.recentLink {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    grid-template-areas:
+        "art title when"
+        "art artist when";
+    align-items: center;
+    column-gap: 12px;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    color: inherit;
+    text-decoration: none;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.recentLink:hover,
+.recentLink:focus-visible {
+    background-color: var(--liquid-glass-button-background);
+    border-color: var(--liquid-glass-button-border);
+}
+
+.recentArt {
+    grid-area: art;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    background-color: var(--liquid-glass-button-background);
+}
+
+.recentArtEmpty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--icon-color);
+}
+
+.recentArtEmpty > i {
+    margin: 0;
+}
+
+/* Only there to group the two lines for the markup; the grid places them. */
+.recentText {
+    display: contents;
+}
+
+.recentTitle {
+    grid-area: title;
+    align-self: end;
+}
+
+.recentTitle,
+.recentArtist {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.recentArtist {
+    grid-area: artist;
+    align-self: start;
+    font-size: 0.9em;
+}
+
+.recentWhen {
+    grid-area: when;
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
+/* On a phone a time on the right leaves the title a few letters, so it goes
+   under the artist instead and the title gets the whole width. */
+@media (max-width: 480px) {
+    .recentLink {
+        grid-template-columns: 48px minmax(0, 1fr);
+        grid-template-areas:
+            "art title"
+            "art artist"
+            "art when";
+    }
+
+    .recentTitle {
+        align-self: auto;
+    }
+
+    .recentArtist {
+        align-self: auto;
+    }
+}
+
+/* The song that is on right now is marked in the accent colour, the same as
+   the card's progress bar. */
+.recentWhen[data-playing="true"] {
+    color: var(--accent-color);
 }

@@ -19,6 +19,30 @@ const LANGUAGES = {
     bs: 'Bosanski (Bosnian)'
 };
 
+// The first of the browser's languages the site has. Only the part before the
+// dash is compared, so sv-SE and sv-FI both land on Swedish.
+function browserLanguage() {
+    const wanted = navigator.languages || [navigator.language];
+
+    for (const tag of wanted) {
+        if (!tag) continue;
+
+        const base = tag.toLowerCase().split('-')[0];
+        if (base in LANGUAGES) return base;
+    }
+
+    return 'en';
+}
+
+// The language to show: the one picked in Settings wins, and without one the
+// browser decides.
+function preferredLanguage() {
+    const saved = localStorage.getItem('lang');
+    if (saved && saved in LANGUAGES) return saved;
+
+    return browserLanguage();
+}
+
 const PREF_DEFAULT = {
     autoUpdateActivity: () => true,
     hideExplicit: () => true,
@@ -231,11 +255,9 @@ matchMedia('(prefers-reduced-transparency: reduce)').addEventListener('change', 
 // Fetched here rather than in i18n.js so the request is in flight while the rest
 // of the scripts are parsed. i18n-wait hides the page until the strings land.
 (function preloadLanguage() {
-    const lang = localStorage.getItem('lang');
+    const lang = preferredLanguage();
 
-    if (!lang) return;                 // nothing saved
     if (lang === 'en') return;         // English is what the HTML already says
-    if (!(lang in LANGUAGES)) return;  // unknown value, ignore it
 
     document.documentElement.classList.add('i18n-wait');
     document.documentElement.setAttribute('lang', lang);
@@ -338,9 +360,9 @@ onSettingsPanel(function wirePanel() {
         }
 
         // The language is not in DEFAULTS - i18n.js owns it - but a reset
-        // that left someone in Swedish would not be much of a reset.
+        // should hand it back to the browser like everything else.
         localStorage.removeItem('lang');
-        if (window.i18n) window.i18n.setLanguage('en');
+        if (window.i18n) window.i18n.setLanguage(browserLanguage());
 
         syncControls();
         applyRootSettings();

@@ -153,7 +153,6 @@
   "This page isn't saved on your device and there's no connection to fetch it with. Pages you've already visited still open - try again once you're back online.": "Den här sidan är inte sparad på din enhet och det finns ingen anslutning att hämta den med. Sidor du redan har besökt går fortfarande att öppna - försök igen när du är uppkopplad.",
 
   "I have a few projects that I've worked on, from translations all the way to a fully-fledged Twitter clone. Check them out! And by the way, the star and fork counts are dynamic!": "Jag har några projekt som jag har jobbat på, från översättningar hela vägen till en fullfjädrad Twitter-klon. Kolla in dem! Och förresten, antalet stjärnor och forkar är dynamiskt!",
-  "You're rate limited on the GitHub API. Showing old values.": "Du är hastighetsbegränsad på GitHub-API:et. Visar gamla värden.",
   "A suite of Linux programs that recreate the Windows 7 originals down to the pixel, with my weird eye for detail - the same layouts, sprites, sounds and animations, only backed by real Linux system data. Three of them so far, and the suite keeps growing.": "En svit Linux-program som återskapar Windows 7-originalen ner till pixeln, med mitt konstiga öga för detaljer - samma layouter, sprites, ljud och animationer, fast med riktig systemdata från Linux i botten. Tre stycken hittills, och sviten fortsätter växa.",
   "Device Manager, Control Panel and Minesweeper": "Enhetshanteraren, Kontrollpanelen och Minröj",
   "A tweak for the X app on iOS that brings back Twitter's original name and look, along with other interface and quality-of-life changes.": "En tweak för X-appen på iOS som återställer Twitters ursprungliga namn och utseende, tillsammans med andra förbättringar av gränssnittet och användarupplevelsen.",
@@ -312,7 +311,7 @@
   "Lanyard, an independent open-source service: my live Discord status on the home page, showing what I am currently listening to and doing.": "Lanyard, en fristående tjänst med öppen källkod: min Discord-status i realtid på startsidan, som visar vad jag lyssnar på och gör just nu.",
   "Discord and Apple: the album art and activity images for that status. If \"Upgrade album art quality\" is turned on in Settings, the full-size cover may also be loaded from the image host of Cider, the application I use to play Apple Music.": "Discord och Apple: skivomslag och aktivitetsbilder till den statusen. Om ”Förbättra skivomslagets kvalitet” är påslaget i Inställningar kan omslaget i full storlek även hämtas från bildvärden hos Cider, programmet jag spelar Apple Music med.",
   "Apple (itunes.apple.com): finding the Apple Music link for the song I am playing. Your browser's language is used to select which country's store is searched.": "Apple (itunes.apple.com): att hitta Apple Music-länken till låten jag spelar. Din webbläsares språk används för att välja vilket lands butik som söks.",
-  "GitHub: the star and fork counts and some of the images on the projects page.": "GitHub: antalet stjärnor och forks och några av bilderna på projektsidan.",
+  "GitHub: some of the images on the projects page. The star and fork counts are fetched by aridan.net itself, so GitHub does not see your IP address for those.": "GitHub: några av bilderna på projektsidan. Antalet stjärnor och forks hämtas av aridan.net själv, så GitHub ser inte din IP-adress för dem.",
   "LRCLIB, an independent, open database of song lyrics: the lyrics for the song I am playing, only when aridan.net cannot retrieve them itself (see Lyrics below).": "LRCLIB, en fristående, öppen databas med låttexter: texten till låten jag spelar, men bara när aridan.net inte kan hämta den själv (se Låttext nedan).",
   "Legal basis and international transfers": "Rättslig grund och internationella överföringar",
   "I use these services on the basis of my legitimate interest in operating a functional personal website (GDPR Article 6(1)(f)). I do not send them any information about you; they receive only what your browser sends when it connects.": "Jag använder de här tjänsterna med stöd av mitt berättigade intresse av att driva en fungerande personlig webbplats (artikel 6.1 f i GDPR). Jag skickar inga uppgifter om dig till dem; de tar bara emot det din webbläsare skickar när den ansluter.",
@@ -351,5 +350,11 @@
   "{0} min read": "{0} min läsning",
   "Newer": "Nyare",
   "Older": "Äldre",
-  "More articles": "Fler artiklar"
+  "More articles": "Fler artiklar",
+  "Recently played": "Nyligen spelat",
+  "The last songs I listened to, newest first.": "De senaste låtarna jag lyssnat på, nyaste först.",
+  "Playing now": "Spelas nu",
+  "Couldn't load the list. Try again later.": "Det gick inte att ladda listan. Försök igen senare.",
+  "Nothing played yet.": "Inget spelat än.",
+  "Loading…": "Laddar…"
 }

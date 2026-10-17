@@ -153,7 +153,6 @@
   "This page isn't saved on your device and there's no connection to fetch it with. Pages you've already visited still open - try again once you're back online.": "Ova stranica nije spremljena na tvom uređaju, a nema veze kojom bi je se dohvatilo. Stranice koje si već posjetio i dalje se otvaraju - pokušaj ponovno kad se vratiš online.",
 
   "I have a few projects that I've worked on, from translations all the way to a fully-fledged Twitter clone. Check them out! And by the way, the star and fork counts are dynamic!": "Imam nekoliko projekata na kojima sam radio, od prijevoda pa sve do potpuno razrađenog Twitter klona. Pogledaj ih! I usput, broj zvjezdica i forkova je dinamičan!",
-  "You're rate limited on the GitHub API. Showing old values.": "Ograničen si na GitHub API-ju. Prikazuju se stare vrijednosti.",
   "A suite of Linux programs that recreate the Windows 7 originals down to the pixel, with my weird eye for detail - the same layouts, sprites, sounds and animations, only backed by real Linux system data. Three of them so far, and the suite keeps growing.": "Skup Linux programa koji rekreiraju originale iz Windowsa 7 do zadnjeg piksela, s mojim čudnim okom za detalje - isti rasporedi, spriteovi, zvukovi i animacije, samo s pravim podacima o Linux sustavu iza njih. Zasad ih ima tri, a skup i dalje raste.",
   "Device Manager, Control Panel and Minesweeper": "Upravitelj uređaja, Upravljačka ploča i Minolovac",
   "A tweak for the X app on iOS that brings back Twitter's original name and look, along with other interface and quality-of-life changes.": "Dodatak za X aplikaciju na iOS-u koji vraća Twitterovo izvorno ime i izgled, uz druge izmjene sučelja i poboljšanja korisničkog iskustva.",
@@ -312,7 +311,7 @@
   "Lanyard, an independent open-source service: my live Discord status on the home page, showing what I am currently listening to and doing.": "Lanyard, neovisna usluga otvorenog koda: moj Discord status uživo na početnoj stranici, koji prikazuje što trenutno slušam i radim.",
   "Discord and Apple: the album art and activity images for that status. If \"Upgrade album art quality\" is turned on in Settings, the full-size cover may also be loaded from the image host of Cider, the application I use to play Apple Music.": "Discord i Apple: omoti albuma i slike aktivnosti za taj status. Ako je u Postavkama uključeno „Poboljšaj kvalitetu omota albuma”, omot u punoj veličini može se učitati i s poslužitelja za slike aplikacije Cider, kojom slušam Apple Music.",
   "Apple (itunes.apple.com): finding the Apple Music link for the song I am playing. Your browser's language is used to select which country's store is searched.": "Apple (itunes.apple.com): pronalaženje Apple Music poveznice za pjesmu koju slušam. Jezik tvog preglednika koristi se za odabir trgovine koje zemlje se pretražuje.",
-  "GitHub: the star and fork counts and some of the images on the projects page.": "GitHub: broj zvjezdica i forkova te neke slike na stranici s projektima.",
+  "GitHub: some of the images on the projects page. The star and fork counts are fetched by aridan.net itself, so GitHub does not see your IP address for those.": "GitHub: neke slike na stranici s projektima. Broj zvjezdica i forkova dohvaća sam aridan.net, pa GitHub za njih ne vidi tvoju IP adresu.",
   "LRCLIB, an independent, open database of song lyrics: the lyrics for the song I am playing, only when aridan.net cannot retrieve them itself (see Lyrics below).": "LRCLIB, neovisna, otvorena baza tekstova pjesama: tekst pjesme koju slušam, ali samo kad ga aridan.net ne može sam dohvatiti (vidi Tekst pjesme u nastavku).",
   "Legal basis and international transfers": "Pravna osnova i međunarodni prijenosi",
   "I use these services on the basis of my legitimate interest in operating a functional personal website (GDPR Article 6(1)(f)). I do not send them any information about you; they receive only what your browser sends when it connects.": "Ove usluge koristim na temelju svog legitimnog interesa da vodim funkcionalnu osobnu web stranicu (članak 6. stavak 1. točka (f) GDPR-a). Ne šaljem im nikakve podatke o tebi; primaju samo ono što tvoj preglednik pošalje pri povezivanju.",
@@ -351,5 +350,11 @@
   "{0} min read": "{0} min čitanja",
   "Newer": "Novije",
   "Older": "Starije",
-  "More articles": "Više članaka"
+  "More articles": "Više članaka",
+  "Recently played": "Nedavno slušano",
+  "The last songs I listened to, newest first.": "Zadnje pjesme koje sam slušao, najnovije prve.",
+  "Playing now": "Svira sada",
+  "Couldn't load the list. Try again later.": "Popis se nije mogao učitati. Pokušaj ponovno kasnije.",
+  "Nothing played yet.": "Još ništa nije slušano.",
+  "Loading…": "Učitavanje…"
 }
