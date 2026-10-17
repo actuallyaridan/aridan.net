@@ -558,6 +558,21 @@ li>a:active, li>button.noUI:active {
     white-space: nowrap;
 }
 
+/* The icons' list ends the bar, so in Liquid Glass it drops most of the
+   padding on its right, as the links' list does on its left. Not all of it:
+   at the same distance as aridan.net, the solid icons look crammed into the
+   end next to the thin grey text, so they get 8px more to look even. */
+.style-liquid-glass #desktop-header>div>ul.notAList {
+    padding-right: 8px;
+}
+
+/* The icons have no pill to show they're hovered, so they take the accent
+   colour instead - the same one the current page's link is in. */
+#desktop-header>div>ul>li>a:hover,
+#desktop-header>div>ul>li>button.noUI:hover {
+    color: var(--accent-text);
+}
+
 .style-liquid-glass .nav-pill {
     position: absolute;
     z-index: -1;
@@ -2521,13 +2536,18 @@ span.token{
     transition: gap .35s cubic-bezier(.2, .8, .2, 1);
 }
 
-/* The menu button, folded on a big screen. */
+/* The menu button, folded on a big screen. Folded to nothing it would
+   still get the list's 20px gap in front of it, leaving Twitter further from
+   the bar's right end than aridan.net is from its left. The negative margin
+   takes that gap back. */
 #desktop-header>div>ul>li.headerMenu {
     max-width: 0;
+    margin-left: -20px;
     opacity: 0;
     visibility: hidden;
     transition:
         max-width .35s cubic-bezier(.2, .8, .2, 1) .1s,
+        margin-left .35s cubic-bezier(.2, .8, .2, 1) .1s,
         opacity .15s ease,
         visibility 0s .45s;
 }
@@ -2550,10 +2570,12 @@ span.token{
 
     #desktop-header>div>ul>li.headerMenu {
         max-width: 10em;
+        margin-left: 0;
         opacity: 1;
         visibility: visible;
         transition:
             max-width .35s cubic-bezier(.2, .8, .2, 1),
+            margin-left .35s cubic-bezier(.2, .8, .2, 1),
             opacity .2s ease .15s,
             visibility 0s;
     }
