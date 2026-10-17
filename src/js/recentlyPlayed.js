@@ -1,5 +1,6 @@
-/* Recently played: the songs I have listened to lately, in a dialog opened from
- * the button under the music card.
+/* Recently played: the songs I have listened to lately, in a dialog opened
+ * from the button under the music card. The song playing right now is left out - it is
+ * already on the card, and the list is for what came before it.
  *
  * The list is kept by the presence Worker (aridan-presence), which sees every
  * song the agent reports whether or not Discord is open. It is only fetched
@@ -25,6 +26,15 @@
     // does not say "now" about a song from an hour ago.
     const AGO_REFRESH_MS = 60 * 1000;
 
+    // Placeholder rows while the first list loads. About what a few songs in
+    // an evening come to, so the dialog opens close to the height it ends up.
+    const SKELETON_ROWS = 5;
+
+    // Each placeholder row's title and artist get their own lengths, so the
+    // rows look like different songs rather than one stamped out five times.
+    const SKELETON_TITLE_WIDTHS = ["70%", "55%", "80%", "60%", "45%"];
+    const SKELETON_ARTIST_WIDTHS = ["40%", "50%", "30%", "45%", "35%"];
+
     // Biggest first: the first unit the time fits at least one of is the one
     // it is told in. The same as lanyard.js.
     const AGO_UNITS = [
@@ -44,6 +54,9 @@
     let status = null;
 
     let tracks = null;
+
+    // The song playing now, as songKey() gives it, or "" with nothing playing.
+    let currentKey = "";
     let fetchedAt = 0;
     let loading = false;
     let agoTimer = 0;
@@ -110,10 +123,28 @@
 
         button.classList.toggle("hide", !hasMusic);
 
-        // A new song means the list has changed. Only redrawn here if it is
-        // open; otherwise the next opening asks for it anyway.
+        // Only a change of song matters here; presence also updates for
+        // things like a game starting, which leave the list as it was.
+        const music = window.Lanyard.appleMusic(presence);
+
+        let key = "";
+        if (music) {
+            key = songKey(music);
+        }
+
+        if (key === currentKey) return;
+        currentKey = key;
+
+        // The song that just ended belongs on the list now, so the next
+        // opening asks again however recently it last did.
+        fetchedAt = 0;
+
+        // Open: the new song comes off straight away, and the one before it
+        // goes on once the Worker has it.
         if (dialog.open) {
-            fetchedAt = 0;
+            if (tracks) {
+                render();
+            }
             load();
         }
     }
@@ -139,10 +170,10 @@
         if (loading) return;
         loading = true;
 
-        // Only said while there is nothing on screen yet. With an older list
+        // Only shown while there is nothing on screen yet. With an older list
         // already showing, it is quietly replaced instead.
         if (!tracks) {
-            setStatus(t("Loading…"));
+            showSkeleton();
         }
 
         try {
@@ -162,9 +193,10 @@
             fetchedAt = Date.now();
             render();
         } catch (error) {
-            debug.warn("Could not load recently played:", error);
+            debug.warn("Could not load the listening history:", error);
 
             if (!tracks) {
+                clearSkeleton();
                 setStatus(t("Couldn't load the list. Try again later."));
             }
         } finally {
@@ -173,21 +205,92 @@
     }
 
     function setStatus(text) {
+        status.classList.remove("visuallyHidden");
         status.textContent = text;
         status.hidden = !text;
     }
 
-    function render() {
-        list.replaceChildren();
+    // Grey rows shaped like the real ones - see "Placeholders while things
+    // load" in styles.css. The rows say nothing to a screen reader, so
+    // "Loading…" is still said, just not shown.
+    function showSkeleton() {
+        setStatus(t("Loading…"));
+        status.classList.add("visuallyHidden");
 
-        if (!tracks.length) {
+        list.replaceChildren();
+        list.classList.add("skeleton");
+        list.setAttribute("aria-hidden", "true");
+
+        for (let i = 0; i < SKELETON_ROWS; i++) {
+            list.appendChild(skeletonRow(i));
+        }
+    }
+
+    function clearSkeleton() {
+        list.classList.remove("skeleton");
+        list.removeAttribute("aria-hidden");
+        list.replaceChildren();
+    }
+
+    function skeletonRow(index) {
+        const item = document.createElement("li");
+        item.className = "recentTrack";
+
+        // The same grid as a real row, so nothing moves when the songs arrive.
+        const box = document.createElement("span");
+        box.className = "recentLink";
+
+        const art = document.createElement("span");
+        art.className = "skeletonBar recentArt";
+        box.appendChild(art);
+
+        const text = document.createElement("span");
+        text.className = "recentText";
+
+        const title = document.createElement("span");
+        title.className = "skeletonBar recentTitle recentSkeletonTitle";
+        title.style.width = SKELETON_TITLE_WIDTHS[index % SKELETON_TITLE_WIDTHS.length];
+        text.appendChild(title);
+
+        const artist = document.createElement("span");
+        artist.className = "skeletonBar recentArtist recentSkeletonArtist";
+        artist.style.width = SKELETON_ARTIST_WIDTHS[index % SKELETON_ARTIST_WIDTHS.length];
+        text.appendChild(artist);
+
+        box.appendChild(text);
+
+        const when = document.createElement("span");
+        when.className = "skeletonBar recentWhen recentSkeletonWhen";
+        box.appendChild(when);
+
+        item.appendChild(box);
+        return item;
+    }
+
+    function render() {
+        clearSkeleton();
+
+        // The Worker may hear of a new song a moment after the card does, so
+        // the playing song is taken out here rather than trusted to the list.
+        const past = [];
+        for (const track of tracks) {
+            const activity = track.activity || {};
+
+            if (currentKey && songKey(activity) === currentKey) {
+                continue;
+            }
+
+            past.push(track);
+        }
+
+        if (!past.length) {
             setStatus(t("Nothing played yet."));
             return;
         }
 
         setStatus("");
 
-        for (const track of tracks) {
+        for (const track of past) {
             list.appendChild(row(track));
         }
     }
@@ -231,10 +334,6 @@
         when.dateTime = new Date(track.at).toISOString();
         when.title = new Date(track.at).toLocaleString(currentLanguage());
         when.dataset.at = String(track.at);
-
-        if (track.playing) {
-            when.dataset.playing = "true";
-        }
 
         when.textContent = whenText(when);
         link.appendChild(when);
@@ -309,11 +408,12 @@
     }
 
     function whenText(el) {
-        if (el.dataset.playing === "true") {
-            return t("Playing now");
-        }
-
-        return timeAgo(Number(el.dataset.at));
+        // Never "now": next to a song that is playing on the card, it reads
+        // as if both were on at once. Anything under a minute is a minute ago
+        // instead.
+        const at = Number(el.dataset.at);
+        const aMinuteAgo = Date.now() - 60 * 1000;
+        return timeAgo(Math.min(at, aMinuteAgo));
     }
 
     function updateTimes() {
@@ -329,8 +429,8 @@
         dialog.querySelector(".modalDescription").textContent = t("The last songs I listened to, newest first.");
         dialog.querySelector(".recentClose").textContent = t("Close");
 
-        // The rows carry translated text of their own - "Playing now", the
-        // "ago" times and the link titles - so they are drawn again.
+        // The rows carry translated text of their own - the "ago" times and
+        // the link titles - so they are drawn again.
         if (tracks && dialog.open) {
             render();
         }
@@ -373,6 +473,13 @@
     function currentLanguage() {
         if (window.i18n && window.i18n.lang) return window.i18n.lang;
         return "en";
+    }
+
+    // The same song whatever its timestamps or artwork say, and whether it
+    // came from Discord or the agent. Matches sameSong() in the Worker, less
+    // the album, which Discord does not always send.
+    function songKey(activity) {
+        return (activity.details || "") + "\n" + artistOf(activity.state);
     }
 
     // Cider puts "by " in front of the artist. Anchored, so an artist with

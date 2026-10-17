@@ -525,8 +525,98 @@ border: 1px solid var(--liquid-glass-button-border);
     display: none;
 }
 
+/* The last song is not the main event the way a playing one is, so it is laid
+   out like a row in Recently played instead: wide and short, the cover beside
+   the song rather than above it, and when it stopped on the right. The
+   heading keeps its own line on top. */
+#amLanyardDiscord.lastPlayed {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 12px;
+    width: 440px;
+    max-width: calc(100% - 24px);
+}
+
+#amLanyardDiscord.lastPlayed .titleActivity {
+    flex-basis: 100%;
+    margin-bottom: 10px;
+}
+
+/* The note is for a song that is on. "Last played" stands on its own. */
+#amLanyardDiscord.lastPlayed .activityHeading > i {
+    display: none;
+}
+
+#amLanyardDiscord.lastPlayed .titleActivity h3 {
+    margin-left: 0;
+}
+
+#amLanyardDiscord.lastPlayed #amDiscordActivityImages {
+    flex: none;
+    width: auto;
+}
+
+/* A still square, the same as the list: a stopped record left at whatever
+   angle it was spinning at looks like a mistake. */
 #amLanyardDiscord.lastPlayed #amActivityLogoLarge {
-    animation-play-state: paused;
+    width: 64px;
+    height: 64px;
+    margin: 0;
+    border-radius: 8px;
+    object-fit: cover;
+    animation: none;
+}
+
+#amLanyardDiscord.lastPlayed #amDiscordActivityInfo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "title ago"
+        "artist ago";
+    align-items: center;
+    column-gap: 12px;
+    flex: 1;
+    min-width: 0;
+    width: auto;
+}
+
+#amLanyardDiscord.lastPlayed #amActivityDetails,
+#amLanyardDiscord.lastPlayed #amActivityState {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+#amLanyardDiscord.lastPlayed #amActivityDetails {
+    grid-area: title;
+}
+
+#amLanyardDiscord.lastPlayed #amActivityState {
+    grid-area: artist;
+}
+
+#amLanyardDiscord.lastPlayed #amLastPlayedAgo {
+    grid-area: ago;
+    margin-top: 0;
+    white-space: nowrap;
+}
+
+/* The badge alone is taller than the rest of the row. Recently played, right
+   under the card, links every song there instead. */
+#amLanyardDiscord.lastPlayed #apple-link {
+    display: none;
+}
+
+/* On a phone the time goes under the artist, the same as in the list. */
+@media (max-width: 480px) {
+    #amLanyardDiscord.lastPlayed #amDiscordActivityInfo {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "title"
+            "artist"
+            "ago";
+    }
 }
 
 div#timeremaning,
@@ -799,6 +889,12 @@ html.lanyard-reserve .lanyardSkeleton {
     display: none;
 }
 
+/* .modalButtons has no space of its own above it, and the last row's hover
+   background would otherwise sit right against the button. */
+.recentDialog .modalButtons {
+    margin-top: 20px;
+}
+
 /* Cover, then title over artist, then the time on the right. */
 .recentLink {
     display: grid;
@@ -816,8 +912,10 @@ html.lanyard-reserve .lanyardSkeleton {
     transition: background-color .15s ease, border-color .15s ease;
 }
 
-.recentLink:hover,
-.recentLink:focus-visible {
+/* a. only: the placeholder rows share the class for their layout, and are
+   not something to point at. */
+a.recentLink:hover,
+a.recentLink:focus-visible {
     background-color: var(--liquid-glass-button-background);
     border-color: var(--liquid-glass-button-border);
 }
@@ -871,6 +969,28 @@ html.lanyard-reserve .lanyardSkeleton {
     white-space: nowrap;
 }
 
+/* The placeholder rows, while the first list loads. The bars sit about where
+   the text's own lines will, and the cover keeps its own rounder corners
+   rather than taking the bars' 6px. */
+.recentList.skeleton .recentArt {
+    border-radius: 8px;
+}
+
+.recentSkeletonTitle {
+    height: 14px;
+    margin-bottom: 4px;
+}
+
+.recentSkeletonArtist {
+    height: 12px;
+    margin-top: 4px;
+}
+
+.recentSkeletonWhen {
+    width: 64px;
+    height: 12px;
+}
+
 /* On a phone a time on the right leaves the title a few letters, so it goes
    under the artist instead and the title gets the whole width. */
 @media (max-width: 480px) {
@@ -882,6 +1002,10 @@ html.lanyard-reserve .lanyardSkeleton {
             "art when";
     }
 
+    .recentSkeletonWhen {
+        margin-top: 6px;
+    }
+
     .recentTitle {
         align-self: auto;
     }
@@ -889,10 +1013,4 @@ html.lanyard-reserve .lanyardSkeleton {
     .recentArtist {
         align-self: auto;
     }
-}
-
-/* The song that is on right now is marked in the accent colour, the same as
-   the card's progress bar. */
-.recentWhen[data-playing="true"] {
-    color: var(--accent-color);
 }

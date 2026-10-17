@@ -93,6 +93,10 @@
   let slideAnimations = [];
   let slideCleanup = null;
 
+  // How many cards are still sliding or coming into focus after a change -
+  // see animateActivityChange(). The strip's arrows wait for these.
+  let cardsMoving = 0;
+
   function log(...parts) {
     debug.log(...parts);
   }
@@ -262,6 +266,13 @@
 
   function updateStripNav() {
     if (!els.strip) return;
+
+    // A card sliding to its new place is moved with a transform, and a moved
+    // card counts as overflow in a scrolling strip. Measured now, the strip
+    // looks too wide for a moment - and the arrow it shows for that stays,
+    // since nothing measures again until a scroll. The last card to settle
+    // measures instead.
+    if (cardsMoving > 0) return;
 
     const max = els.strip.scrollWidth - els.strip.clientWidth;
     const overflowing = max > 1;
@@ -580,13 +591,14 @@
 
       const previous = before.get(card);
       if (!previous) {
-        card.animate(
+        const entering = card.animate(
           [
             { opacity: 0, filter: "blur(10px)", transform: "scale(.94)" },
             { opacity: 1, filter: "blur(0)", transform: "none" },
           ],
           { duration: CARD_MS, easing: CARD_EASE }
         );
+        holdStripNav(entering);
         continue;
       }
 
@@ -595,12 +607,34 @@
       const dy = previous.top - now.top;
 
       if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-        card.animate(
+        const sliding = card.animate(
           [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
           { duration: CARD_MS, easing: CARD_EASE }
         );
+        holdStripNav(sliding);
       }
     }
+  }
+
+  // Keeps the strip's arrows as they are until this animation is over, then
+  // measures again - see updateStripNav(). Cancelled counts as over too, so a
+  // change that interrupts another cannot leave the arrows stuck.
+  function holdStripNav(animation) {
+    cardsMoving++;
+
+    let done = false;
+    function settle() {
+      if (done) return;
+      done = true;
+
+      cardsMoving--;
+      if (cardsMoving === 0) {
+        updateStripNav();
+      }
+    }
+
+    animation.addEventListener("finish", settle);
+    animation.addEventListener("cancel", settle);
   }
 
   function updateActivityImages(activities) {
