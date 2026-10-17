@@ -57,6 +57,9 @@
   const ART_SIZE = 300;
   const BACKDROP_FADE_MS = 1200;
 
+  // Mirrors UA in functions/api/lyrics.js.
+  const LRCLIB_CLIENT = "aridan.net/1.0 (+https://github.com/actuallyaridan/aridan.net)";
+
   // The blur is made by shrinking the art down through these sizes and back
   // up again, not with a filter. See blurInto().
   const BLUR_DOWN = [32, 16, 8];
@@ -321,17 +324,35 @@
 
       // Anything other than JSON means the endpoint is not really there: Pages
       // Functions only run under the Cloudflare runtime, not a static server.
+      //
+      // Except for a 5xx. Cloudflare puts its own plain-text "error code: 502"
+      // page in place of a Function's 502, so on the live site that is a
+      // failure like any other, not a missing backend.
       if (!type.includes("application/json")) {
         const err = new Error(
           "/api/lyrics returned " + res.status + " " +
-          (type || "with no content type") +
-          " - Pages Functions only run under the Cloudflare runtime"
+          (type || "with no content type")
         );
-        err.noBackend = true;
+
+        if (res.status < 500) {
+          err.message += " - Pages Functions only run under the Cloudflare runtime";
+          err.noBackend = true;
+        }
+
         throw err;
       }
 
       const body = await res.json();
+
+      // The Function checked the song is the one playing but could not get
+      // through to LRCLIB, which turns most requests from Cloudflare away. The
+      // browser asks from an address of its own, so it tries instead, for the
+      // song the Function checked rather than the one asked about.
+      if (res.status === 424 && body.reason === "upstream" && body.song) {
+        debug.log("The server couldn't reach LRCLIB (" + body.detail + "), asking it directly...");
+        return askLrclib(body.song);
+      }
+
       logAnswer(res.status, body);
 
       // 404 is a real answer here, so it is handled like a success.
@@ -356,6 +377,32 @@
     }
 
     return guarded;
+  }
+
+  // The same lookup the Function does, from here. Answers in the Function's
+  // own shape, so the rest of the page cannot tell which side found it.
+  async function askLrclib(song) {
+    const lrclib = await import("/src/js/lrclib.js");
+
+    const result = await lrclib.lookup(song, {
+      // A browser may not set its own user-agent, so LRCLIB takes this
+      // header in its place.
+      headers: { "Lrclib-Client": LRCLIB_CLIENT },
+      retries: 2,
+    });
+
+    let status = 200;
+    let body;
+
+    if (result.hit) {
+      body = lrclib.shape(result.hit);
+    } else {
+      status = 404;
+      body = { found: false, reason: "no_match", plain: result.plain };
+    }
+
+    logAnswer(status, body);
+    return body;
   }
 
   // What the search turned up, in words. Errors are left to the warning the
