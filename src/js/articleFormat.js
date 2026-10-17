@@ -263,6 +263,27 @@
         }
     }
 
+    // A comfortable reading pace for the kind of writing on here. The number
+    // is only ever a rough guide, so it is rounded up to whole minutes.
+    var WORDS_PER_MINUTE = 200;
+
+    // Counted from what is on the page rather than the Markdown, so link
+    // addresses and formatting marks are not counted as words. Used by the
+    // article page and the privacy page's byline (legalByline.js).
+    function readingMinutes(el) {
+        var words = el.textContent.trim().split(/\s+/);
+
+        var count = 0;
+        for (var i = 0; i < words.length; i++) {
+            if (words[i]) count++;
+        }
+
+        var minutes = Math.ceil(count / WORDS_PER_MINUTE);
+        if (minutes < 1) minutes = 1;
+
+        return minutes;
+    }
+
     global.ArticleFormat = {
         parse: parse,
         stringify: stringify,
@@ -273,6 +294,7 @@
         formatDate: formatDate,
         localDate: localDate,
         dateSortKey: dateSortKey,
+        readingMinutes: readingMinutes,
         INDEX_URL: "/assets/content/articles/index.json",
         DIR_URL: "/assets/content/articles/"
     };

@@ -277,7 +277,14 @@ function renderPiholeStats(data, { example = false } = {}) {
 
   renderUpdatedLine(data, example);
 
-  // The cards start greyed out; this has to run whatever happened above.
+  // The cards start as placeholders; this has to run whatever happened above.
+  stopLoading();
+}
+
+// Ends the placeholders, leaving the "-" under any stat that was not filled
+// in. Every way a fetch can end calls it - a failed one too, or the bars
+// would shimmer on as though an answer were still on its way.
+function stopLoading() {
   for (const el of document.querySelectorAll(".pi-loading")) {
     el.classList.remove("pi-loading");
   }
@@ -316,6 +323,7 @@ async function updatePiholeStats() {
     // 503 means the Pi has not reported in yet, which fixes itself.
     if (response.status === 503) {
       debug.warn("Pi-hole stats not available yet.");
+      stopLoading();
       return;
     }
 
@@ -327,6 +335,7 @@ async function updatePiholeStats() {
     renderPiholeStats(data);
   } catch (error) {
     console.error("Failed to fetch Pi-hole stats:", error);
+    stopLoading();
 
     const errEl = document.getElementById("pi-error");
     if (errEl) errEl.style.display = "block";

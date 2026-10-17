@@ -108,18 +108,34 @@
         results.appendChild(list);
     }
 
-    // The site's loading ring, the same one the article list shows. The
-    // hidden text is what the live region reads out in its place.
-    function spinner() {
-        const wrap = element("div", "versionLoading");
+    // As many as the site loads today, so the list is about the height it
+    // will be when the real rows replace these.
+    const SKELETON_ROWS = 4;
 
-        const ring = element("div", "lds-ring");
-        ring.setAttribute("aria-hidden", "true");
-        for (let i = 0; i < 4; i++) {
-            ring.appendChild(element("div"));
+    // Grey rows shaped like the real ones - a name, a badge and two lines -
+    // while /api/versions answers. The hidden text is what the live region
+    // reads out in their place.
+    function skeleton() {
+        const wrap = element("div");
+
+        const list = element("ul", "versionList skeleton");
+        list.setAttribute("aria-hidden", "true");
+
+        for (let i = 0; i < SKELETON_ROWS; i++) {
+            const item = element("li", "versionItem versionSkeleton");
+
+            const head = element("div", "versionHead");
+            head.appendChild(element("span", "skeletonBar skeletonName"));
+            head.appendChild(element("span", "skeletonBar skeletonBadge"));
+            item.appendChild(head);
+
+            item.appendChild(element("span", "skeletonBar skeletonDetail"));
+            item.appendChild(element("span", "skeletonBar skeletonDetail short"));
+
+            list.appendChild(item);
         }
 
-        wrap.appendChild(ring);
+        wrap.appendChild(list);
         wrap.appendChild(element("span", "visuallyHidden", t("Checking...")));
         return wrap;
     }
@@ -127,7 +143,7 @@
     // Every time the page is opened, so it is never showing an old answer.
     async function run(results) {
         results.textContent = "";
-        results.appendChild(spinner());
+        results.appendChild(skeleton());
 
         try {
             const res = await fetch("/api/versions", { cache: "no-store" });

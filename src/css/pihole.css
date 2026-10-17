@@ -100,17 +100,29 @@
   color: var(--paragraph-color);
 }
 
-.pi-loading {
-  color: var(--secondary-title-color);
-  animation: pi-pulse 1.2s ease-in-out infinite;
+/* Until the first stats arrive, each number is a grey bar (see "Placeholders
+   while things load" in styles.css). The "-" stays in the markup underneath,
+   only hidden: it keeps the line its full height, and it is what a stat the
+   Pi did not report is left showing once loading ends. */
+.pi-num.pi-loading {
+  position: relative;
+  color: transparent;
 }
 
-@keyframes pi-pulse {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.8; }
+.pi-num.pi-loading::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3em;
+  height: .75em;
+  transform: translate(-50%, -50%);
 }
 
-html.reduce-motion .pi-loading { animation: none; }
+/* The two-wide cards hold the longer values - a card model, an uptime. */
+.pi-card-wide .pi-num.pi-loading::before {
+  width: 5.5em;
+}
 
 /* Every digit the same width, so a number counting up (window.countTo in
    general.js) changes in place instead of shuffling sideways - and so does

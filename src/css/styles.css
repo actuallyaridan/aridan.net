@@ -2567,22 +2567,26 @@ html.reduce-motion #desktop-header ul.notAList {
 /* ---------- Placeholders while things load ----------
 
    Grey shapes standing in for what is on its way - the music card on the
-   homepage, the article list, an article - so the space it will take is
+   homepage, the article list, an article, the Pi-hole stats, Component
+   versions in Settings - so the space it will take is
    there from the start instead of a spinner or nothing.
 
    .skeleton goes on the block, .skeletonBar on each shape inside it. The
    shine sweeps across the whole window rather than each shape on its own
    (background-attachment: fixed), so every bar catches it at the same time,
    the way light moving over one surface would. */
-:root {
-    --skeleton-base: color-mix(in srgb, var(--paragraph-color) 13%, transparent);
-    --skeleton-shine: color-mix(in srgb, var(--paragraph-color) 24%, transparent);
-}
-
 .skeleton .skeletonBar,
+.pi-num.pi-loading::before,
 .full-article:not(.isLoaded) #articleTitle:empty::before,
 .full-article:not(.isLoaded) #articlePreview:empty::before,
 .full-article:not(.isLoaded) #articlePreview:empty::after {
+    /* Worked out on each bar rather than once on :root, so they follow the
+       surface the bar is on. A custom property made from another is fixed
+       where it is declared, and the settings panel - dark even in the light
+       theme - brings its own --paragraph-color that a :root one never saw. */
+    --skeleton-base: color-mix(in srgb, var(--paragraph-color) 13%, transparent);
+    --skeleton-shine: color-mix(in srgb, var(--paragraph-color) 24%, transparent);
+
     display: block;
     border-radius: 6px;
     background-color: var(--skeleton-base);
@@ -2609,6 +2613,7 @@ html.reduce-motion #desktop-header ul.notAList {
 }
 
 html.reduce-motion .skeleton .skeletonBar,
+html.reduce-motion .pi-num.pi-loading::before,
 html.reduce-motion .full-article:not(.isLoaded) #articleTitle:empty::before,
 html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::before,
 html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::after {

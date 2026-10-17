@@ -455,11 +455,40 @@ html.reduce-transparency .settingsSheetHeader::before {
     margin: 0;
 }
 
-/* Centred in the space the list will take, like the article list's. */
-.versionLoading {
-    display: flex;
-    justify-content: center;
-    padding: 12px 0;
+/* The rows versionCheck.js shows while it checks. Each bar is a little
+   shorter than the line it stands in for, with the rest as margin, so a row
+   is as tall as a real one and nothing jumps when they are swapped.
+   --line is Jost's normal line height, which the real rows use. */
+.versionSkeleton {
+    --line: 1.4375em;
+}
+
+/* The real head lines its name and badge up by their text, which bars do
+   not have - lined up that way they push the head taller than a line. */
+.versionSkeleton .versionHead {
+    align-items: center;
+}
+
+.versionSkeleton .skeletonName {
+    width: 42%;
+    height: 1em;
+    margin: calc((var(--line) - 1em) / 2) 0;
+}
+
+.versionSkeleton .skeletonBadge {
+    width: 72px;
+    height: .8em;
+    margin: calc((var(--line) - .8em) / 2) 0;
+}
+
+.versionSkeleton .skeletonDetail {
+    width: 55%;
+    height: .85em;
+    margin: calc((var(--line) - .85em) / 2) 0;
+}
+
+.versionSkeleton .skeletonDetail.short {
+    width: 38%;
 }
 
 .versionList {

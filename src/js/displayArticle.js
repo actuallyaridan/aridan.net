@@ -3,10 +3,6 @@
 
     var AF = window.ArticleFormat;
 
-    // A comfortable reading pace for the kind of writing on here. The number
-    // is only ever a rough guide, so it is rounded up to whole minutes.
-    var WORDS_PER_MINUTE = 200;
-
     // An article's own icon, as Font Awesome classes - "fa-brands
     // fa-raspberry-pi". Checked, since it comes from the front matter.
     var ICON_CLASSES = /^fa-[a-z]+( fa-[a-z0-9-]+)+$/;
@@ -78,28 +74,12 @@
         var rawDate = AF.escapeHtml(meta.date || "");
         var isoDate = AF.formatDate(meta.date) || "";
         var shownDate = AF.escapeHtml(AF.localDate(isoDate));
-        var minutes = readingMinutes(content);
+        var minutes = AF.readingMinutes(content);
 
         var byline = document.getElementById("articleByline");
         byline.innerHTML = `<li><i class="fa-regular fa-calendar" aria-hidden="true"></i><time datetime="${rawDate}" data-iso="${AF.escapeHtml(isoDate)}">${shownDate}</time></li>` +
             `<li><i class="fa-regular fa-clock" aria-hidden="true"></i><span data-minutes="${minutes}">${AF.escapeHtml(minutesLabel(minutes))}</span></li>`;
         byline.hidden = false;
-    }
-
-    // Counted from what is on the page rather than the Markdown, so link
-    // addresses and formatting marks are not counted as words.
-    function readingMinutes(content) {
-        var words = content.textContent.trim().split(/\s+/);
-
-        var count = 0;
-        for (var i = 0; i < words.length; i++) {
-            if (words[i]) count++;
-        }
-
-        var minutes = Math.ceil(count / WORDS_PER_MINUTE);
-        if (minutes < 1) minutes = 1;
-
-        return minutes;
     }
 
     function minutesLabel(minutes) {
