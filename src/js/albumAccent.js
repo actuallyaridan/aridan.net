@@ -37,7 +37,7 @@
     let generation = 0;
     let painted = false;
 
-    window.Lanyard.subscribe((presence) => onTrack(window.Lanyard.appleMusic(presence)));
+    window.Lanyard.subscribe((presence) => onTrack(shownTrack(presence)));
     window.addEventListener("settings:change", onSettingsChange);
     watchTheme();
 
@@ -58,6 +58,18 @@
         }
 
         applyAccent(true);
+    }
+
+    // Whatever cover the music card is showing: the song playing now, or the
+    // last one while nothing is, so the colour stays put when a song stops.
+    function shownTrack(presence) {
+        const playing = window.Lanyard.appleMusic(presence);
+        if (playing) return playing;
+
+        const last = window.Lanyard.lastPlayed(presence);
+        if (last) return last.activity;
+
+        return null;
     }
 
     function onTrack(activity) {
