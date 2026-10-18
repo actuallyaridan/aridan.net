@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#f1f1f1">
 <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
-    <script src="/src/js/settingsModal.js" defer></script>
     <meta name="description" content="Articles about this website, the things I build, and whatever else seems worth writing down.">
     <link rel="canonical" href="https://aridan.net/articles/">
 
@@ -38,10 +37,7 @@
     <script src="/src/js/general.js" defer></script>
     <script src="/src/js/i18n.js" defer></script>
 
-    <script src="/src/js/articleFormat.js" defer></script>
-    <script src="/src/js/articleStore.js" defer></script>
-    <script src="/src/js/previewArticles.js" defer></script>
-    <script src="/src/js/articleAdmin.js" defer></script>
+    <script src="/src/js/articles.js" defer></script>
     <script src="/src/js/lanyardClient.js" defer></script>
     <script src="/src/js/albumAccent.js" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@17.0.3/dist/twemoji.min.js" integrity="sha384-Y5xukbGJwykbHHkTbLJykYLcBPFxrwipTbEh0puxhkz9CZ90raTPGe2Ks4vCxsYU" referrerpolicy="no-referrer"
@@ -66,7 +62,6 @@
             <li><a href="/projects/">Projects</a></li>
             <li><a href="/hobbies/">Hobbies</a></li>
             <li class="active"><a href="/articles/" aria-current="page">Articles</a></li>
-            <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
             <li><a href="/pihole/">Pi-hole</a></li>
             <li><a href="/contact/">Contact</a></li>
         </ul>
@@ -88,7 +83,6 @@
                         <li><a href="/projects/">Projects</a></li>
                         <li><a href="/hobbies/">Hobbies</a></li>
                         <li class="active"><a href="/articles/" aria-current="page">Articles</a></li>
-                        <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                         <li><a href="/pihole/">Pi-hole</a></li>
                         <li><a href="/contact/">Contact</a></li>
                     </ul>
@@ -111,7 +105,7 @@
                 </div>
             </div>
             
-            <!-- Shown by previewArticles.js while the list loads - see
+            <!-- Shown by articles.js while the list loads - see
                  "Placeholders while things load" in styles.css. -->
             <div id="loading" aria-hidden="true">
                 <div class="articleSkeletons skeleton">

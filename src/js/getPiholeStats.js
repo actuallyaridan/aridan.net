@@ -290,26 +290,68 @@ function stopLoading() {
   }
 }
 
-function renderUpdatedLine(data, example) {
-  const updatedEl = document.getElementById("pi-updated");
-  if (!updatedEl) return;
+// What the line under the stats last said, so it can be written again in
+// another language without waiting for the next fetch.
+let updatedState = { kind: "never" };
 
-  if (example) {
-    updatedEl.textContent = "example data (local dev)";
-    return;
+function translate(english, ...args) {
+  if (window.i18n) return window.i18n.t(english, ...args);
+
+  let text = english;
+  for (let i = 0; i < args.length; i++) {
+    text = text.split("{" + i + "}").join(args[i]);
+  }
+  return text;
+}
+
+function updatedWhen() {
+  if (updatedState.kind === "example") {
+    // Only ever seen on my own machine, so it stays in English.
+    return "example data (local dev)";
   }
 
-  if (!data.updated) return;
+  if (updatedState.kind === "never") {
+    return translate("never");
+  }
 
-  const ageMs = Date.now() - data.updated;
+  const ageMs = Date.now() - updatedState.at;
   const mins = Math.max(0, Math.round(ageMs / 60000));
 
   if (mins === 0) {
-    updatedEl.textContent = "just now";
-  } else {
-    updatedEl.textContent = mins + " min ago";
+    return translate("just now");
   }
+
+  return translate("{0} min ago", mins);
 }
+
+function writeUpdatedLine() {
+  const updatedEl = document.getElementById("pi-updated");
+  if (!updatedEl) return;
+
+  const line = translate(
+    "Updated {0} - updates automatically every 15 minutes.",
+    updatedWhen()
+  );
+
+  // A no-break space keeps "15 minutes" from being split across two lines.
+  // Put in here rather than in the string, since i18n.js turns every kind of
+  // space in a key into a plain one.
+  updatedEl.textContent = line.replace("15 ", "15\u00a0");
+}
+
+function renderUpdatedLine(data, example) {
+  if (example) {
+    updatedState = { kind: "example" };
+  } else if (data.updated) {
+    updatedState = { kind: "at", at: data.updated };
+  } else {
+    return;
+  }
+
+  writeUpdatedLine();
+}
+
+if (window.i18n) window.i18n.onChange(writeUpdatedLine);
 
 async function updatePiholeStats() {
   if (PIHOLE_IS_LOCAL) {
@@ -346,10 +388,6 @@ async function updatePiholeStats() {
 const MACKEY_LINE = "But they're all bad, 'mkay.";
 const MACKEY_GIF = "/assets/uploads/images/mkay.gif";
 
-// One play of the clip is 2.07s. Ended a little early so it never shows
-// starting over - see RANDY_SHOWN_MS in settings.js.
-const MACKEY_SHOWN_MS = 1800;
-
 function wireMackey() {
   const number = document.getElementById("pi-blocked");
   if (!number) return;
@@ -358,8 +396,9 @@ function wireMackey() {
   const card = number.closest(".pi-card");
   const bubble = speechBubble(card, { centered: true, gifWidth: 240 });
 
+  // No time limit: it loops for as long as the pointer stays on the card.
   onHover(card, function () {
-    bubble.showGif(MACKEY_GIF, MACKEY_LINE, MACKEY_SHOWN_MS);
+    bubble.showGif(MACKEY_GIF, MACKEY_LINE);
   }, bubble.hide);
 }
 

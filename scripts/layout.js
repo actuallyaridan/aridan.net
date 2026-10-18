@@ -219,7 +219,7 @@ function keepFlagged(lines, flags, partialFile) {
 }
 
 function markCurrent(line, url) {
-  // A link that is commented out, like the Minecraft one, stays as it is.
+  // A link that is commented out stays as it is.
   if (line.trim().startsWith("<!--")) return line;
 
   let marked = line.replace(OWN_LINK, (whole, before, href, after) => {

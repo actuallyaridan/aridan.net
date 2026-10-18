@@ -29,7 +29,7 @@ const SOURCES = [
   "/articles/edit/",
   "/contact/",
   "/experience/",
-  "/minecraft/",
+  "/hobbies/",
   "/pihole/",
   "/privacy/",
   "/projects/",

@@ -26,7 +26,7 @@ function stripQuotes(v) {
     return v;
 }
 
-// Mirrors the top-level key: value handling in src/js/articleFormat.js. Nested
+// Mirrors the top-level key: value handling in src/js/articles.js (ArticleFormat). Nested
 // lists are ignored here because no metadata we emit uses them.
 export function parseFrontmatter(text) {
     const src = String(text == null ? "" : text).replace(/^﻿/, "");

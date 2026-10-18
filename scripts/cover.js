@@ -41,7 +41,7 @@ const LOAD_BUDGET_MS = 5000;
 
 const FRONT_MATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/;
 
-// The same check displayArticle.js makes before using one.
+// The same check articles.js makes before using one.
 const ICON_CLASSES = /^fa-[a-z]+( fa-[a-z0-9-]+)+$/;
 
 const DEFAULT_ICON = "fa-solid fa-newspaper";

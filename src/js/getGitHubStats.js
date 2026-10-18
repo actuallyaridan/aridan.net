@@ -69,7 +69,79 @@ function fillCounts(repos, attribute, field) {
         const total = totalFor(el.getAttribute(attribute), repos, field);
         if (total === null) continue;
 
+        // Kept for the label next to it, which needs the real number - the
+        // one shown is rounded, and only reaches it once it has counted up.
+        el.dataset.count = total;
         showCount(el, total);
+    }
+}
+
+/* ---------- "stars" and "forks", in the page's language ----------
+ * Which word follows a number depends on the number, and not only in
+ * English: Bosnian and Croatian have one form after 2-4 and another after 5
+ * and up. Intl.PluralRules knows which applies, and the dictionaries in
+ * /src/i18n/ have a word for each:
+ *
+ *   "star" / "stars"   one and the rest, in every language
+ *   "stars (2-4)"      the 2-4 form, only where a language has one
+ *
+ * and the same for "fork".
+ */
+const GITHUB_LABELS = {
+    stars: { one: "star", few: "stars (2-4)", other: "stars" },
+    forks: { one: "fork", few: "forks (2-4)", other: "forks" }
+};
+
+function githubWord(english) {
+    if (window.i18n) return window.i18n.t(english);
+    return english;
+}
+
+// The number behind a count as the page shows it: the one saved by
+// fillCounts, or failing that the one written into the page - "371", or
+// "1.6K", which is near enough to 1600 to pick the same word.
+function countOf(el) {
+    if (el.dataset.count) return Number(el.dataset.count);
+
+    const written = el.textContent.trim();
+    if (written.endsWith("K")) {
+        return Math.round(parseFloat(written) * 1000);
+    }
+
+    return Number(written);
+}
+
+function labelFor(kind, n) {
+    const forms = GITHUB_LABELS[kind];
+
+    let lang = "en";
+    if (window.i18n) lang = window.i18n.lang;
+
+    // From 1000 the number is shown as "1.6K" - read as thousands, which
+    // takes the plural whatever the exact number ends in.
+    if (n >= 1000) return githubWord(forms.other);
+
+    const category = new Intl.PluralRules(lang).select(n);
+
+    if (category === "one") return githubWord(forms.one);
+
+    if (category === "few") {
+        const few = githubWord(forms.few);
+
+        // Only some languages have this form; the rest use "other".
+        if (few !== forms.few) return few;
+    }
+
+    return githubWord(forms.other);
+}
+
+function writeGitHubLabels() {
+    for (const label of document.querySelectorAll("[data-github-label]")) {
+        const kind = label.dataset.githubLabel;
+        const count = label.parentElement.querySelector("[data-github-" + kind + "]");
+        if (!count) continue;
+
+        label.textContent = labelFor(kind, countOf(count));
     }
 }
 
@@ -93,6 +165,13 @@ async function updateGitHubStats() {
 
     fillCounts(data.repos, "data-github-stars", "stars");
     fillCounts(data.repos, "data-github-forks", "forks");
+    writeGitHubLabels();
+}
+
+if (window.i18n) {
+    window.i18n.onChange(writeGitHubLabels);
+} else {
+    writeGitHubLabels();
 }
 
 updateGitHubStats();

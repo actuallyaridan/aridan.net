@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#f1f1f1">
 <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
-    <script src="/src/js/settingsModal.js" defer></script>
     <meta name="description" content="That page doesn't exist. Check the address, or head back to the homepage.">
     <link rel="canonical" href="https://aridan.net/404.html">
 
@@ -24,7 +23,7 @@
     <meta name="twitter:site" content="@actuallyaridan">
     <meta name="twitter:creator" content="@actuallyaridan">
     <meta name="author" content="Adnan Bukvic">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <title>404 - aridan.net</title>
@@ -38,8 +37,6 @@
 
     <script src="/src/js/lanyardClient.js" defer></script>
     <script src="/src/js/albumAccent.js" defer></script>
-    <script src="/src/js/profanity.js" defer></script>
-    <script src="/src/js/notFound.js" defer></script>
     <link rel="alternate" type="application/rss+xml" title="aridan.net articles" href="/feed.xml">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/media/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/assets/media/favicons/icon-192.png">
@@ -60,7 +57,6 @@
             <li><a href="/projects/">Projects</a></li>
             <li><a href="/hobbies/">Hobbies</a></li>
             <li><a href="/articles/">Articles</a></li>
-            <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
             <li><a href="/pihole/">Pi-hole</a></li>
             <li><a href="/contact/">Contact</a></li>
         </ul>
@@ -82,7 +78,6 @@
                         <li><a href="/projects/">Projects</a></li>
                         <li><a href="/hobbies/">Hobbies</a></li>
                         <li><a href="/articles/">Articles</a></li>
-                        <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                         <li><a href="/pihole/">Pi-hole</a></li>
                         <li><a href="/contact/">Contact</a></li>
                     </ul>
@@ -102,7 +97,10 @@
                 <div>
                     <h1 class="name">I don’t know about you, but I’m feeling 404</h1>
                     <p class="description titleColor">The page you're looking for doesn't exist. Check the URL and try again. If you used a link to go here, the page it was referring to was probably deleted.</p>
-                    <a href="/" class="button">Go back home</a>
+                    <div class="infoButtons">
+                        <!-- Hovering it gets Cartman - see the end of settings.js. -->
+                        <a href="/" class="button" data-going-home>Go back home</a>
+                    </div>
                 </div>
             </div>
         </main>

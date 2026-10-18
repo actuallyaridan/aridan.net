@@ -708,39 +708,12 @@ function wireSubpages(panel) {
 
     const versionResults = panel.querySelector('.versionCheckResults');
 
-    async function checkVersions() {
+    function checkVersions() {
         if (!versionResults) return;
-
-        try {
-            await loadVersionCheck();
-        } catch (err) {
-            console.error('[versions]', err);
-            return;
-        }
+        if (!window.VersionCheck) return;
 
         window.VersionCheck.run(versionResults);
     }
-}
-
-// Only fetched the first time the button is pressed - see versionCheck.js.
-let versionCheckLoading = null;
-
-function loadVersionCheck() {
-    if (window.VersionCheck) return Promise.resolve();
-    if (versionCheckLoading) return versionCheckLoading;
-
-    versionCheckLoading = new Promise(function (resolve, reject) {
-        const script = document.createElement('script');
-        script.src = '/src/js/versionCheck.js';
-        script.onload = resolve;
-        script.onerror = function () {
-            versionCheckLoading = null;
-            reject(new Error('versionCheck.js failed to load'));
-        };
-        document.head.appendChild(script);
-    });
-
-    return versionCheckLoading;
 }
 
 /* ---------- Speech bubbles ----------
@@ -750,7 +723,6 @@ function loadVersionCheck() {
  *
  * Gives back show(text, ms), showGif(url, line, ms) and hide(). The options:
  *   centered  hang from the middle of the anchor rather than its right
- *   start     hang from its left, wherever the caller lines it up
  *   floating  put the bubble on <body> and line it up under the anchor when
  *             shown, for an anchor inside something that would clip it
  *   box       for a floating one, a function giving the box to line it up
@@ -813,7 +785,6 @@ function speechBubble(anchor, options) {
     const bubble = document.createElement('span');
     bubble.className = 'speechBubble';
     if (opts.centered) bubble.classList.add('centered');
-    if (opts.start) bubble.classList.add('start');
     if (opts.floating) bubble.classList.add('floating');
     bubble.setAttribute('role', 'status');
     bubble.hidden = true;
@@ -959,6 +930,9 @@ function speechBubble(anchor, options) {
 const RANDY_QUOTE = "I'm sorry, I thought this was America!";
 const RANDY_GIF = '/assets/uploads/images/randy.gif';
 
+// The one gif that goes away on its own: the hover ones loop until the
+// pointer leaves, but Randy is set off by a click, with nothing to end him.
+//
 // One play of randy.gif is 4.19s. Taken down a little before that: the clip
 // starts playing as soon as it has loaded, a moment before it is on screen,
 // and a timer is never exactly on time, so ending right at 4.19s showed it
@@ -1035,40 +1009,29 @@ onSettingsPanel(function wireTaylorsVersion() {
     });
 });
 
-/* ---------- Look what you made me do ----------
- * The first switch to the dark theme on a visit gets a line from the
- * reputation era, under the Dark button. Only the first, and only when it's
- * picked by hand - following the system into dark mode isn't anyone's doing.
+/* ---------- Screw you guys ----------
+ * Hovering "Go back home" on the offline and 404 pages gets Cartman doing
+ * just that. Here rather than in a script of the pages' own, since this one
+ * is already saved for offline use - see sw.js, which saves the gif too. The bubble
+ * floats on the page rather than going inside the link, where its text would
+ * become part of the link's name.
  */
-const REPUTATION_LINE = "Look what you made me do";
-const REPUTATION_SHOWN_MS = 2500;
+const SCREW_YOU_GUYS_GIF = '/assets/uploads/images/scewyouguys.gif';
+const SCREW_YOU_GUYS_LINE = "Screw you guys, I'm going home.";
 
-let reputationShown = false;
+function wireScrewYouGuys() {
+    for (const home of document.querySelectorAll('[data-going-home]')) {
+        const bubble = speechBubble(home, { floating: true, gifWidth: 240 });
 
-onSettingsPanel(function wireReputation() {
-    const dark = document.querySelector('.settingsPanel input[name="theme-color"][value="dark"]');
-    if (!dark) return;
-
-    const options = dark.closest('.themeOptions');
-    const darkLabel = options.querySelector('label[for="dark"]');
-
-    const bubble = speechBubble(options, { start: true });
-
-    dark.addEventListener('change', function () {
-        if (!dark.checked) return;
-        if (reputationShown) return;
-        reputationShown = true;
-
-        // Lined up with the Dark button, wherever the buttons wrapped to.
-        bubble.element.style.left = darkLabel.offsetLeft + 'px';
-        bubble.element.style.top = (darkLabel.offsetTop + darkLabel.offsetHeight) + 'px';
-
-        bubble.show(REPUTATION_LINE, REPUTATION_SHOWN_MS);
-    });
-
-    // Switched away again before it's gone, it goes too.
-    for (const radio of options.querySelectorAll('input[name="theme-color"]')) {
-        if (radio === dark) continue;
-        radio.addEventListener('change', bubble.hide);
+        // No time limit: it loops for as long as the pointer stays on it.
+        onHover(home, function () {
+            bubble.showGif(SCREW_YOU_GUYS_GIF, SCREW_YOU_GUYS_LINE);
+        }, bubble.hide);
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireScrewYouGuys);
+} else {
+    wireScrewYouGuys();
+}

@@ -3,7 +3,14 @@
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
   width: 100%;
-  margin: 0.5rem 0 1rem;
+  margin: 0 0 1rem;
+}
+
+/* A little room under a heading. Only there: the first grid has none, and
+   with a top margin of its own it started lower than the first thing on
+   every other page. */
+.section-title + .pi-grid {
+  margin-top: 0.5rem;
 }
 
 .section > div:has(> .pi-grid) {
@@ -13,7 +20,8 @@
 .pi-card {
   background-color: var(--card-background-color);
   border: 1px solid transparent;
-  border-radius: 16px;
+  /* The corners every other card on the site has. */
+  border-radius: 12px;
   padding: 1.25rem 1rem;
   text-align: center;
 }

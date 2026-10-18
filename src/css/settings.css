@@ -455,7 +455,7 @@ html.reduce-transparency .settingsSheetHeader::before {
     margin: 0;
 }
 
-/* The rows versionCheck.js shows while it checks. Each bar is a little
+/* The rows the Component versions page shows while it checks. Each bar is a little
    shorter than the line it stands in for, with the rest as margin, so a row
    is as tall as a real one and nothing jumps when they are swapped.
    --line is Jost's normal line height, which the real rows use. */
@@ -609,16 +609,6 @@ html.reduce-transparency .settingsSheetHeader::before {
     left: calc(50% - 6px);
 }
 
-/* Hangs from the left, under something its caller lines it up with. */
-.speechBubble.start {
-    right: auto;
-}
-
-.speechBubble.start::before {
-    right: auto;
-    left: 18px;
-}
-
 .speechBubble[hidden] {
     display: none;
 }
@@ -658,12 +648,6 @@ html.reduce-transparency .settingsSheetHeader::before {
 
 html.reduce-motion .speechBubble {
     animation: none;
-}
-
-/* An icon an easter egg hangs off - the 404 page's, say. Nothing to show it
-   can be pressed beyond the pointer, so it stays a surprise. */
-.pokeable {
-    cursor: pointer;
 }
 
 /* Tapped three times for "(Taylor's Version)" - see settings.js. Not

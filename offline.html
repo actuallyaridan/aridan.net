@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#f1f1f1">
     <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
-    <script src="/src/js/settingsModal.js" defer></script>
     <meta name="description" content="You're offline.">
     <meta name="robots" content="noindex, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,7 +40,6 @@
             <li><a href="/projects/">Projects</a></li>
             <li><a href="/hobbies/">Hobbies</a></li>
             <li><a href="/articles/">Articles</a></li>
-            <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
             <li><a href="/pihole/">Pi-hole</a></li>
             <li><a href="/contact/">Contact</a></li>
         </ul>
@@ -63,7 +61,6 @@
                         <li><a href="/projects/">Projects</a></li>
                         <li><a href="/hobbies/">Hobbies</a></li>
                         <li><a href="/articles/">Articles</a></li>
-                        <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                         <li><a href="/pihole/">Pi-hole</a></li>
                         <li><a href="/contact/">Contact</a></li>
                     </ul>
@@ -83,8 +80,10 @@
                 <div>
                     <h1 class="name">You're offline</h1>
                     <p class="description titleColor">This page isn't saved on your device and there's no connection to fetch it with. Pages you've already visited still open - try again once you're back online.</p>
-                    <img class="offlineCartman" src="/assets/uploads/images/scewyouguys.gif" width="320" height="240" alt="Cartman: Screw you guys, I'm going home.">
-                    <a href="/" class="button">Go back home</a>
+                    <div class="infoButtons">
+                        <!-- Hovering it gets Cartman - see the end of settings.js. -->
+                        <a href="/" class="button" data-going-home>Go back home</a>
+                    </div>
                 </div>
             </div>
         </main>

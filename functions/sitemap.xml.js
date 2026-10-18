@@ -1,8 +1,7 @@
 import { SITE, articleUrl, escapeXml, loadAllArticles, toDate } from "./_lib/articles.js";
 
 // Pages that are linked from the nav. /articles/new/ and /articles/edit/ are
-// local-only editor screens, and /minecraft/ is deliberately unlisted, so none
-// of them belong here.
+// local-only editor screens, so they don't belong here.
 const PAGES = [
     { path: "/", priority: "1.0", changefreq: "weekly" },
     { path: "/experience/", priority: "0.8", changefreq: "monthly" },

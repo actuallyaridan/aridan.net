@@ -43,13 +43,16 @@
         "main #Remaining",
         "main #Elapsed",
         "main .warn:not(#editorFolderBar) p",
-        "main .articleAdminBar > button.button",
+        // Not Save on the editor pages: articles.js draws it, with how the
+        // save is going in it, and translates it itself.
+        "main .articleAdminBar > button.button:not(#saveArticle)",
         "main .articleAdminBar #deleteArticle",
         "main #editorFolderBar > button.button",
         // The label only - the first child. A field with a hint also has a
         // span.editorInput around its input, which must not be written over.
         "main .editorField > span:first-child",
         "main .editorField .fieldHintText",
+        "main .editorByline .fieldHintText",
         "#settingsLayer h2",
         ".settingsPanel .settingsGroupHeading",
         ".settingsPanel label.theme-label",
@@ -63,6 +66,13 @@
     const ATTR_SELECTORS = [
         ["main .editorField > input[placeholder]", "placeholder"],
         ["main .editorField > textarea[placeholder]", "placeholder"],
+        // The editor's hero and byline - see "The hero" in articles.js.
+        ["main .editorHero textarea[placeholder]", "placeholder"],
+        ["main .editorHero textarea[aria-label]", "aria-label"],
+        ["main .editorHero .iconPickerButton[title]", "title"],
+        ["main .editorHero .iconPickerButton[aria-label]", "aria-label"],
+        ["main .editorByline input[placeholder]", "placeholder"],
+        ["main .editorByline input[aria-label]", "aria-label"],
         ["main .articleAdminBar [title]", "title"],
         ["main .articleAdminBar .articleMenuButton[aria-label]", "aria-label"],
         ["main .readMore a[title]", "title"],

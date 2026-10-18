@@ -14,8 +14,8 @@ Supports multiple languages and follows accessibility guidelines for a more open
 
 ## Scripts
 
-There's no build step, but two scripts in `scripts/` help keep things in
-order. Both are run by hand, and what they write is committed like any other
+There's no build step, but a few scripts in `scripts/` help keep things in
+order. They're all run by hand, and what they write is committed like any other
 change, so the deploy stays exactly as it is.
 
 - `node scripts/layout.js` - the header, menu and footer live in
@@ -28,6 +28,10 @@ change, so the deploy stays exactly as it is.
 - `python3 scripts/placeholders.py` - makes the tiny blurred previews every
   image shows while it loads, and writes them into `src/css/styles.css`.
   Run it after adding or changing an image. Needs Pillow.
+- `node scripts/vendor-prosemirror.js` - downloads ProseMirror, the engine
+  under the article editor, into `src/vendor/prosemirror/`. It's self-hosted
+  because jsDelivr's builds would load several copies of its core, which
+  breaks it. Change a version in the script and run it to update.
 
 ## The fine print
 

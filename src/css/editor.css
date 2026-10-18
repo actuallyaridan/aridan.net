@@ -4,10 +4,11 @@ body.editorPage main.container {
 
 /* ---------- Folder bar ----------
 
-   Which folder the editor saves into, and how the last save went. A glass
-   card like the article cards, with an icon that says the state at a glance.
-   Only an error is red. The state comes from data-state, set in
-   articleEditor.js. */
+   Only there while the folder needs something from you: none chosen yet,
+   one that might be the wrong one, or a browser that can't save. A glass
+   card like the article cards, with an icon that says which. Once a good
+   folder is chosen it moves into the byline (.folderLink) and this goes.
+   The state comes from data-state, set in articles.js. */
 #editorFolderBar {
     display: flex;
     align-items: center;
@@ -24,6 +25,10 @@ body.editorPage main.container {
         border-color .2s ease;
 }
 
+#editorFolderBar[hidden] {
+    display: none;
+}
+
 /* Grey, not the accent - the bar is information, not something to press. */
 #editorFolderIcon {
     flex: 0 0 auto;
@@ -32,23 +37,6 @@ body.editorPage main.container {
     font-size: 1.1em;
     text-align: center;
     color: var(--secondary-title-color);
-}
-
-/* The site's own small loading ring (.lds-ring.smallLoader in lanyard.css),
-   in the icon's place while something is being saved or deleted. Reduce
-   motion swaps it for an hourglass there too. */
-#editorFolderLoader {
-    flex: 0 0 auto;
-    margin: 0;
-    font-size: 1.1em;
-}
-
-#editorFolderBar[data-state="busy"] #editorFolderLoader {
-    display: inline-block;
-}
-
-#editorFolderBar[data-state="busy"] #editorFolderIcon {
-    display: none;
 }
 
 #editorFolderBar p {
@@ -84,14 +72,6 @@ body.editorPage main.container {
     font-size: .9em;
 }
 
-/* Saved: only the check is coloured - the card itself stays as it is, the
-   way the loading ring is the only colour while saving. Always green (the
-   green accent theme's text colour), never the accent: with the red accent
-   a red check would read as a failure. */
-#editorFolderBar[data-state="ok"] #editorFolderIcon {
-    color: light-dark(#23692f, #37a349);
-}
-
 /* Possibly the wrong folder: only the icon says so, in the orange of the
    "idle" status - a heads-up, not an error. Darker on the light theme so it
    still reads against the glass. */
@@ -99,58 +79,10 @@ body.editorPage main.container {
     color: light-dark(#b45f06, #f2841d);
 }
 
-/* Something went wrong: .destructive's red. */
-#editorFolderBar[data-state="error"] {
-    background-color: rgba(249, 76, 87, 0.12);
-    border-color: rgba(249, 76, 87, 0.35);
-}
-
-#editorFolderBar[data-state="error"] #editorFolderIcon {
-    color: light-dark(#c30712, #f95964);
-}
-
 @media (forced-colors: active) {
     #editorFolderBar {
         border: 1px solid CanvasText;
     }
-}
-
-/* Loading: until articleEditor.js has looked up the folder saved last time,
-   bars stand in for the icon, the text and the button, each the size of
-   what it replaces so the bar is its full height from the start. */
-#editorFolderBar .skeletonBar {
-    display: none;
-    flex: 0 0 auto;
-}
-
-#editorFolderBar[data-state="loading"] .skeletonBar {
-    display: block;
-}
-
-#editorFolderBar[data-state="loading"] #editorFolderIcon,
-#editorFolderBar[data-state="loading"] p,
-#editorFolderBar[data-state="loading"] .button {
-    display: none;
-}
-
-#editorFolderBar .folderSkeletonIcon {
-    width: 1.25em;
-    height: 1.25em;
-    border-radius: 50%;
-}
-
-#editorFolderBar .folderSkeletonText {
-    flex: 1 1 auto;
-    max-width: 55%;
-    height: 13px;
-    margin-right: auto;
-}
-
-/* As tall as the button, and as wide as "Select folder". */
-#editorFolderBar .folderSkeletonButton {
-    width: 107px;
-    height: 34px;
-    border-radius: 999px;
 }
 
 .section.editorForm,
@@ -235,37 +167,416 @@ body.editorPage main.container {
 
 .editorField textarea { resize: vertical; }
 
-/* The form's shape on the Edit page, in the box articleEditor.js shows
-   while the article loads: a label and a field-sized bar for each field.
-   lanyard.css centres whatever is in #loading, so it is stretched back. */
-#loading>.editorSkeleton {
-    align-items: stretch;
+/* ---------- The hero ----------
+   The article's own hero, written in place: the title and summary are
+   textareas wearing the heading's and description's looks (see .name and
+   .description in styles.css), so the top of the page reads the way it
+   will on the article page. The glass behind them is what says they can
+   be written in, and a hover adds the edge the site's other fields get.
+   articles.js sizes them to their text. */
+.editorHeading {
+    width: 100%;
+    margin: 10px 0;
+    font-size: 1em;
 }
 
-.editorSkeletonField {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.editorSkeleton .skeletonLabel {
-    width: 80px;
-    height: 15px;
-    margin: 4px 0;
-}
-
-.editorSkeleton .skeletonInput {
-    height: 45px;
+.heroTitle,
+.heroSummary {
+    display: block;
+    width: 100%;
+    padding: 4px 10px;
+    border: 1px solid transparent;
     border-radius: 12px;
+    background-color: var(--liquid-glass-button-background);
+    font: inherit;
+    text-align: center;
+    resize: none;
+    overflow: hidden;
+    transition: background-color .2s ease, border-color .2s ease;
 }
 
-.editorSkeleton .skeletonInput.summary {
-    height: 91px;
+.heroTitle {
+    font-size: 2em;
+    font-weight: 550;
+    line-height: 1.25;
+    color: var(--title-color);
 }
 
-.editorSkeleton .skeletonInput.body {
-    /* The body textarea's 18 rows. */
-    height: 436px;
+/* The description's place in the hero: the same gap above the buttons. */
+.heroSummary {
+    margin-bottom: var(--hero-gap, 32px);
+    line-height: 1.5;
+    color: var(--title-color);
+}
+
+.heroTitle:hover,
+.heroSummary:hover {
+    border-color: rgba(127, 127, 127, 0.3);
+}
+
+.heroTitle:focus,
+.heroSummary:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    background-color: var(--liquid-glass-button-background);
+    border-color: var(--liquid-glass-button-border);
+}
+
+.heroTitle::placeholder,
+.heroSummary::placeholder {
+    color: var(--secondary-title-color);
+    opacity: .45;
+}
+
+/* While an article loads on the Edit page, bars stand in for the title and
+   summary - the article page's, sized the same - and the byline waits. */
+.heroTitleSkeleton,
+.heroSummarySkeleton {
+    display: none;
+}
+
+.editorHero[data-loading] .heroTitle,
+.editorHero[data-loading] .heroSummary {
+    display: none;
+}
+
+.editorHero[data-loading] .heroTitleSkeleton {
+    display: block;
+    width: 70%;
+    height: 2em;
+    margin: 14px auto;
+    border-radius: 10px;
+}
+
+.editorHero[data-loading] .heroSummarySkeleton {
+    display: block;
+    width: 55%;
+    height: 1em;
+    margin: 0 auto var(--hero-gap, 32px);
+    border-radius: 6px;
+}
+
+.editorHero[data-loading] ~ .editorByline {
+    visibility: hidden;
+}
+
+/* ---------- The icon, and picking another ---------- */
+.editorHero .icon {
+    position: relative;
+}
+
+.iconPickerButton {
+    position: relative;
+    display: block;
+    width: 128px;
+    height: 128px;
+    padding: 0;
+    border: 0;
+    border-radius: 25%;
+    background: none;
+    cursor: pointer;
+}
+
+.iconPickerButton > .icon-background {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 128px;
+    margin: 0;
+    transition: background-color .2s ease;
+}
+
+.iconPickerButton:hover > .icon-background {
+    background-color: rgba(127, 127, 127, 0.22);
+}
+
+.iconPickerButton:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 4px;
+}
+
+/* A small pen in the corner, so the icon reads as something to press. */
+.iconPickerBadge {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--liquid-glass-button-border);
+    background-color: var(--header-background-color);
+    -webkit-backdrop-filter: blur(var(--blur-regular));
+    backdrop-filter: blur(var(--blur-regular));
+    color: var(--header-text-color);
+    font-size: 13px;
+}
+
+.iconPickerBadge > i {
+    width: auto;
+    margin: 0;
+}
+
+/* The "more" menu's glass, holding a grid of icons. */
+.iconPicker {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    translate: -50% 0;
+    z-index: 10;
+    width: 268px;
+    padding: 10px;
+    border-radius: 18px;
+    background-color: var(--header-background-color);
+    border: 1px solid var(--liquid-glass-button-border);
+    -webkit-backdrop-filter: blur(var(--blur-regular));
+    backdrop-filter: blur(var(--blur-regular));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 8px 24px rgba(0, 0, 0, 0.18);
+    animation: articleMenuIn .15s ease;
+}
+
+.iconPicker[hidden] {
+    display: none;
+}
+
+html.reduce-motion .iconPicker {
+    animation: none;
+}
+
+html.reduce-transparency .iconPicker {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--card-background-color);
+}
+
+.iconPickerGrid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+}
+
+.iconChoice {
+    display: grid;
+    place-items: center;
+    height: 44px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: none;
+    color: var(--paragraph-color);
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease;
+}
+
+.iconChoice > i {
+    width: auto;
+    margin: 0;
+}
+
+/* Background only - see the site's buttons. */
+.iconChoice:hover {
+    background-color: rgba(127, 127, 127, 0.18);
+}
+
+.iconChoice[aria-pressed="true"] {
+    color: var(--accent-text);
+    background-color: rgba(127, 127, 127, 0.14);
+    border-color: rgba(127, 127, 127, 0.2);
+}
+
+.iconOther {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--liquid-glass-button-border);
+    border-radius: 999px;
+    background: none;
+    color: var(--paragraph-color);
+    font: inherit;
+    font-size: .9em;
+    cursor: pointer;
+    transition: background-color .2s ease;
+}
+
+.iconOther:hover {
+    background-color: rgba(127, 127, 127, 0.18);
+}
+
+.iconChoice:focus-visible,
+.iconOther:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 1px;
+}
+
+/* ---------- The byline ----------
+   The article page's, with the file name as the one field in it: as wide
+   as the name, with ".md" right after it and the hint beside that. */
+.editorByline {
+    margin-bottom: 18px;
+}
+
+.editorByline .editorInput {
+    display: inline-flex;
+    align-items: center;
+}
+
+.editorByline input {
+    padding: 1px 4px;
+    border: 0;
+    border-bottom: 1px dashed var(--liquid-glass-button-border);
+    border-radius: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+}
+
+.editorByline input:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* An existing article's file name can't change, so it's plain text. */
+.editorByline input:read-only {
+    border-bottom-color: transparent;
+    padding: 0;
+}
+
+.slugExtension {
+    opacity: .7;
+}
+
+/* The folder the article is saved into, in front of its file name, as
+   "articles/pihole.md". Pressing it picks another. A dashed line, like the
+   file name's, says it can be pressed; the hover tint is the toolbar's. */
+.folderLink {
+    /* None on the right, where the file name carries straight on. */
+    padding: 1px 0 1px 3px;
+    border: 0;
+    border-bottom: 1px dashed var(--liquid-glass-button-border);
+    border-radius: 4px 4px 0 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color .2s ease;
+}
+
+.folderLink[hidden] {
+    display: none;
+}
+
+/* One path, "articles/pihole.md": no byline gap between the folder and the
+   name, only after the file icon. */
+.editorByline .editorSlug {
+    gap: 0;
+}
+
+.editorByline .editorSlug > i {
+    margin-right: 6px;
+}
+
+.folderLink:hover {
+    background-color: rgba(127, 127, 127, 0.18);
+}
+
+.folderLink:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* ---------- Saving, and what it says ----------
+   The Save button carries how a save is going (data-state, set in
+   articles.js), and the note under the buttons anything longer. */
+
+/* Busy while saving, but it's the one thing to look at, so it doesn't fade
+   like the other buttons do while they wait. */
+#saveArticle[data-state="busy"]:disabled,
+#saveArticle[data-state="ok"]:disabled {
+    opacity: 1;
+    filter: none;
+    cursor: progress;
+}
+
+/* The site's small loading ring (.lds-ring.smallLoader in lanyard.css) in
+   the floppy's place, in the button's white. */
+#saveArticle .lds-ring.smallLoader,
+.editorStatus .lds-ring.smallLoader {
+    display: inline-block;
+    flex: none;
+    margin-right: 10px;
+}
+
+#saveArticle .lds-ring.smallLoader div {
+    border-top-color: currentColor;
+}
+
+/* Failed: .destructive's red, in place of the accent. */
+.style-liquid-glass #saveArticle[data-state="error"] {
+    background: light-dark(#c30712, #d83a45);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.style-liquid-glass #saveArticle[data-state="error"]:hover:where(:not(:disabled)) {
+    background: light-dark(#a8060f, #c4313b);
+}
+
+.editorStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    margin: 14px 0 0;
+    padding: 8px 14px;
+    border: 1px solid var(--liquid-glass-button-border);
+    border-radius: 12px;
+    background-color: var(--liquid-glass-button-background);
+    color: var(--paragraph-color);
+    font-size: .9em;
+    text-align: left;
+}
+
+.editorStatus[hidden] {
+    display: none;
+}
+
+.editorStatus > i {
+    flex: none;
+    width: auto;
+    margin: 0;
+}
+
+.editorStatus .lds-ring.smallLoader {
+    margin-right: 0;
+}
+
+/* Done: only the check is coloured, and always green, never the accent -
+   with the red accent a red check would read as a failure. */
+.editorStatus[data-kind="ok"] > i {
+    color: light-dark(#23692f, #37a349);
+}
+
+.editorStatus[data-kind="error"] {
+    background-color: rgba(249, 76, 87, 0.12);
+    border-color: rgba(249, 76, 87, 0.35);
+}
+
+.editorStatus[data-kind="error"] > i {
+    color: light-dark(#c30712, #f95964);
+}
+
+.editorByline .fieldHint {
+    position: relative;
+    top: auto;
+    right: auto;
+    translate: none;
+    width: 22px;
+    height: 22px;
+    margin-left: 2px;
 }
 
 /* ---------- Field hints ----------
@@ -354,11 +665,288 @@ html.reduce-transparency .fieldHintText {
     backdrop-filter: none;
 }
 
-.editorBody {
+/* .editorField textarea, so it outranks the fields' font: inherit - it's
+   the Markdown view, and Markdown lines up better in a monospace font. */
+.editorField textarea.editorBody {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: .95em;
     line-height: 1.55;
     min-height: 320px;
+}
+
+/* ---------- The body editor ----------
+   One pane, written in looking the way the article will: it carries the
+   article page's .article-content class, so its headings, lists, quotes and
+   code take exactly those styles. What's here is only what an editor needs
+   on top - the box it sits in, the toolbar, and the few rules ProseMirror
+   itself depends on. See "The body" in articles.js. */
+
+.editorBodyField textarea[hidden],
+.editorRich[hidden] {
+    display: none;
+}
+
+/* The same glass the title and summary sit on, so it's clear the body can
+   be written in wherever you've scrolled to, with the edge the other
+   fields get on hover. As wide as the toolbar, folder bar and title above
+   it, so all their edges line up. The toolbar shows it's being edited - see
+   .editorBodyField:focus-within below. The min-height is room to click
+   into while it's still short. */
+.editorRich {
+    position: relative;
+    min-height: 320px;
+    padding: 9px 13px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background-color: var(--liquid-glass-button-background);
+    color: var(--paragraph-color);
+    text-align: left;
+    cursor: text;
+    transition: border-color .2s ease;
+}
+
+.editorRich:hover {
+    border-color: rgba(127, 127, 127, 0.3);
+}
+
+.editorRich:focus {
+    outline: none;
+}
+
+/* Room between the toolbar and the first line, the same as the byline
+   leaves above the article page's first heading. */
+.editorBodyField {
+    gap: 18px;
+}
+
+/* While you're writing, the toolbar takes the accent ring the fields had,
+   since the text itself has no edge to put it on. */
+.editorToolbar {
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.editorBodyField:focus-within .editorToolbar {
+    border-color: var(--accent-color);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 0 1px var(--accent-color),
+        0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* The Markdown view, the same way: on the same glass, lined up the same,
+   in a monospace font and growing with what's in it (articles.js sizes
+   it) rather than scrolling inside a box. The selector outweighs the glass
+   fields' own. Only with the editor running: without it the textarea is
+   all there is, and keeps its usual field look. */
+.style-liquid-glass .editorBodyField.isRich textarea.editorBody.button {
+    width: 100%;
+    min-height: 320px;
+    padding: 9px 13px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background-color: var(--liquid-glass-button-background);
+    transition: border-color .2s ease;
+    box-shadow: none;
+    resize: none;
+    overflow: hidden;
+    color: var(--paragraph-color);
+}
+
+.style-liquid-glass .editorBodyField.isRich textarea.editorBody.button:hover {
+    background-color: var(--liquid-glass-button-background);
+    border-color: rgba(127, 127, 127, 0.3);
+}
+
+.style-liquid-glass .editorBodyField.isRich textarea.editorBody.button:focus {
+    outline: none;
+}
+
+/* The article page's first heading has the byline above it to keep it off
+   the top; here it would sit right against the box's edge. */
+.editorRich > :first-child {
+    margin-top: 0;
+}
+
+.editorRich > :last-child {
+    margin-bottom: 0;
+}
+
+/* What ProseMirror needs from any page it runs on - from its own
+   prosemirror.css. Without pre-wrap, spaces typed in a row would collapse
+   as they're typed. */
+.editorRich {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0;
+}
+
+.editorRich pre {
+    white-space: pre-wrap;
+}
+
+.editorRich li {
+    position: relative;
+}
+
+.ProseMirror-hideselection *::selection {
+    background: transparent;
+}
+
+.ProseMirror-hideselection {
+    caret-color: transparent;
+}
+
+.ProseMirror-selectednode {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* An empty body says what to do, the way an empty textarea would. */
+.editorRich[data-empty="true"]::before {
+    content: attr(data-placeholder);
+    position: absolute;
+    left: 13px;
+    right: 13px;
+    top: 9px;
+    color: var(--secondary-title-color);
+    opacity: .55;
+    pointer-events: none;
+}
+
+/* A code block's language, small in its corner - set by typing ```js, or
+   asked for when the toolbar makes one. */
+.editorRich pre[data-language] {
+    position: relative;
+}
+
+.editorRich pre[data-language]::after {
+    content: attr(data-language);
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    font-size: .75em;
+    color: var(--secondary-title-color);
+    opacity: .7;
+    pointer-events: none;
+}
+
+/* A divider (typed as ---) is a whole node: clicking it selects it, so it
+   gets room to be clicked on, and shows when it is selected. */
+.editorRich hr {
+    width: 100%;
+    padding: 4px 0;
+    background-clip: content-box;
+}
+
+/* ---------- The toolbar ----------
+   The header's glass, made into a bar that stays under the header while a
+   long article scrolls past. --editorToolbarTop is the header's height,
+   which articles.js measures. */
+.editorToolbar {
+    position: sticky;
+    top: var(--editorToolbarTop, 80px);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 42px;
+    background-color: var(--header-background-color);
+    -webkit-backdrop-filter: blur(var(--blur-regular));
+    backdrop-filter: blur(var(--blur-regular));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.editorToolbar::-webkit-scrollbar {
+    display: none;
+}
+
+html.reduce-transparency .editorToolbar {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--card-background-color);
+}
+
+.editorTool {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: none;
+    color: var(--header-text-color);
+    font: inherit;
+    font-weight: 550;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color .2s ease, border-color .2s ease, opacity .12s ease;
+}
+
+.editorTool > i {
+    margin: 0;
+}
+
+/* Background only - see the site's buttons. */
+.editorTool:hover:where(:not(:disabled)) {
+    background-color: rgba(127, 127, 127, 0.18);
+}
+
+.editorTool:active:where(:not(:disabled)) {
+    opacity: .55;
+}
+
+/* On for what's at the cursor - bold text, a heading - in the accent, the
+   way the current page's link is in the header. */
+.editorTool[aria-pressed="true"] {
+    color: var(--accent-text);
+    background-color: rgba(127, 127, 127, 0.14);
+    border-color: rgba(127, 127, 127, 0.2);
+}
+
+.editorTool:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+.editorTool:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 1px;
+}
+
+.editorToolbarSeparator {
+    flex: none;
+    width: 1px;
+    height: 20px;
+    margin: 0 4px;
+    background-color: var(--liquid-glass-button-border);
+}
+
+/* Pushes the Markdown switch to the far end. */
+.editorToolbarSpacer {
+    flex: 1;
+    min-width: 6px;
+}
+
+/* On a phone the tools don't fit in one row, and a row you have to swipe
+   along hides half of them - so it wraps into two, as a rounded box rather
+   than a pill. */
+@media (max-width: 560px) {
+    .editorToolbar {
+        flex-wrap: wrap;
+        row-gap: 2px;
+        overflow-x: visible;
+        border-radius: 22px;
+    }
 }
 
 .articleAdminNotice { min-height: 1.4em; margin: 0; }
@@ -522,7 +1110,7 @@ html.reduce-transparency .articleMenuList {
 }
 
 /* Cartman, in place of the folder bar and the form on the live site - see
-   respectMyAuthority() in articleEditor.js. */
+   respectMyAuthority() in articles.js. */
 .authoritah {
     display: block;
     width: 320px;

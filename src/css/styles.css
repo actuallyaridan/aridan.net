@@ -791,6 +791,12 @@ div.section>div {
     flex: 1;
 }
 
+/* The same room above the footer on every page, whatever the page ends on -
+   the privacy page's article and the settings panel aren't .sections. */
+main.container>:last-child {
+    margin-bottom: 18px;
+}
+
 /* The header's navigator, as a standalone control: the project filter and
    the lyrics overlay's style switcher. Built exactly like the header so it
    looks and behaves the same, in both styles:
@@ -1732,7 +1738,8 @@ html.reduce-motion .emailDialog[open] {
 
    One card per article: the title, the preview and the date. Built like the
    Apple Music card on the home page - the same glass, border and corners, and
-   no shadow - and spaced like the Pi-hole page's stat cards. The whole card is the link - see
+   no shadow - and spaced like the Pi-hole page's stat cards, as wide as
+   every other page's sections. The whole card is the link - see
    .articleLink below - and it answers hover and press the way a .button
    does, since that is what it is.
 
@@ -1744,7 +1751,7 @@ html.reduce-motion .emailDialog[open] {
     grid-template-columns: 1fr auto;
     align-items: center;
     gap: 18px;
-    margin: 16px 12px 0;
+    margin: 16px 0 0;
     padding: 16px 18px;
     text-align: left;
     border-radius: 12px;
@@ -1961,16 +1968,10 @@ html.reduce-motion .articlePreview:active {
 }
 
 /* Under an article: the newer and older ones, as article list cards (see
-   renderPager in displayArticle.js). Room enough above that they read as
+   renderPager in articles.js). Room enough above that they read as
    "what next" rather than the article's last paragraph. */
 .articlePager {
     margin-top: 36px;
-}
-
-/* Flush with the article's text, rather than inset the way the list's are. */
-.articlePager>.section.articlePreview {
-    margin-left: 0;
-    margin-right: 0;
 }
 
 .article-content img {
@@ -2637,7 +2638,7 @@ html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::after {
 }
 
 /* The article list's: three cards shaped like the real ones (see
-   .section.articlePreview), in the box previewArticles.js shows while the
+   .section.articlePreview), in the box articles.js shows while the
    list loads and hides once it is in. */
 /* #loading also holds the music card's spinner on pages with lanyard.css,
    whose rule for it centres everything - these are laid out like the text
@@ -2651,7 +2652,7 @@ html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::after {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin: 16px 12px 0;
+    margin: 16px 0 0;
     padding: 18px;
     border-radius: 12px;
     background-color: var(--card-background-color);
@@ -2682,7 +2683,7 @@ html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::after {
     margin-top: 4px;
 }
 
-/* An article's title and preview, empty until it loads (displayArticle.js
+/* An article's title and preview, empty until it loads (articles.js
    fills them in, and adds .isLoaded): bars in their place, as tall as the
    lines they stand in for, so the heading is its full height from the start
    and nothing under it moves down when the words arrive. The preview is
@@ -2866,13 +2867,3 @@ img[src="https://raw.githubusercontent.com/dimdenGD/OldTwitter/refs/heads/master
     background-image: url(data:image/webp;base64,UklGRkwBAABXRUJQVlA4WAoAAAAQAAAAFwAAFwAAQUxQSEoAAAABcGPbttIMAGds7jBI9x5i0/Ckf1LyypQRMQG6V9+JD9K9cpRwRxbEzemIRam9s/AHpBj/TiD2kPrOJENDcSMJvEZ2uf6O/ZZEB1ZQOCDcAAAA0AUAnQEqGAAYAD7dYqZOqKWjIigNURAbiWwAnTKEcCaAAaouyEy13rJr9Oim+9qgXAVxD+IB8AD5YeFMWEJZF97BnBl/Eju9iLzr7/LOmEaob0X562uvvgj6JRIfzcRUQzX0cS5TLIUJXVHyxrlJRu3djWTG/o5UUBn82CUvAPRRS17O17a6Et+yIWmOGuXCI1C98iNuBPR7U0eydN7xnlvmV8JWhDLQpH4sed+TftNM++7G9kH4rAEEEJK2kqTfgHd+Dh9q799BicudhKkHwBZ5a5lOgvgspYAAAA==);
 }
 /* /generated:placeholders */
-
-/* Cartman on the offline page, between the text and the button home. */
-.offlineCartman {
-    display: block;
-    width: 240px;
-    max-width: 100%;
-    height: auto;
-    margin: 0 auto 32px;
-    border-radius: 16px;
-}

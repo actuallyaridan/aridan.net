@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#f1f1f1">
 <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
-    <script src="/src/js/settingsModal.js" defer></script>
     <meta name="description"
         content="aridan.net">
     <meta name="author" content="Adnan Bukvic">
@@ -27,10 +26,7 @@
     <script src="/src/js/lanyardClient.js" defer></script>
     <script src="/src/js/albumAccent.js" defer></script>
 
-    <script src="/src/js/articleFormat.js" defer></script>
-    <script src="/src/js/articleStore.js" defer></script>
-    <script src="/src/js/articleMenu.js" defer></script>
-    <script src="/src/js/articleEditor.js" defer></script>
+    <script src="/src/js/articles.js" defer></script>
     <script defer="" src="https://cdn.jsdelivr.net/npm/@twemoji/api@17.0.3/dist/twemoji.min.js" integrity="sha384-Y5xukbGJwykbHHkTbLJykYLcBPFxrwipTbEh0puxhkz9CZ90raTPGe2Ks4vCxsYU" referrerpolicy="no-referrer"
         crossorigin="anonymous"></script>
     <link rel="alternate" type="application/rss+xml" title="aridan.net articles" href="/feed.xml">
@@ -53,7 +49,6 @@
             <li><a href="/projects/">Projects</a></li>
             <li><a href="/hobbies/">Hobbies</a></li>
             <li class="active"><a href="/articles/" aria-current="page">Articles</a></li>
-            <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
             <li><a href="/pihole/">Pi-hole</a></li>
             <li><a href="/contact/">Contact</a></li>
         </ul>
@@ -75,7 +70,6 @@
                         <li><a href="/projects/">Projects</a></li>
                         <li><a href="/hobbies/">Hobbies</a></li>
                         <li class="active"><a href="/articles/" aria-current="page">Articles</a></li>
-                        <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                         <li><a href="/pihole/">Pi-hole</a></li>
                         <li><a href="/contact/">Contact</a></li>
                     </ul>
@@ -90,11 +84,28 @@
         </header>
         <!-- /shared:header -->
         <main class="container" id="mainContent" tabindex="-1">
-            <div class="info">
-                <p class="icon"><i class="fa-solid fa-pen-nib icon-background" aria-hidden="true"></i></p>
+            <!-- The article's own hero, the way the article page shows it -
+                 its icon, title and summary - written in place. See "The
+                 hero" in articles.js. -->
+            <div class="info editorHero" data-loading>
+                <p class="icon">
+                    <button type="button" class="iconPickerButton" id="articleIconButton"
+                        title="Change the icon" aria-label="Change the icon" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa-solid fa-newspaper icon-background" id="articleIcon" aria-hidden="true"></i>
+                        <span class="iconPickerBadge" aria-hidden="true"><i class="fa-solid fa-pen"></i></span>
+                    </button>
+                </p>
                 <div>
-                    <h1 class="name">Edit article</h1>
-                    <p class="description titleColor">Edit an existing article and save it back to <code>assets/content/articles/</code>. </p>
+                    <h1 class="editorHeading">
+                        <textarea id="fieldTitle" class="heroTitle" rows="1" aria-label="Title"
+                            placeholder="Just a title, nothing fancy" required></textarea>
+                    </h1>
+                    <textarea id="fieldPreview" class="heroSummary" rows="1" aria-label="Summary"
+                        placeholder="A short description of the article for the listing page."></textarea>
+                    <!-- Stand-ins for the title and summary while the article
+                         loads, like the article page's. -->
+                    <span class="skeletonBar heroTitleSkeleton" aria-hidden="true"></span>
+                    <span class="skeletonBar heroSummarySkeleton" aria-hidden="true"></span>
                     <div class="articleAdminBar">
                         <a href="/articles/" class="button backButton" title="Back to Articles" aria-label="Back to Articles"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></a>
                         <button type="submit" form="editorForm" class="button primary" id="saveArticle"
@@ -104,7 +115,7 @@
                         <button type="button" class="button" id="downloadArticle">
                             <i class="fa-solid fa-download" aria-hidden="true"></i>Download
                         </button>
-                        <!-- Delete is kept behind the "more" menu - see articleMenu.js. -->
+                        <!-- Delete is kept behind the "more" menu - see articles.js. -->
                         <span class="articleMenu">
                             <button type="button" class="button articleMenuButton" title="More options"
                                 aria-label="More options" aria-haspopup="menu" aria-expanded="false">
@@ -117,79 +128,77 @@
                             </div>
                         </span>
                     </div>
+                    <!-- What saving, downloading or deleting has to say beyond
+                         what the Save button shows - see "Saving, and what it
+                         says" in articles.js. -->
+                    <p class="editorStatus" id="editorStatus" role="status" aria-live="polite" hidden>
+                        <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i><span></span>
+                    </p>
                 </div>
 
-                <!-- Starts as "loading", with bars in place of the icon, the text
-                     and the button until articleEditor.js knows which folder was
-                     saved last - see "Placeholders while things load" in
-                     styles.css. -->
-                <span id="editorFolderBar" class="skeleton" data-state="loading">
-                    <i class="fa-solid fa-folder" id="editorFolderIcon" aria-hidden="true"></i>
-                    <div class="lds-ring smallLoader" id="editorFolderLoader" aria-hidden="true"><div></div><div></div><div></div><div></div></div>
-                    <span class="skeletonBar folderSkeletonIcon" aria-hidden="true"></span>
+                <!-- Only shown while the folder needs something from you - none
+                     chosen yet, or one that might be the wrong one. Once
+                     there's a good one it moves into the byline. Hidden until
+                     articles.js has looked up the folder saved last time. -->
+                <span id="editorFolderBar" data-state="loading" hidden>
+                    <i class="fa-solid fa-circle-exclamation" id="editorFolderIcon" aria-hidden="true"></i>
                     <p role="status" aria-live="polite"><span id="editorFolderState">No folder selected yet.</span></p>
-                    <span class="skeletonBar folderSkeletonText" aria-hidden="true"></span>
                     <button type="button" class="button" id="editorPickFolder"
                         title="Pick assets/content/articles/">Select folder</button>
-                    <span class="skeletonBar folderSkeletonButton" aria-hidden="true"></span>
                 </span>
             </div>
+
+            <!-- The article page's byline, kept up to date while writing. The
+                 file name is the one part that's a field: on a new article it
+                 follows the title until it's changed by hand. In front of it,
+                 the folder it's saved into. -->
+            <ul class="articleMeta articleByline editorByline" id="editorByline">
+                <li><i class="fa-regular fa-calendar" aria-hidden="true"></i><time id="editorDate"></time></li>
+                <li><i class="fa-regular fa-clock" aria-hidden="true"></i><span id="editorReadingTime"></span></li>
+                <li class="editorSlug">
+                    <i class="fa-regular fa-file" aria-hidden="true"></i>
+                    <!-- The folder it's saved into, once there is one - the
+                         full folder bar above only shows until then. -->
+                    <button type="button" class="folderLink" id="editorFolderLink" hidden></button>
+                    <span class="editorInput">
+                        <input type="text" id="fieldSlug" placeholder="the-identifier-for-this-article"
+                            aria-label="File name" aria-describedby="slugHint" spellcheck="false" required>
+                        <span class="slugExtension" aria-hidden="true">.md</span>
+                        <span class="fieldHint" tabindex="0">
+                            <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                            <span class="fieldHintText" id="slugHint" role="tooltip">Becomes <code>&lt;name&gt;.md</code> and the article's web address.</span>
+                        </span>
+                    </span>
+                </li>
+            </ul>
             
 
             <div class="editorLayout hide">
                 <form class="section editorForm" id="editorForm" autocomplete="off" novalidate>
-                    <label class="editorField">
-                        <span>Title</span>
-                        <input type="text" id="fieldTitle" class="button" placeholder="Just a title, nothing fancy" required>
-                    </label>
-
-                    <label class="editorField">
-                        <span>File name</span>
-                        <span class="editorInput">
-                            <input type="text" id="fieldSlug" class="button" placeholder="the-identifier-for-this-article"
-                                aria-describedby="slugHint" required>
-                            <span class="fieldHint" tabindex="0">
-                                <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-                                <span class="fieldHintText" id="slugHint" role="tooltip">Becomes <code>&lt;name&gt;.md</code> and the article's web address.</span>
-                            </span>
-                        </span>
-                    </label>
-
-
-                    <label class="editorField">
-                        <span>Summary</span>
-                        <textarea id="fieldPreview" class="button" rows="3"
-                            placeholder="A short description of the article for the listing page."></textarea>
-                    </label>
-
-                    <label class="editorField">
-                        <span>Body</span>
-                        <textarea id="fieldBody" class="button editorBody" rows="18"
+                    <!-- A div, not a label: articles.js puts the formatting toolbar
+                         and the editor in here, and the textarea becomes the
+                         "Markdown" view - or stays as it is, if the editor
+                         can't load. -->
+                    <div class="editorField editorBodyField">
+                        <span id="fieldBodyLabel" class="visuallyHidden">Body</span>
+                        <textarea id="fieldBody" class="button editorBody" rows="18" aria-labelledby="fieldBodyLabel"
                             placeholder="## A heading&#10;&#10;Write your article in Markdown."></textarea>
-                    </label>
+                    </div>
                 </form>
 
             </div>
-            <!-- The form's shape, shown until the article has loaded - see
-                 "Placeholders while things load" in styles.css. -->
+            <!-- The article page's own body placeholder, shown until the
+                 article has loaded - see "Placeholders while things load" in
+                 styles.css. -->
             <div id="loading" aria-hidden="true" style="display: block;">
-                <div class="section editorForm editorSkeleton skeleton">
-                    <div class="editorSkeletonField">
-                        <span class="skeletonBar skeletonLabel"></span>
-                        <span class="skeletonBar skeletonInput"></span>
-                    </div>
-                    <div class="editorSkeletonField">
-                        <span class="skeletonBar skeletonLabel"></span>
-                        <span class="skeletonBar skeletonInput"></span>
-                    </div>
-                    <div class="editorSkeletonField">
-                        <span class="skeletonBar skeletonLabel"></span>
-                        <span class="skeletonBar skeletonInput summary"></span>
-                    </div>
-                    <div class="editorSkeletonField">
-                        <span class="skeletonBar skeletonLabel"></span>
-                        <span class="skeletonBar skeletonInput body"></span>
-                    </div>
+                <div class="articleBodySkeleton skeleton">
+                    <span class="skeletonBar skeletonHeading"></span>
+                    <span class="skeletonBar skeletonLine"></span>
+                    <span class="skeletonBar skeletonLine"></span>
+                    <span class="skeletonBar skeletonLine short"></span>
+                    <span class="skeletonBar skeletonLine"></span>
+                    <span class="skeletonBar skeletonLine"></span>
+                    <span class="skeletonBar skeletonLine short"></span>
                 </div>
             </div>
         </main>

@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#f1f1f1">
     <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
-    <script src="/src/js/settingsModal.js" defer></script>
     <meta name="description" content="How aridan.net handles personal data: no cookies or tracking, and which third-party services the site loads content from.">
     <link rel="canonical" href="https://aridan.net/privacy/">
 
@@ -36,8 +35,7 @@
     <link rel="stylesheet" href="/src/css/lanyard.css">
     <script src="/src/js/general.js" defer></script>
     <script src="/src/js/i18n.js" defer></script>
-    <script src="/src/js/articleFormat.js" defer></script>
-    <script src="/src/js/legalByline.js" defer></script>
+    <script src="/src/js/articles.js" defer></script>
 
     <script src="/src/js/lanyardClient.js" defer></script>
     <script src="/src/js/albumAccent.js" defer></script>
@@ -63,7 +61,6 @@
             <li><a href="/projects/">Projects</a></li>
             <li><a href="/hobbies/">Hobbies</a></li>
             <li><a href="/articles/">Articles</a></li>
-            <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
             <li><a href="/pihole/">Pi-hole</a></li>
             <li><a href="/contact/">Contact</a></li>
         </ul>
@@ -85,7 +82,6 @@
                         <li><a href="/projects/">Projects</a></li>
                         <li><a href="/hobbies/">Hobbies</a></li>
                         <li><a href="/articles/">Articles</a></li>
-                        <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                         <li><a href="/pihole/">Pi-hole</a></li>
                         <li><a href="/contact/">Contact</a></li>
                     </ul>
@@ -110,7 +106,7 @@
                 </div>
 
                 <!-- When the policy last changed, and how long it takes to read,
-                     filled in by legalByline.js. Change data-updated with it. -->
+                     filled in by general.js. Change data-updated with it. -->
                 <ul class="articleMeta articleByline" id="legalByline" data-updated="2026-10-17" hidden></ul>
                 <div class="article-content">
                     <h2>Who is responsible</h2>

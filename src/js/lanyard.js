@@ -97,14 +97,14 @@
   // see animateActivityChange(). The strip's arrows wait for these.
   let cardsMoving = 0;
 
-  // Randy as Lorde, on hovering Lorde's name - see initLorde().
+  // What hovering a couple of artists' names gets - see initArtistEggs().
   const LORDE_GIF = "/assets/uploads/images/iamlorde.gif";
   const LORDE_LINE = "I am Lorde, ya ya ya";
 
-  // One play is 5s, ended a little early so it never shows starting over.
-  const LORDE_SHOWN_MS = 4700;
+  // Taylor Swift's lucky number.
+  const TAYLOR_LINE = "13";
 
-  let lordeBubble = null;
+  let artistBubble = null;
 
   function log(...parts) {
     debug.log(...parts);
@@ -127,7 +127,7 @@
 
   initAccessibility();
   initStripNav();
-  initLorde();
+  initArtistEggs();
   syncRefreshButton();
 
   window.Lanyard.subscribe((data) => {
@@ -712,10 +712,8 @@
     refreshLinkIfNewTrack(a);
   }
 
-  // A couple of artists get a little extra on the card's heading - see
-  // [data-artist] in lanyard.css. Taylor Swift gets a 13, her lucky number,
-  // and hovering Lorde's name gets Randy as Lorde - see initLorde().
-  // Any credited artist counts, so a feature does too.
+  // A couple of artists get something when their name is hovered - see
+  // initArtistEggs(). Any credited artist counts, so a feature does too.
   function markArtist(a) {
     if (!els.amCard) return;
 
@@ -726,7 +724,7 @@
       return;
     }
 
-    if (lordeBubble) lordeBubble.hide();
+    if (artistBubble) artistBubble.hide();
 
     if (artists.includes("taylor swift")) {
       els.amCard.dataset.artist = "taylor";
@@ -735,10 +733,11 @@
     }
   }
 
-  // Randy as Lorde, from the clip, while the pointer is on the artist's name
-  // and a Lorde song is on. The bubble floats on the page rather than in the
-  // card, which the strip of activities would cut off.
-  function initLorde() {
+  // While the pointer is on the artist's name: Randy as Lorde, from the clip,
+  // for a Lorde song, and a 13 for a Taylor Swift one, her lucky number -
+  // the way she drew it on her hand. The bubble floats on the page rather
+  // than in the card, which the strip of activities would cut off.
+  function initArtistEggs() {
     const name = els.amActivityState;
     if (!name) return;
     if (typeof speechBubble !== "function") return;
@@ -751,13 +750,23 @@
       return range.getBoundingClientRect();
     }
 
-    lordeBubble = speechBubble(name, { floating: true, gifWidth: 150, box: nameBox });
+    artistBubble = speechBubble(name, { floating: true, gifWidth: 150, box: nameBox });
 
     onHover(name, () => {
-      if (els.amCard?.dataset.artist !== "lorde") return;
-      lordeBubble.showGif(LORDE_GIF, LORDE_LINE, LORDE_SHOWN_MS);
-    }, lordeBubble.hide);
+      const artist = els.amCard?.dataset.artist;
+
+      // The 13 has a look of its own - see .luckyThirteen in lanyard.css.
+      artistBubble.element.classList.toggle("luckyThirteen", artist === "taylor");
+
+      if (artist === "lorde") {
+        // No time limit: it loops for as long as the pointer stays on the name.
+        artistBubble.showGif(LORDE_GIF, LORDE_LINE);
+      } else if (artist === "taylor") {
+        artistBubble.show(TAYLOR_LINE);
+      }
+    }, artistBubble.hide);
   }
+
 
 
 

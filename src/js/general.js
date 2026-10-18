@@ -1,4 +1,6 @@
-/* Page furniture: emoji, the mobile menu, nav pills, the service worker. */
+/* Page furniture: emoji, the mobile menu, nav pills, the service worker - and,
+ * at the bottom, the small bits only one or two pages use, each of which checks
+ * for its own page first. */
 
 // twemoji only walks the DOM it is handed, once. Anything rendered after load -
 // article cards, article bodies - has to ask for its own pass, so this is a
@@ -601,7 +603,7 @@ function returnToRevealParent() {
 
 function toggleSettings() {
     // The settings page shows the panel inline; everywhere else it is a layer
-    // under the page (settingsModal.js).
+    // under the page (settingsPanel.js).
     const inline = document.getElementById("settingsInline");
 
     if (inline) {
@@ -667,7 +669,7 @@ document.addEventListener("keydown", function (e) {
     if (e.key === "Tab") trapRevealFocus(e);
 });
 
-// For settingsModal.js, which keeps its old name and API.
+// For SettingsModal in settingsPanel.js, which keeps its old name and API.
 window.PageReveal = {
     open: openReveal,
     close: closeReveal,
@@ -1034,3 +1036,268 @@ window.addEventListener("load", function () {
     window.repositionNavPills();
     initServiceWorker();
 });
+
+/* The email dialog. Any link marked data-email-dialog opens it instead of
+ * jumping straight to a mail app, so people without one set up still get the
+ * address. Without JavaScript the link is a plain mailto: and still works.
+ * A native <dialog> gives focus trapping, Escape and an inert page for free.
+ */
+(() => {
+    "use strict";
+
+    const ADDRESS = "adnan@aridan.net";
+
+    function t(en) {
+        return window.i18n ? window.i18n.t(en) : en;
+    }
+
+    function markup() {
+        return `
+<dialog id="emailDialog" class="emailDialog" aria-labelledby="emailDialogTitle">
+    <p class="emailDialogIcon"><i class="fa-solid fa-envelope" aria-hidden="true"></i></p>
+    <h2 id="emailDialogTitle">Email</h2>
+    <p class="modalDescription">Open it in your mail app, or copy the address and send it from wherever you like.</p>
+    <div class="emailAddress">
+        <span>${ADDRESS}</span>
+        <button type="button" class="noUI emailCopy" title="Copy address" aria-label="Copy address"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
+    </div>
+    <p class="emailCopied" role="status" aria-live="polite"></p>
+    <div class="modalButtons">
+        <a class="button primary" href="mailto:${ADDRESS}"></i>Open mail app</a>
+        <button type="button" class="button emailClose">Close</button>
+    </div>
+</dialog>`;
+    }
+
+    let dialog = null;
+    let resetTimer = null;
+
+    function copied(ok) {
+        const status = dialog.querySelector(".emailCopied");
+        const icon = dialog.querySelector(".emailCopy > i");
+
+        // Success is shown by the checkmark alone; the words stay for screen readers.
+        if (ok) status.innerHTML = `<span class="visuallyHidden">${t("Copied to clipboard")}</span>`;
+        else status.textContent = t("Couldn't copy - select the address instead");
+        icon.className = ok ? "fa-solid fa-check" : "fa-regular fa-copy";
+
+        // Select it for them, so Ctrl+C is all that is left to do.
+        if (!ok) window.getSelection()?.selectAllChildren(dialog.querySelector(".emailAddress > span"));
+
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => {
+            status.textContent = "";
+            icon.className = "fa-regular fa-copy";
+        }, 2000);
+    }
+
+    function copy() {
+        if (!navigator.clipboard) {
+            copied(false);
+            return;
+        }
+        navigator.clipboard.writeText(ADDRESS).then(() => copied(true), () => copied(false));
+    }
+
+    // Translated here rather than through i18n.js's selectors, since the
+    // dialog is built after the page has already been translated once.
+    function translate() {
+        dialog.querySelector("h2").textContent = t("Email");
+        dialog.querySelector(".modalDescription").textContent =
+            t("Open it in your mail app, or copy the address and send it from wherever you like.");
+        dialog.querySelector(".primary").lastChild.nodeValue = t("Open mail app");
+        dialog.querySelector(".emailClose").textContent = t("Close");
+
+        const copyBtn = dialog.querySelector(".emailCopy");
+        copyBtn.title = t("Copy address");
+        copyBtn.setAttribute("aria-label", t("Copy address"));
+    }
+
+    function inject() {
+        if (!document.querySelector("[data-email-dialog]")) return;
+
+        document.body.insertAdjacentHTML("beforeend", markup().trim());
+        dialog = document.getElementById("emailDialog");
+
+        dialog.querySelector(".emailCopy").addEventListener("click", copy);
+        dialog.querySelector(".emailClose").addEventListener("click", () => dialog.close());
+
+        // Choosing the mail app is the end of the job, so the dialog goes too.
+        dialog.querySelector(".primary").addEventListener("click", () => dialog.close());
+
+        // A click on the backdrop lands on the <dialog> itself, never its children.
+        dialog.addEventListener("click", (e) => {
+            if (e.target === dialog) dialog.close();
+        });
+
+        for (const link of document.querySelectorAll("[data-email-dialog]")) {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                dialog.showModal();
+            });
+        }
+
+        window.i18n?.onChange(translate);
+    }
+
+    // Not straight away: i18n.js loads after this file, and the dialog has
+    // to sign up for its language changes. DOMContentLoaded waits for every
+    // deferred script, i18n.js included.
+    document.addEventListener("DOMContentLoaded", inject);
+})();
+
+/* The Ongoing/Finished filter on Projects, and its twin on Hobbies. */
+(function () {
+    // The rules between sections, hidden along with the section they follow.
+    function isSeparator(el) {
+        if (el == null) return false;
+        if (el.tagName !== "HR") return false;
+        return el.classList.contains("onMobile");
+    }
+
+    function show(status) {
+        let lastShown = null;
+
+        for (const section of document.querySelectorAll("main .section[data-status]")) {
+            const visible = section.dataset.status === status;
+            section.classList.toggle("hide", !visible);
+
+            const next = section.nextElementSibling;
+            if (isSeparator(next)) {
+                next.classList.toggle("hide", !visible);
+            }
+
+            if (visible) lastShown = section;
+        }
+
+        // A rule after the last visible section would hang off the bottom.
+        if (lastShown && isSeparator(lastShown.nextElementSibling)) {
+            lastShown.nextElementSibling.classList.add("hide");
+        }
+
+        // aria-pressed doubles as the styling hook - see .projectFilter in styles.css.
+        for (const button of document.querySelectorAll(".projectFilter button[data-status]")) {
+            const active = button.dataset.status === status;
+
+            if (active) {
+                button.setAttribute("aria-pressed", "true");
+            } else {
+                button.setAttribute("aria-pressed", "false");
+            }
+        }
+    }
+
+    function init() {
+        const filter = document.querySelector(".projectFilter");
+        if (!filter) return;
+
+        const buttons = [...filter.querySelectorAll("button[data-status]")];
+
+        for (const button of buttons) {
+            button.addEventListener("click", () => {
+                show(button.dataset.status);
+
+                // replaceState, so flicking between filters does not fill up Back.
+                history.replaceState(null, "", "#" + button.dataset.status);
+            });
+        }
+
+        const statuses = buttons.map((button) => button.dataset.status);
+
+        window.addEventListener("hashchange", () => {
+            const status = location.hash.slice(1);
+            if (statuses.includes(status)) show(status);
+        });
+
+        // Each page marks its own default as pressed in the markup (Ongoing on
+        // Projects, Hackintosh on Hobbies), so this file needs no list of them.
+        const pressed = buttons.find((button) => button.getAttribute("aria-pressed") === "true");
+        let defaultStatus = statuses[0];
+        if (pressed) {
+            defaultStatus = pressed.dataset.status;
+        }
+
+        const fromUrl = location.hash.slice(1);
+        if (statuses.includes(fromUrl)) {
+            show(fromUrl);
+        } else {
+            show(defaultStatus);
+        }
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+})();
+
+/* The date and reading time over the privacy page, the same byline an
+ * article has (see renderArticle in articles.js). Written by script
+ * rather than into the page so the date is shown the way the visitor's
+ * language writes it, and so the reading time is counted from whatever
+ * language the page is in.
+ */
+(function () {
+    "use strict";
+
+    var AF = null;
+    var byline = null;
+    var content = null;
+
+    function translate(english, value) {
+        if (window.i18n) return window.i18n.t(english, value);
+        return english.split("{0}").join(value);
+    }
+
+    function item(iconClass, child) {
+        var li = document.createElement("li");
+
+        var icon = document.createElement("i");
+        icon.className = iconClass;
+        icon.setAttribute("aria-hidden", "true");
+
+        li.appendChild(icon);
+        li.appendChild(child);
+        return li;
+    }
+
+    function render() {
+        // When the policy last changed, from data-updated on the list itself.
+        var iso = byline.dataset.updated;
+
+        byline.textContent = "";
+
+        if (iso) {
+            var time = document.createElement("time");
+            time.setAttribute("datetime", iso);
+            time.textContent = AF.localDate(iso);
+
+            byline.appendChild(item("fa-regular fa-calendar", time));
+        }
+
+        var minutes = AF.readingMinutes(content);
+
+        var label = document.createElement("span");
+        label.textContent = translate("{0} min read", minutes);
+
+        byline.appendChild(item("fa-regular fa-clock", label));
+        byline.hidden = false;
+    }
+
+    function init() {
+        AF = window.ArticleFormat;
+        byline = document.getElementById("legalByline");
+        content = document.querySelector(".legal .article-content");
+
+        if (!AF || !byline || !content) return;
+
+        render();
+
+        if (window.i18n) window.i18n.onChange(render);
+    }
+
+    // articles.js (for ArticleFormat) and i18n.js both load after this file,
+    // and DOMContentLoaded waits for them.
+    document.addEventListener("DOMContentLoaded", init);
+})();

@@ -70,8 +70,7 @@ html.lyricsOpen #page * {
    on. Focus landing on a button is what brings the bar back for them.
 
    The buttons are the site's own .button, so they look like every other
-   button. Only size and spacing are set here.
-   The earlier always-glass look is kept in lyricsGlassControls.css. */
+   button. Only size and spacing are set here. */
 #lyricsControls {
     position: absolute;
     top: max(16px, env(safe-area-inset-top));

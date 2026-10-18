@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#f1f1f1">
     <script src="/src/js/settings.js"></script>
     <script src="/src/js/settingsPanel.js" defer></script>
-    <script src="/src/js/settingsModal.js" defer></script>
     <meta name="description" content="Adnan Bukvic - a Swedish tech enthusiast, web developer and IT technician. Hackintoshes, vintage iPod restorations, and whatever I happen to be listening to right now.">
     <link rel="canonical" href="https://aridan.net/">
 
@@ -103,7 +102,6 @@
             <li><a href="/projects/">Projects</a></li>
             <li><a href="/hobbies/">Hobbies</a></li>
             <li><a href="/articles/">Articles</a></li>
-            <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
             <li><a href="/pihole/">Pi-hole</a></li>
             <li><a href="/contact/">Contact</a></li>
         </ul>
@@ -125,7 +123,6 @@
                         <li><a href="/projects/">Projects</a></li>
                         <li><a href="/hobbies/">Hobbies</a></li>
                         <li><a href="/articles/">Articles</a></li>
-                        <!--<li><a href="/minecraft/">Minecraft Server</a></li>-->
                         <li><a href="/pihole/">Pi-hole</a></li>
                         <li><a href="/contact/">Contact</a></li>
                     </ul>
@@ -192,6 +189,9 @@
                                         <span class="activityHeading">
                                             <i class="fa-brands fa-itunes-note" aria-hidden="true"></i><h3 id="amActivityName">Apple Music</h3>
                                         </span>
+                                        <!-- When the last song stopped, on the heading's right.
+                                             Only shown in the last-played layout. -->
+                                        <p id="amLastPlayedAgo" class="subtitleColor"></p>
                                         <div class="lds-ring smallLoader">
                                             <div></div>
                                             <div></div>
@@ -211,7 +211,6 @@
                                             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="--:-- / --:--">
                                             <div class="progress-bar" id="amProgressBar"></div>
                                         </div>
-                                        <p id="amLastPlayedAgo" class="subtitleColor"></p>
 
                                         <!--<div id="amTimeremaning">
                                             <p id="amActivityTime" class="subTitle">-:-</p>
