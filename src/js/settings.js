@@ -982,7 +982,7 @@ onSettingsPanel(function wireRandy() {
 
 /* ---------- Taylor's Version ----------
  * Tapping the version number at the bottom of Settings three times in a row
- * re-records it: "version 6.1.8 (Taylor's Version)". Three more taps and it
+ * re-records it: "version 6.1.9 (Taylor's Version)". Three more taps and it
  * goes back. Not saved anywhere - it lasts until the page is left.
  */
 const TAYLORS_VERSION = " (Taylor's Version)";

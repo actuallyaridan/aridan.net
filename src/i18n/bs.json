@@ -170,6 +170,7 @@
   "Updated {0} - updates automatically every 15 minutes.": "Ažurirano {0} - automatski se ažurira svakih 15 minuta.",
   "just now": "upravo sada",
   "{0} min ago": "prije {0} min",
+  "{0} used of {1}": "{0} od {1} iskorišteno",
   "never": "nikad",
   "DNS queries": "DNS upiti",
   "of traffic blocked": "saobraćaja blokirano",

@@ -494,10 +494,13 @@
     // Apple's CDN names the size in the path - .../600x600bb.jpg, or sr
     // instead of bb - so any size can be asked for. It also sends CORS
     // headers, which the Cider host does not.
-    const APPLE_SIZE_IN_PATH = /\/(\d+)x\1(bb|sr)(-\d+)?\.(jpg|png)(\?.*)?$/i;
+    //
+    // The extension picks the format too, and Cider asks for .png: a 1024px
+    // cover is about 2 MB as a PNG and under 100 KB as a WebP.
+    const APPLE_SIZE_IN_PATH = /\/(\d+)x\1(bb|sr)(-\d+)?\.(jpg|png|webp)(\?.*)?$/i;
 
     function resizeApple(url, size) {
-      return url.replace(APPLE_SIZE_IN_PATH, "/" + size + "x" + size + "$2$3.$4$5");
+      return url.replace(APPLE_SIZE_IN_PATH, "/" + size + "x" + size + "$2$3.webp$5");
     }
 
     // There is no Discord proxy hash for these, so Apple covers are sized

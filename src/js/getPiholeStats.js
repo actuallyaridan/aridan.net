@@ -56,14 +56,64 @@ function isPiholeLocalHost() {
 
 const PIHOLE_IS_LOCAL = isPiholeLocalHost();
 
+// The site's language rather than the browser's: someone reading in Swedish on
+// an English system should see "1 756 845", not "1,756,845".
+function piholeLocale() {
+  let lang = "en";
+  if (window.i18n && window.i18n.lang) lang = window.i18n.lang;
+
+  const fallback = LOCALE_FALLBACKS[lang];
+  if (fallback && !hasNumberData(lang)) return fallback;
+
+  return lang;
+}
+
+// Chrome ships without Bosnian number data, yet still claims to support it,
+// and quietly writes "1,756,845" the English way. Croatian writes numbers the
+// same as Bosnian, so it stands in. Firefox has the real thing.
+const LOCALE_FALLBACKS = { bs: "hr" };
+
+const numberDataKnown = {};
+
+function hasNumberData(lang) {
+  if (numberDataKnown[lang] === undefined) {
+    const own = new Intl.NumberFormat(lang).format(1000.5);
+    const english = new Intl.NumberFormat("en").format(1000.5);
+    numberDataKnown[lang] = own !== english;
+  }
+
+  return numberDataKnown[lang];
+}
+
+function formatNumber(n, options) {
+  const value = Number(n) || 0;
+
+  try {
+    return new Intl.NumberFormat(piholeLocale(), options).format(value);
+  } catch {
+    return new Intl.NumberFormat("en", options).format(value);
+  }
+}
+
+// Narrow units for the ones that fit on a tile - "5d 3h" in English, "5 d. 3 h"
+// in Croatian - so no dictionary has to know them.
+function formatUnit(n, unit, display, extra) {
+  const options = { style: "unit", unit: unit, unitDisplay: display, ...extra };
+  return formatNumber(n, options);
+}
+
 // Rounded down, hence the "+", so the headline is never larger than the truth.
 // `steady` keeps the one decimal even when it is a 0 - "121.0K+" rather than
 // "121K+" - for the numbers on the way while one is counting up, which
 // would otherwise change length every few frames (see countTo in general.js).
+//
+// The digits follow the language - "272,7K+" in Swedish - but the K and M stay.
+// Intl's compact notation has each language's own, and "272,7 tis.+" is too
+// wide for a tile on a phone.
 function abbreviatePiholeNumber(n, steady) {
   const value = Number(n) || 0;
 
-  if (value < 1000) return value.toLocaleString();
+  if (value < 1000) return formatNumber(value);
 
   let scaled;
   let suffix;
@@ -83,19 +133,18 @@ function abbreviatePiholeNumber(n, steady) {
     options.minimumFractionDigits = 1;
   }
 
-  const text = floored.toLocaleString(undefined, options);
-  return text + suffix + "+";
+  return formatNumber(floored, options) + suffix + "+";
 }
 
 function formatSize(gb) {
   const n = Number(gb) || 0;
 
-  if (n < 1) return Math.round(n * 1024) + " MB";
-  return n + " GB";
+  if (n < 1) return formatUnit(Math.round(n * 1024), "megabyte", "short");
+  return formatUnit(n, "gigabyte", "short");
 }
 
 function usedOfTotal(usedGb, totalGb) {
-  return formatSize(usedGb) + " used of " + formatSize(totalGb);
+  return translate("{0} used of {1}", formatSize(usedGb), formatSize(totalGb));
 }
 
 // Only the two largest units, so five days shows as "5d 3h".
@@ -106,27 +155,51 @@ function formatUptime(seconds) {
   const hours = Math.floor((total % 86400) / 3600);
   const minutes = Math.floor((total % 3600) / 60);
 
-  if (days > 0) return days + "d " + hours + "h";
-  if (hours > 0) return hours + "h " + minutes + "m";
-  return minutes + "m";
+  if (days > 0) {
+    return formatUnit(days, "day", "narrow") + " " + formatUnit(hours, "hour", "narrow");
+  }
+
+  if (hours > 0) {
+    return formatUnit(hours, "hour", "narrow") + " " + formatUnit(minutes, "minute", "narrow");
+  }
+
+  return formatUnit(minutes, "minute", "narrow");
 }
 
 function formatWrites(gb) {
   const n = Number(gb) || 0;
 
-  if (n >= 1024) return (n / 1024).toFixed(1) + " TB";
-  return Math.round(n) + " GB";
+  if (n >= 1024) {
+    return formatUnit(n / 1024, "terabyte", "short", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
+  }
+
+  return formatUnit(Math.round(n), "gigabyte", "short");
 }
 
+// Months and years are short rather than narrow: a narrow month is "3m" in
+// English and Swedish, which reads as minutes.
 function formatAge(days) {
   const d = Math.max(0, Math.floor(Number(days) || 0));
 
-  if (d < 60) return d + "d";
-  if (d < 730) return Math.floor(d / 30.44) + " mo";
-  return (d / 365.25).toFixed(1) + " yr";
+  if (d < 60) return formatUnit(d, "day", "narrow");
+  if (d < 730) return formatUnit(Math.floor(d / 30.44), "month", "short");
+
+  return formatUnit(d / 365.25, "year", "short", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
 }
 
+// The last answer, so a language switch can write it out again in the new
+// language without waiting for the next fetch.
+let lastRender = null;
+
 function renderPiholeStats(data, { example = false } = {}) {
+  lastRender = { data: data, example: example };
+
   function setStat(id, text, fullTitle) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -162,19 +235,20 @@ function renderPiholeStats(data, { example = false } = {}) {
   }
 
   function full(n) {
-    return Number(n).toLocaleString();
+    return formatNumber(n);
   }
 
-  function oneDecimal(n) {
-    return Number(n).toFixed(1);
-  }
-
+  // The API sends 15.53 for 15.53%, and Intl wants 0.1553.
   function percentOneDecimal(n) {
-    return oneDecimal(n) + "%";
+    return formatNumber(Number(n) / 100, {
+      style: "percent",
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
   }
 
   function percentWhole(n) {
-    return Math.round(Number(n)) + "%";
+    return formatNumber(Math.round(Number(n)) / 100, { style: "percent" });
   }
 
   countStat("pi-total", data.total, abbreviatePiholeNumber, full(data.total), true);
@@ -194,7 +268,10 @@ function renderPiholeStats(data, { example = false } = {}) {
 
   if (data.temp_c != null) {
     countStat("pi-temp", data.temp_c, function (n) {
-      return oneDecimal(n) + "\u00b0C";
+      return formatUnit(n, "celsius", "short", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      });
     });
   }
 
@@ -260,18 +337,18 @@ function renderPiholeStats(data, { example = false } = {}) {
   }
 
   if (data.sd_fs_errors != null) {
-    setStat("pi-sd-fserr", String(Number(data.sd_fs_errors) || 0));
+    setStat("pi-sd-fserr", formatNumber(data.sd_fs_errors));
   }
 
   if (data.sd_mmc_errors != null) {
-    setStat("pi-sd-ioerr", String(Number(data.sd_mmc_errors) || 0));
+    setStat("pi-sd-ioerr", formatNumber(data.sd_mmc_errors));
   }
   if (data.sd_lifetime_writes_gb != null) {
     setStat("pi-sd-writes", formatWrites(data.sd_lifetime_writes_gb));
   }
 
   if (data.sd_capacity_gb != null) {
-    setStat("pi-sd-size", Math.round(Number(data.sd_capacity_gb)) + " GB");
+    setStat("pi-sd-size", formatUnit(Math.round(Number(data.sd_capacity_gb)), "gigabyte", "short"));
   }
   if (data.sd_age_days != null) setStat("pi-sd-age", formatAge(data.sd_age_days));
 
@@ -351,7 +428,18 @@ function renderUpdatedLine(data, example) {
   writeUpdatedLine();
 }
 
-if (window.i18n) window.i18n.onChange(writeUpdatedLine);
+// The counts are already at their values, so countTo writes them straight out
+// rather than counting up again.
+function rerenderPiholeStats() {
+  if (!lastRender) {
+    writeUpdatedLine();
+    return;
+  }
+
+  renderPiholeStats(lastRender.data, { example: lastRender.example });
+}
+
+if (window.i18n) window.i18n.onChange(rerenderPiholeStats);
 
 async function updatePiholeStats() {
   if (PIHOLE_IS_LOCAL) {

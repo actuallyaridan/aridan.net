@@ -2600,7 +2600,8 @@ html.reduce-motion #desktop-header ul.notAList {
 /* ---------- Placeholders while things load ----------
 
    Grey shapes standing in for what is on its way - the music card on the
-   homepage, the article list, an article, the article editor (editor.css),
+   homepage and its album art, the article list, an article, the article
+   editor (editor.css),
    the Pi-hole stats, Component versions in Settings - so the space it will
    take is
    there from the start instead of a spinner or nothing.
@@ -2611,6 +2612,8 @@ html.reduce-motion #desktop-header ul.notAList {
    the way light moving over one surface would. */
 .skeleton .skeletonBar,
 .pi-num.pi-loading::before,
+#activityLogoLarge[src^="data:"],
+#amActivityLogoLarge[src^="data:"],
 .full-article:not(.isLoaded) #articleTitle:empty::before,
 .full-article:not(.isLoaded) #articlePreview:empty::before,
 .full-article:not(.isLoaded) #articlePreview:empty::after {
@@ -2648,6 +2651,8 @@ html.reduce-motion #desktop-header ul.notAList {
 
 html.reduce-motion .skeleton .skeletonBar,
 html.reduce-motion .pi-num.pi-loading::before,
+html.reduce-motion #activityLogoLarge[src^="data:"],
+html.reduce-motion #amActivityLogoLarge[src^="data:"],
 html.reduce-motion .full-article:not(.isLoaded) #articleTitle:empty::before,
 html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::before,
 html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::after {

@@ -3,7 +3,7 @@
 // buys the descriptive User-Agent they ask callers to send and - most
 // importantly - a place to check the request against my presence. The page
 // only asks LRCLIB itself after this has checked the song and failed to get
-// through, which is what the 424 below is for.
+// through, which is what the "upstream" answer below is for.
 //
 // Lyrics are copyrighted by their publishers, and LRCLIB holds no licence for
 // them. So this only ever answers for the song I am playing right now, never
@@ -27,10 +27,12 @@ const LISTENING = 2;
 const UPSTREAM_TIMEOUT_MS = 6000;
 const MAX_FIELD = 200;
 
-// One retry, not more: LRCLIB turns most Worker requests away (see
-// src/js/lrclib.js), and the page asks it directly when this gives up, so
-// every second spent waiting here is a second longer before that.
-const UPSTREAM_RETRIES = 1;
+// No retries. LRCLIB's limit is per address, and every Worker shares a few of
+// them with everyone else on Cloudflare, so a 429 here does not clear in the
+// moment a retry waits - it only adds to the pile and holds the page up. A
+// different User-Agent does not help either: it is the address that is
+// limited. The page asks LRCLIB from its own address as soon as this gives up.
+const UPSTREAM_RETRIES = 0;
 
 // no-store on every answer, hits included - see the note at the top.
 const jsonHeaders = {
@@ -82,15 +84,17 @@ export async function onRequestGet({ request, env }) {
     });
   } catch (err) {
     // The song is checked and only LRCLIB is in the way, so the page is told
-    // which one it is and asks LRCLIB itself. A 424 rather than a 502:
-    // Cloudflare swaps the body of a 502 from a Function for its own "error
-    // code: 502" page, and the page needs this JSON to read.
+    // which one it is and asks LRCLIB itself. A 200 rather than an error
+    // status: this is the usual way a lookup goes, since LRCLIB turns most
+    // Worker requests away, and any 4xx or 5xx is printed in red in the
+    // console of everyone who opens the lyrics. Not a 502 in any case -
+    // Cloudflare swaps that body for its own "error code: 502" page.
     return json({
       found: false,
       reason: "upstream",
       detail: String(err?.message || err),
       song: playing,
-    }, 424);
+    }, 200);
   }
 
   if (!result.hit) {

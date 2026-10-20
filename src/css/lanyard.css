@@ -235,12 +235,23 @@ div#discord::-webkit-scrollbar {
   }
 }
 
-/* The card starts out on the loading spinner (index.html), which turns by
-   itself - turning it as well would be two spins at once. The cover only
-   starts turning once it is an actual cover; lanyard.js never puts the
-   spinner back after that. */
-#amActivityLogoLarge[src$="spinner.gif"] {
-  animation: none;
+/* Until the first cover is in, the image is a transparent 1px GIF
+   (index.html) showing the skeleton shine from styles.css behind it - a
+   blank src, unlike none at all, never shows the alt text or a broken-image
+   icon. lanyard.js never puts it back once a cover has loaded, so this is
+   only ever the first load.
+
+   The shine takes the place of the spin, and a still placeholder keeps the
+   cover's own shape rather than the bars' 6px corners. The last-played
+   square's 8px wins over these on its own. */
+#amActivityLogoLarge[src^="data:"] {
+  border-radius: 50%;
+  transform: none;
+}
+
+#activityLogoLarge[src^="data:"] {
+  border-radius: 5px;
+  width: 96px;
 }
 
 #activityLogoSmall,

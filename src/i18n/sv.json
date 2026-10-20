@@ -43,7 +43,7 @@
   "Debug mode": "Felsökningsläge",
   "Done": "Klar",
   "Reset": "Återställ",
-  "Press again to reset": "Tryck igen för att återställa",
+  "Press again to reset": "Bekräfta återställning",
   "Settings reset": "Inställningarna har återställts",
 
   "tech enthusiast": "teknikentusiast",
@@ -168,6 +168,7 @@
   "Updated {0} - updates automatically every 15 minutes.": "Uppdaterad {0} - uppdateras automatiskt var 15:e minut.",
   "just now": "nyss",
   "{0} min ago": "för {0} min sedan",
+  "{0} used of {1}": "{0} av {1} används",
   "never": "aldrig",
   "DNS queries": "DNS-förfrågningar",
   "of traffic blocked": "av trafiken blockerad",

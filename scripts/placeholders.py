@@ -21,7 +21,7 @@ Needs Pillow (`pip install pillow`). Images on other sites - the GitHub
 logos on the projects page - are downloaded to make theirs.
 
 Skipped: SVGs, which are drawings with nothing to blur, and GIFs, which here
-are only the spinner the album art already uses while it loads.
+are only the South Park reactions shown on hover.
 """
 
 import base64

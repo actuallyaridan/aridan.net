@@ -6,6 +6,11 @@
 
   const HIGH_RES = 512;
   const UPGRADE_RES = 1024;
+
+  // Apple covers can be asked for at any size, so the card gets one that is
+  // just enough for its 96px at 3x and nothing bigger. The same size as
+  // ART_SIZE in lyrics.js, so the lyrics panel reuses this download.
+  const APPLE_RES = 300;
   const LOADER_MS = 500;
   const REFRESH_TIMEOUT_MS = 10000;
 
@@ -859,8 +864,10 @@
 
   // The Apple Music lookup costs a few network round trips, so it only runs
   // when the track itself has actually changed, not on every presence update.
+  // The artwork is left out of the key: the agent can swap Cider's cover for
+  // Apple's partway through a song, and that is still the same song.
   function refreshLinkIfNewTrack(a) {
-    const parts = [a.details, a.state, a.assets?.large_text, a.assets?.large_image];
+    const parts = [a.details, a.state, a.assets?.large_text];
     const trackKey = parts.join("|");
 
     if (trackKey === lastTrackKey) return;
@@ -960,8 +967,8 @@
       });
     } else if (art.mzstatic) {
       ladder.push({
-        url: art.mzstatic(HIGH_RES),
-        label: "standard definition album cover (" + HIGH_RES + "px)",
+        url: art.mzstatic(APPLE_RES),
+        label: "album cover (" + APPLE_RES + "px)",
       });
     }
 
@@ -978,10 +985,7 @@
         label: "animated album cover (original)",
       });
     } else if (art.mzstatic) {
-      ladder.push({
-        url: art.mzstatic(UPGRADE_RES),
-        label: "high definition album cover (" + UPGRADE_RES + "px)",
-      });
+      // No upgrade: the first rung is already sharp at this size.
     } else if (art.direct && art.proxy && still) {
       // Without "&animated=true" Discord's proxy hands back the first frame.
       ladder.push({
@@ -1230,20 +1234,59 @@
     });
   }
 
-  // Tries the UPC from the artwork, then an exact title search, against each
-  // storefront in turn. Whatever comes back already carries the right country
-  // in its path, so it is used as given.
+  // What each song's lookup found, kept as the promise so a second call while
+  // the first is still out waits for it instead of asking again. "" means
+  // nothing was found. A song that comes back later, or a language switch,
+  // then costs no requests at all - preferredStore() re-homes what was found.
+  const appleLinks = new Map();
+
+  // Bumped by every call, so a slow lookup for the last song cannot put its
+  // link on the badge after the next song has started.
+  let appleLinkToken = 0;
+
   async function refreshAppleMusicLink(title, artist, album, artworkURL) {
     const badge = els.appleLink;
     if (!badge || !title || !artist) return;
 
     lastAppleTrack = { title, artist, album, artworkURL };
 
+    appleLinkToken++;
+    const token = appleLinkToken;
+
+    const key = [title, artist, album].join("|");
+
+    let found = appleLinks.get(key);
+    if (found === undefined) {
+      found = findAppleMusicLink(title, artist, album, artworkURL);
+      appleLinks.set(key, found);
+
+      // A failed lookup is forgotten, so the song gets another go next time
+      // it comes on rather than a search link for good.
+      found.then((href) => {
+        if (href === null) appleLinks.delete(key);
+      });
+    }
+
+    const href = await found;
+    if (token !== appleLinkToken) return;
+
     const stores = storefrontCascade();
 
-    // Where the link should end up, not necessarily anywhere we can usefully ask.
-    const home = stores[0];
+    if (href) {
+      lastAppleHref = preferredStore(href, stores);
+    } else {
+      lastAppleHref = searchPageUrl(title, artist, album, stores[0]);
+    }
 
+    applyAppleHref();
+  }
+
+  // Tries the UPC from the artwork, then an exact title search, against each
+  // storefront in turn. Whatever comes back already carries the right country
+  // in its path, so it is used as given. "" when nothing matched, null when
+  // the lookup itself failed.
+  async function findAppleMusicLink(title, artist, album, artworkURL) {
+    const stores = storefrontCascade();
     const searchable = stores.filter((s) => !UNSEARCHABLE_STOREFRONTS.includes(s));
 
     const titleN = normalizeTitle(title);
@@ -1266,16 +1309,12 @@
       if (!href && searchable.length) {
         href = await lookupByAlbum(album, searchable[0].toUpperCase(), titleN, artistsN);
       }
-
-      if (href) href = preferredStore(href, stores);
     } catch (e) {
       warn("Apple Music lookup failed", e);
+      return null;
     }
 
-    if (!href) href = searchPageUrl(title, artist, album, home);
-
-    lastAppleHref = href;
-    applyAppleHref();
+    return href;
   }
 
   // Kept apart from the lookup so a language switch only rewrites the query

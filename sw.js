@@ -208,6 +208,39 @@ async function networkFirstAsset(request) {
     return network;
 }
 
+// Fetches still on their way, by URL. The homepage asks for its banner twice -
+// the <link rel="preload"> and then the CSS background - and Chrome does not
+// hand a preload answered by a worker on to the second request, so both reach
+// the worker. Without this, each one went to the network: the banner downloaded
+// twice on a first visit, and was revalidated twice on every visit after.
+const inFlight = new Map();
+
+function fetchAndCache(request, cache) {
+    const key = request.url;
+
+    let pending = inFlight.get(key);
+    if (!pending) {
+        pending = fetch(request);
+
+        const stored = pending.then((response) => {
+            if (!response || !response.ok) return;
+            return cache.put(request, response.clone());
+        });
+
+        // Kept until the copy is in the cache, not just until the headers
+        // arrive: a request in between would find neither and fetch again.
+        // Gone after that, so the next page view revalidates as usual.
+        const forget = () => inFlight.delete(key);
+        stored.then(forget, forget);
+
+        inFlight.set(key, pending);
+    }
+
+    // Each caller gets its own copy: a body can only be read once, and the
+    // original is never read, so it can be cloned for as many as ask.
+    return pending.then((response) => response.clone());
+}
+
 // The cached copy goes back at once and a fresh one is fetched for next time.
 // Only for what can be a version old without breaking anything - images,
 // fonts, icons.
@@ -216,13 +249,7 @@ async function staleWhileRevalidate(request) {
     const cached = await cache.match(request);
 
     // Deliberately not awaited: this keeps running after the response has gone back.
-    const network = fetch(request)
-        .then((response) => {
-            // clone() because the page is about to read this body too.
-            if (response && response.ok) cache.put(request, response.clone());
-            return response;
-        })
-        .catch(() => cached);
+    const network = fetchAndCache(request, cache).catch(() => cached);
 
     if (cached) return cached;
     return network;

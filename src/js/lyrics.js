@@ -347,8 +347,9 @@
       // The Function checked the song is the one playing but could not get
       // through to LRCLIB, which turns most requests from Cloudflare away. The
       // browser asks from an address of its own, so it tries instead, for the
-      // song the Function checked rather than the one asked about.
-      if (res.status === 424 && body.reason === "upstream" && body.song) {
+      // song the Function checked rather than the one asked about. A 200 now;
+      // a 424 from a deploy before that means the same.
+      if (body.reason === "upstream" && body.song) {
         debug.log("The server couldn't reach LRCLIB (" + body.detail + "), asking it directly...");
         return askLrclib(body.song);
       }
