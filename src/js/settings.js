@@ -214,6 +214,14 @@ function reserveLanyardSpace() {
     const root = document.documentElement;
     root.style.setProperty('--lanyard-reserve', saved + 'px');
     root.classList.add('lanyard-reserve');
+
+    // The placeholder takes the shape of whichever card the last visit ended
+    // on. Only a song that was playing gets the taller Apple Music one; with
+    // no kind saved (a visit from before it was), the smaller last-played
+    // card is the safer guess.
+    if (localStorage.getItem('lanyardReserveKind') !== 'playing') {
+        root.classList.add('lanyard-reserve-last');
+    }
 }
 
 // Matching the album art used to be a toggle of its own, with a picked colour

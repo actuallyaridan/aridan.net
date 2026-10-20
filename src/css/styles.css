@@ -1627,6 +1627,24 @@ html.reduce-motion .roleRoller {
     will-change: transform;
 }
 
+/* showModal() makes the page inert, but not unscrollable: a wheel or swipe
+   over the backdrop, or past the end of the recently played list, still
+   scrolls the page underneath. So the page stops scrolling while a modal is
+   up.
+
+   On body, not html: body's overflow-y: scroll is what the window scrolls
+   by, and only while html has no overflow of its own. Giving html one turns
+   body into a scroller of its own, at the top, and the whole page jumps.
+   The gutter stays reserved, or the scrollbar going away would shift the
+   page sideways behind the dialog. */
+body:has(dialog:modal) {
+    overflow-y: hidden;
+}
+
+html:has(dialog:modal) {
+    scrollbar-gutter: stable;
+}
+
 .emailDialog::backdrop {
     background-color: rgba(0, 0, 0, 0.4);
     -webkit-backdrop-filter: blur(var(--blur-subtle));

@@ -831,11 +831,88 @@ html.lanyard-reserve .lanyardSkeleton {
     border-radius: 8px;
 }
 
+.lanyardSkeleton .skeletonButtons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 24px;
+}
+
 .lanyardSkeleton .skeletonButton {
     width: 105px;
     height: 45px;
-    margin-top: 24px;
     border-radius: 999px;
+}
+
+.lanyardSkeleton .skeletonRecentButton {
+    width: 173px;
+}
+
+/* The last-played card instead (#amLanyardDiscord.lastPlayed, above): wide
+   and short, the heading over a square cover with the song beside it, and
+   Recently played under it rather than Lyrics. settings.js picks it when the
+   last visit ended on that card. */
+.lanyardSkeletonLast {
+    display: none;
+}
+
+html.lanyard-reserve-last .lanyardSkeletonCard {
+    display: none;
+}
+
+html.lanyard-reserve-last .lanyardSkeletonLast {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    grid-template-areas:
+        "heading heading ago"
+        "art lines lines";
+    align-items: center;
+    column-gap: 12px;
+    width: 440px;
+    max-width: calc(100vw - 48px);
+    height: auto;
+    box-sizing: border-box;
+}
+
+/* Each bar as tall as the line of text it stands in for, less a little. */
+.lanyardSkeletonLast .skeletonHeading {
+    grid-area: heading;
+    width: 90px;
+    margin: 3px 0 13px;
+}
+
+.lanyardSkeletonLast .skeletonAgo {
+    grid-area: ago;
+    width: 64px;
+    height: 13px;
+    margin: 4px 0 14px;
+    border-radius: 999px;
+}
+
+.lanyardSkeletonLast .skeletonArt {
+    grid-area: art;
+    width: 64px;
+    height: 64px;
+    margin: 0;
+    border-radius: 8px;
+}
+
+.lanyardSkeletonLast .skeletonLines {
+    grid-area: lines;
+    display: flex;
+    flex-direction: column;
+}
+
+html.lanyard-reserve-last .lanyardSkeleton .skeletonButtons {
+    margin-top: 30px;
+}
+
+html.lanyard-reserve-last .lanyardSkeleton .skeletonLyricsButton {
+    display: none;
+}
+.lanyardSkeletonLast .skeletonArtist {
+    width: 40%;
+    margin-top: 16px;
 }
 
 /* ---------- Recently played ----------
@@ -866,21 +943,66 @@ html.lanyard-reserve .lanyardSkeleton {
     max-height: min(420px, 55vh);
     overflow-y: auto;
     overscroll-behavior: contain;
+    /* Still scrolls by wheel, swipe and keyboard, just without a bar beside
+       the rows. */
+    scrollbar-width: none;
     text-align: left;
+    /* Fades the rows out at an edge with more past it. recentlyPlayed.js
+       sets fadeTop and fadeBottom as the list scrolls, so the first song is
+       not dimmed while it is already at the top. */
+    --recent-fade-top: 0px;
+    --recent-fade-bottom: 0px;
+    -webkit-mask-image: linear-gradient(to bottom,
+        transparent, #000 var(--recent-fade-top),
+        #000 calc(100% - var(--recent-fade-bottom)), transparent);
+    mask-image: linear-gradient(to bottom,
+        transparent, #000 var(--recent-fade-top),
+        #000 calc(100% - var(--recent-fade-bottom)), transparent);
+    transition: --recent-fade-top .2s ease, --recent-fade-bottom .2s ease;
+}
+
+.recentList.fadeTop {
+    --recent-fade-top: 32px;
+}
+
+.recentList.fadeBottom {
+    --recent-fade-bottom: 32px;
+}
+
+.recentList::-webkit-scrollbar {
+    display: none;
+}
+
+/* Registered so the fades can ease in and out; a browser without @property
+   just snaps them. */
+@property --recent-fade-top {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0px;
+}
+
+@property --recent-fade-bottom {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0px;
+}
+
+html.reduce-motion .recentList {
+    transition: none;
 }
 
 .recentList:empty {
     display: none;
 }
 
-/* .modalButtons has no space of its own above it, and the last row's hover
-   background would otherwise sit right against the button. */
+/* .modalButtons has no space of its own above it, and the last row would
+   otherwise sit right against the button. */
 .recentDialog .modalButtons {
     margin-top: 20px;
 }
 
 /* Cover, then title over artist, then the time on the right. */
-.recentLink {
+.recentRow {
     display: grid;
     grid-template-columns: 48px minmax(0, 1fr) auto;
     grid-template-areas:
@@ -888,20 +1010,7 @@ html.lanyard-reserve .lanyardSkeleton {
         "art artist when";
     align-items: center;
     column-gap: 12px;
-    padding: 8px;
-    border-radius: 12px;
-    border: 1px solid transparent;
-    color: inherit;
-    text-decoration: none;
-    transition: background-color .15s ease, border-color .15s ease;
-}
-
-/* a. only: the placeholder rows share the class for their layout, and are
-   not something to point at. */
-a.recentLink:hover,
-a.recentLink:focus-visible {
-    background-color: var(--liquid-glass-button-background);
-    border-color: var(--liquid-glass-button-border);
+    padding: 8px 12px 8px 8px;
 }
 
 .recentArt {
@@ -978,7 +1087,7 @@ a.recentLink:focus-visible {
 /* On a phone a time on the right leaves the title a few letters, so it goes
    under the artist instead and the title gets the whole width. */
 @media (max-width: 480px) {
-    .recentLink {
+    .recentRow {
         grid-template-columns: 48px minmax(0, 1fr);
         grid-template-areas:
             "art title"

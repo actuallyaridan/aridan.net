@@ -942,6 +942,9 @@
   const backdrop = {
     ctx: backdropCanvas?.getContext("2d") || null,
     buffer: null,
+
+    // One cover's art, drawn whole before it is faded onto `buffer`.
+    layer: null,
     down: [],
     up: [],
     // The 8x8 step with the colour boost drawn in, where canvas filters work.
@@ -981,6 +984,7 @@
 
   function makeCanvases() {
     backdrop.buffer = makeCanvas(ART_DRAW_SIZE);
+    backdrop.layer = makeCanvas(ART_DRAW_SIZE);
     backdrop.down = [];
     backdrop.up = [];
 
@@ -1169,15 +1173,32 @@
     bufferCtx.clearRect(0, 0, bufferSize, bufferSize);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+    // Every cover fades in, the first one too: with nothing under it, it
+    // fades up out of the black shade instead of snapping on.
     for (const layer of backdrop.layers) {
       let alpha = (now - layer.born) / BACKDROP_FADE_MS;
       if (alpha > 1) alpha = 1;
-      if (layer === backdrop.layers[0]) alpha = 1;
 
-      bufferCtx.save();
-      bufferCtx.globalAlpha = alpha;
-      drawArt(bufferCtx, layer.art, seconds);
-      bufferCtx.restore();
+      // The frame's timestamp can be a moment older than the cover's load
+      // time. A negative globalAlpha is ignored rather than clamped, which
+      // would leave it at 1 and flash the cover in at full strength.
+      if (alpha < 0) alpha = 0;
+
+      // The cover is drawn whole first and then faded as one picture. Fading
+      // each of its five overlapping copies instead stacks them up, so most
+      // of the colour arrives in the first tenth of the fade.
+      if (alpha < 1) {
+        const layerCtx = backdrop.layer.getContext("2d");
+        layerCtx.clearRect(0, 0, bufferSize, bufferSize);
+        drawArt(layerCtx, layer.art, seconds);
+
+        bufferCtx.save();
+        bufferCtx.globalAlpha = alpha;
+        bufferCtx.drawImage(backdrop.layer, 0, 0);
+        bufferCtx.restore();
+      } else {
+        drawArt(bufferCtx, layer.art, seconds);
+      }
     }
 
     blurInto(ctx, backdrop.buffer);
@@ -1228,8 +1249,10 @@
     backdrop.lastDraw = now;
     drawBackdrop(now);
 
-    // Still art only needs drawing until its fade-in is over.
-    const fading = backdrop.layers.length > 1;
+    // Still art only needs drawing until its fade-in is over. Checked on the
+    // newest cover's age, since the first cover fades in on its own.
+    const newest = backdrop.layers[backdrop.layers.length - 1];
+    const fading = now - newest.born < BACKDROP_FADE_MS;
     if (reduceMotion() && !fading) return;
 
     backdrop.rafId = window.requestAnimationFrame(backdropFrame);

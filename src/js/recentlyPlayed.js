@@ -100,6 +100,8 @@
             if (e.target === dialog) dialog.close();
         });
 
+        list.addEventListener("scroll", updateFades, { passive: true });
+
         dialog.addEventListener("close", () => {
             clearInterval(agoTimer);
             agoTimer = 0;
@@ -170,6 +172,29 @@
 
         clearInterval(agoTimer);
         agoTimer = setInterval(updateTimes, AGO_REFRESH_MS);
+
+        updateFades();
+    }
+
+    // The fade at each end of the list only shows while there are more rows
+    // past it to scroll to. The 1px slack absorbs sub-pixel scroll positions,
+    // which would otherwise leave a faint fade on a list scrolled to its end.
+    function updateFades() {
+        const max = list.scrollHeight - list.clientHeight;
+        const here = list.scrollTop;
+
+        let moreAbove = false;
+        if (here > 1) {
+            moreAbove = true;
+        }
+
+        let moreBelow = false;
+        if (here < max - 1) {
+            moreBelow = true;
+        }
+
+        list.classList.toggle("fadeTop", moreAbove);
+        list.classList.toggle("fadeBottom", moreBelow);
     }
 
     async function load() {
@@ -230,6 +255,8 @@
         for (let i = 0; i < SKELETON_ROWS; i++) {
             list.appendChild(skeletonRow(i));
         }
+
+        updateFades();
     }
 
     function clearSkeleton() {
@@ -243,8 +270,8 @@
         item.className = "recentTrack";
 
         // The same grid as a real row, so nothing moves when the songs arrive.
-        const box = document.createElement("span");
-        box.className = "recentLink";
+        const box = document.createElement("div");
+        box.className = "recentRow";
 
         const art = document.createElement("span");
         art.className = "skeletonBar recentArt";
@@ -299,6 +326,8 @@
         for (const track of past) {
             list.appendChild(row(track));
         }
+
+        updateFades();
     }
 
     function row(track) {
@@ -310,21 +339,11 @@
         const item = document.createElement("li");
         item.className = "recentTrack";
 
-        // The whole row is the link, so it is one tab stop and one big target.
-        const link = document.createElement("a");
-        link.className = "recentLink";
-        link.href = appleMusicSearch(activity);
-        link.target = "_blank";
-        link.rel = "noopener";
-        // Named after the song, as it's shown - so with the explicit filter
-        // on, the title is filtered here too.
-        if (title) {
-            link.title = t("Listen to {0} on Apple Music", title);
-        } else {
-            link.title = t("Listen on Apple Music");
-        }
+        // Just something to read - none of it is a link.
+        const box = document.createElement("div");
+        box.className = "recentRow";
 
-        link.appendChild(cover(activity));
+        box.appendChild(cover(activity));
 
         const text = document.createElement("span");
         text.className = "recentText";
@@ -339,7 +358,7 @@
         artistEl.textContent = artist;
         text.appendChild(artistEl);
 
-        link.appendChild(text);
+        box.appendChild(text);
 
         const when = document.createElement("time");
         when.className = "recentWhen subtitleColor";
@@ -348,9 +367,9 @@
         when.dataset.at = String(track.at);
 
         when.textContent = whenText(when);
-        link.appendChild(when);
+        box.appendChild(when);
 
-        item.appendChild(link);
+        item.appendChild(box);
         return item;
     }
 
@@ -400,25 +419,6 @@
         return placeholder;
     }
 
-    // A search rather than the exact song: the card's exact lookup takes
-    // several requests to Apple per song, which is a lot for twenty of them,
-    // and the song is almost always the first result anyway. The real names
-    // are searched for, not the censored ones shown.
-    function appleMusicSearch(activity) {
-        const parts = [];
-
-        if (activity.details) {
-            parts.push(activity.details);
-        }
-
-        const artist = artistOf(activity.state);
-        if (artist) {
-            parts.push(artist);
-        }
-
-        return "https://music.apple.com/search?term=" + encodeURIComponent(parts.join(" "));
-    }
-
     function whenText(el) {
         // Never "now": next to a song that is playing on the card, it reads
         // as if both were on at once. Anything under a minute is a minute ago
@@ -441,8 +441,8 @@
         dialog.querySelector(".modalDescription").textContent = t("The last songs I listened to, newest first.");
         dialog.querySelector(".recentClose").textContent = t("Close");
 
-        // The rows carry translated text of their own - the "ago" times and
-        // the link titles - so they are drawn again.
+        // The rows carry translated text of their own - the "ago" times -
+        // so they are drawn again.
         if (tracks && dialog.open) {
             render();
         }

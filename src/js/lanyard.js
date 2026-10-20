@@ -522,11 +522,25 @@
     // The whole section, so the Lyrics button under the card is counted too.
     const section = document.querySelector(".discordWrapper");
 
+    // Which card it was, so the placeholder can take the same shape.
+    let lastPlayed = false;
+    if (els.amCard && els.amCard.classList.contains("lastPlayed")) {
+      lastPlayed = true;
+    }
+
     try {
       if (open && section) {
         localStorage.setItem("lanyardReserve", String(section.offsetHeight));
       } else {
         localStorage.removeItem("lanyardReserve");
+      }
+
+      if (open && lastPlayed) {
+        localStorage.setItem("lanyardReserveKind", "last");
+      } else if (open) {
+        localStorage.setItem("lanyardReserveKind", "playing");
+      } else {
+        localStorage.removeItem("lanyardReserveKind");
       }
     } catch {
       // Storage blocked, the next visit just grows the card instead.
