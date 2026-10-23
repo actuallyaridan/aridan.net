@@ -1,6 +1,22 @@
-# <img src="/assets/media/favicons/icon-192.png" width="32px" height="32px"> aridan.net
-A modern, fast and lightweight website that can be used to show general information about a person.
-Supports multiple languages and follows accessibility guidelines for a more open internet. 
+<div align="center">
+
+  <img src="./assets/media/favicons/icon-192.png" width="64" height="64" alt="">
+
+  # aridan.net
+  <i>My personal website, at <a href="https://aridan.net">aridan.net</a></i>
+
+  <p>
+    A modern, fast and lightweight website that can be used to show general information about a person. Supports multiple languages and follows accessibility guidelines for a more open internet.
+  </p>
+
+</div>
+<br>
+
+| | | |
+|:-------------------------:|:-------------------------:|:-------------------------:|
+| <img src="./screenshots/now-playing.webp" alt="The homepage in the light theme, with the Apple Music card showing the song playing right now, its progress bar, and the Lyrics and Recently played buttons."> | <img src="./screenshots/last-played.webp" alt="The homepage in the dark theme with nothing playing, so the card shows the last played song and how long ago it was."> | <img src="./screenshots/settings.webp" alt="The settings panel slid out from the right, with language, theme, accent colour, and the general, performance, accessibility and developer toggles."> |
+| <img src="./screenshots/projects.webp" alt="The Projects page in the dark theme, with the Ongoing and Paused tabs and the Windows-alike Software for Linux project and its live star and fork counts."> | <img src="./screenshots/articles.webp" alt="The Articles page in the light theme, listing articles as cards with their preview and date."> | <img src="./screenshots/hobbies.webp" alt="The Hobbies page in the dark theme, with the Hackintosh and iPods tabs."> |
+| <img src="./screenshots/mobile-home.webp" alt="The homepage on a phone in the light theme, with the last played card under the header."> | <img src="./screenshots/mobile-menu.webp" alt="The mobile menu in the dark theme, with the page pushed aside and the navigation links listed on the right."> | <img src="./screenshots/mobile-settings.webp" alt="The settings panel on a phone, slid out over the page."> |
 
 ## Contributors
 
