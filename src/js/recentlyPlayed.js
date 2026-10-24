@@ -36,7 +36,7 @@
     const SKELETON_ARTIST_WIDTHS = ["40%", "50%", "30%", "45%", "35%"];
 
     // Biggest first: the first unit the time fits at least one of is the one
-    // it is told in. The same as lanyard.js.
+    // it is told in. The same as presence.js.
     const AGO_UNITS = [
         { unit: "year", seconds: 365 * 24 * 60 * 60 },
         { unit: "month", seconds: 30 * 24 * 60 * 60 },
@@ -112,8 +112,8 @@
         window.i18n?.onChange(translate);
         translate();
 
-        if (window.Lanyard) {
-            window.Lanyard.subscribe(onPresence);
+        if (window.Presence) {
+            window.Presence.subscribe(onPresence);
         }
     }
 
@@ -122,10 +122,10 @@
     function onPresence(presence) {
         let hasMusic = false;
 
-        if (window.Lanyard.appleMusic(presence)) {
+        if (window.Presence.appleMusic(presence)) {
             hasMusic = true;
         }
-        if (window.Lanyard.lastPlayed(presence)) {
+        if (window.Presence.lastPlayed(presence)) {
             hasMusic = true;
         }
 
@@ -133,7 +133,7 @@
 
         // Only a change of song matters here; presence also updates for
         // things like a game starting, which leave the list as it was.
-        const music = window.Lanyard.appleMusic(presence);
+        const music = window.Presence.appleMusic(presence);
 
         let key = "";
         if (music) {
@@ -377,7 +377,7 @@
     // the Cider host's originals can be tens of megabytes. With no small copy
     // to be had, the row gets a music note instead.
     function cover(activity) {
-        const art = window.Lanyard ? window.Lanyard.artwork(activity) : null;
+        const art = window.Presence ? window.Presence.artwork(activity) : null;
 
         let url = "";
         if (art && art.proxy) {
@@ -451,7 +451,7 @@
     /* ---------- Helpers ---------- */
 
     // "3 hours ago", in whichever language the site is in. The same as
-    // timeAgo() in lanyard.js.
+    // timeAgo() in presence.js.
     function timeAgo(at) {
         const elapsed = Math.max(0, (Date.now() - at) / 1000);
         const format = relativeTimeFormat();
@@ -495,7 +495,7 @@
     }
 
     // Cider puts "by " in front of the artist. Anchored, so an artist with
-    // "by" inside their name keeps it. The same as artistOf() in lanyard.js.
+    // "by" inside their name keeps it. The same as artistOf() in presence.js.
     function artistOf(state) {
         return String(state || "").trim().replace(/^by\s+/i, "");
     }

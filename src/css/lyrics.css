@@ -141,7 +141,7 @@ html.lyricsOpen #page * {
 
 /* As tall as the box's inside, whichever style sets that height. Round and
    turning like a record, the same as the cover in the Apple Music widget -
-   `spin` is that widget's animation, from lanyard.css, which every page with
+   `spin` is that widget's animation, from presence.css, which every page with
    the lyrics overlay loads. */
 #lyricsNowArt {
     flex: 0 0 auto;

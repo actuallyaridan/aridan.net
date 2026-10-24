@@ -2,7 +2,7 @@
 (() => {
   "use strict";
 
-  if (!document.querySelector(".discordWrapper")) return;
+  if (!document.querySelector(".presenceWrapper")) return;
 
   const HIGH_RES = 512;
   const UPGRADE_RES = 1024;
@@ -13,6 +13,9 @@
   const APPLE_RES = 300;
   const LOADER_MS = 500;
   const REFRESH_TIMEOUT_MS = 10000;
+
+  // Lanyard's numbering for an activity's "type", as in presenceClient.js.
+  const LISTENING = 2;
 
   const CARD_MS = 320;
   const CARD_EASE = "cubic-bezier(.2,.7,.3,1)";
@@ -45,16 +48,11 @@
     loading: byId("loading"),
     error: byId("errorMessage"),
     errorText: byId("errorMessageText"),
-    content: byId("loadedLanyard"),
-    lanyardDiscord: byId("lanyardDiscord"),
+    content: byId("loadedPresence"),
+    presenceCard: byId("presenceCard"),
 
-    amCard: byId("amLanyardDiscord"),
-    otherCard: byId("discordActivity"),
-
-    activityLogoLarge: byId("activityLogoLarge"),
-    activityName: byId("activityName"),
-    activityDetails: byId("activityDetails"),
-    activityState: byId("activityState"),
+    amCard: byId("amActivity"),
+    otherTemplate: byId("otherActivityTemplate"),
 
     amActivityLogoLarge: byId("amActivityLogoLarge"),
     amActivityName: byId("amActivityName"),
@@ -64,17 +62,14 @@
 
     amProgressBar: byId("amProgressBar"),
     amProgressTrack: byId("amProgressTrack"),
-    progressBar: byId("ProgressBar"),
-    progressTrack: byId("ProgressTrack"),
-    progressSeparator: byId("ProgressSeparator"),
 
     appleLink: byId("apple-link"),
 
-    refresh: byId("lanyardRefresh"),
+    refresh: byId("presenceRefresh"),
 
-    strip: byId("discord"),
-    scrollPrev: byId("discordScrollPrev"),
-    scrollNext: byId("discordScrollNext"),
+    strip: byId("activityStrip"),
+    scrollPrev: byId("activityScrollPrev"),
+    scrollNext: byId("activityScrollNext"),
   };
 
   let presence = null;
@@ -102,6 +97,27 @@
   // see animateActivityChange(). The strip's arrows wait for these.
   let cardsMoving = 0;
 
+  // One card per program besides the music, by key - see cardKeys(). Each is
+  // { el, parts }, parts being the elements in it that get written to.
+  let otherCards = new Map();
+
+  // When this page first saw each program, by key, for the ones that do not
+  // say when they were opened - see openedAt().
+  const firstSeen = new Map();
+
+  // The music card's own clock and progress bar. The clock is commented out
+  // in index.html, so those three come back null and are skipped. Its bar
+  // stays put with no end to count to, just empty.
+  const amParts = {
+    track: els.amProgressTrack,
+    bar: els.amProgressBar,
+    hidesUntimed: false,
+    clock: null,
+    time: byId("amActivityTime"),
+    remaining: byId("amRemaining"),
+    elapsed: byId("amElapsed"),
+  };
+
   // What hovering a couple of artists' names gets - see initArtistEggs().
   const LORDE_GIF = "/assets/uploads/images/iamlorde.gif";
   const LORDE_LINE = "I am Lorde, ya ya ya";
@@ -119,14 +135,12 @@
     debug.warn(...parts);
   }
 
-  for (const card of [els.amCard, els.otherCard]) {
-    if (card) card.classList.add("activity");
-  }
+  els.amCard?.classList.add("activity");
 
   // The load-time entrance is a one-off: once it has played, the card goes
   // back to its usual slide so closing it later still animates.
   els.content?.addEventListener("animationend", (e) => {
-    if (e.animationName !== "lanyard-focus-in") return;
+    if (e.animationName !== "presence-focus-in") return;
     els.content.classList.remove("revealing");
   });
 
@@ -135,7 +149,7 @@
   initArtistEggs();
   syncRefreshButton();
 
-  window.Lanyard.subscribe((data) => {
+  window.Presence.subscribe((data) => {
     presence = data;
     setRefreshBusy(false);
     updateUi();
@@ -149,6 +163,10 @@
   els.refresh?.addEventListener("click", onRefreshClick);
   window.i18n?.onChange(() => {
     applyAppleHref();
+
+    for (const card of otherCards.values()) {
+      translateClock(card.parts);
+    }
 
     if (lastPlayedAt) {
       setText(els.amActivityName, translate("Last played"));
@@ -172,7 +190,9 @@
       upgradeArt = !!value;
       if (upgradeArt && presence) {
         artState.delete(els.amActivityLogoLarge);
-        artState.delete(els.activityLogoLarge);
+        for (const card of otherCards.values()) {
+          artState.delete(card.parts.logo);
+        }
         updateUi();
       }
       return;
@@ -200,7 +220,12 @@
   function onMotionChange() {
     if (!presence) return;
 
-    for (const el of [els.amActivityLogoLarge, els.activityLogoLarge]) {
+    const covers = [els.amActivityLogoLarge];
+    for (const card of otherCards.values()) {
+      covers.push(card.parts.logo);
+    }
+
+    for (const el of covers) {
       const state = artState.get(el);
       if (!state) continue;
 
@@ -212,13 +237,13 @@
   }
 
   function syncRefreshButton() {
-    els.refresh?.classList.toggle("hide", window.Lanyard.autoUpdate);
+    els.refresh?.classList.toggle("hide", window.Presence.autoUpdate);
   }
 
   function onRefreshClick() {
-    if (window.Lanyard.autoUpdate) return;
+    if (window.Presence.autoUpdate) return;
     setRefreshBusy(true);
-    window.Lanyard.refresh();
+    window.Presence.refresh();
     refreshTimer = setTimeout(() => setRefreshBusy(false), REFRESH_TIMEOUT_MS);
   }
 
@@ -315,14 +340,14 @@
 
       updateActivityInfo(activities, status);
 
-      const music = window.Lanyard.appleMusic(presence);
-      if (music) updateProgressBar(music.timestamps);
+      const music = window.Presence.appleMusic(presence);
+      if (music) updateProgressBar(music.timestamps, amParts);
 
       show(els.loading, false);
-      // Empty but expanded, #loadedLanyard still contributes its 12px top margin
+      // Empty but expanded, #loadedPresence still contributes its 12px top margin
       // and nudges the page down, so it only opens once there is actually an
       // activity card inside it.
-      const last = window.Lanyard.lastPlayed(presence);
+      const last = window.Presence.lastPlayed(presence);
       showActivityCard(activities.length > 0 || !!last);
       show(els.error, false);
 
@@ -343,7 +368,7 @@
     firstAnswerSeen = true;
 
     const root = document.documentElement;
-    const roomHeld = root.classList.contains("lanyard-reserve");
+    const roomHeld = root.classList.contains("presence-reserve");
 
     const wasOpen = cardOpen;
     cardOpen = !!yes;
@@ -361,7 +386,7 @@
     }
 
     slideCard(() => {
-      if (releasing) root.classList.remove("lanyard-reserve");
+      if (releasing) root.classList.remove("presence-reserve");
     }, changing, roomHeld);
   }
 
@@ -378,7 +403,7 @@
     settleSlide();
 
     const animate = !reduceMotion() && !document.hidden;
-    const followers = elementsBelow(els.lanyardDiscord);
+    const followers = elementsBelow(els.presenceCard);
 
     let before = null;
     if (animate) before = followers.map(boxTop);
@@ -525,7 +550,7 @@
     const open = cardOpen;
 
     // The whole section, so the Lyrics button under the card is counted too.
-    const section = document.querySelector(".discordWrapper");
+    const section = document.querySelector(".presenceWrapper");
 
     // Which card it was, so the placeholder can take the same shape.
     let lastPlayed = false;
@@ -535,17 +560,17 @@
 
     try {
       if (open && section) {
-        localStorage.setItem("lanyardReserve", String(section.offsetHeight));
+        localStorage.setItem("presenceReserve", String(section.offsetHeight));
       } else {
-        localStorage.removeItem("lanyardReserve");
+        localStorage.removeItem("presenceReserve");
       }
 
       if (open && lastPlayed) {
-        localStorage.setItem("lanyardReserveKind", "last");
+        localStorage.setItem("presenceReserveKind", "last");
       } else if (open) {
-        localStorage.setItem("lanyardReserveKind", "playing");
+        localStorage.setItem("presenceReserveKind", "playing");
       } else {
-        localStorage.removeItem("lanyardReserveKind");
+        localStorage.removeItem("presenceReserveKind");
       }
     } catch {
       // Storage blocked, the next visit just grows the card instead.
@@ -554,24 +579,24 @@
 
   function updateActivityInfo(activities, status) {
     // With nothing playing, the music card shows the last song instead.
-    const last = window.Lanyard.lastPlayed(presence);
+    const last = window.Presence.lastPlayed(presence);
 
     // Discord only reports activity while online, but the aridan-presence
     // agent reports it with Discord closed too, so either one opens this.
     // So does a last song to show.
-    show(els.lanyardDiscord, status === "online" || activities.length > 0 || !!last);
+    show(els.presenceCard, status === "online" || activities.length > 0 || !!last);
 
     // Nothing at all: the whole card collapses, and the collapse needs a height
     // to shrink from, so the last frame is left mounted rather than emptied out
-    // first. #loadedLanyard's delayed visibility takes it out of the a11y tree
+    // first. #loadedPresence's delayed visibility takes it out of the a11y tree
     // once the transition has finished.
     if (!activities.length && !last) {
       setLastPlayedMode(false);
       return;
     }
 
-    const appleMusic = window.Lanyard.appleMusic(presence);
-    const others = activities.filter((a) => !window.Lanyard.isAppleMusic(a));
+    const appleMusic = window.Presence.appleMusic(presence);
+    const others = activities.filter((a) => !window.Presence.isAppleMusic(a));
 
     animateActivityChange(() => {
       if (appleMusic) {
@@ -583,16 +608,213 @@
         show(els.amCard, false);
       }
 
-      show(els.otherCard, others.length > 0);
-      updateActivityImages(others);
-      updateActivityDetails(others);
+      updateOtherCards(others);
     });
+  }
+
+  // A card for every program, after the music card. Cards are kept by key
+  // from one update to the next, so the cover in each is not loaded again
+  // and the FLIP in animateActivityChange() can tell a moved card from a new
+  // one.
+  function updateOtherCards(others) {
+    const sorted = sortByOpened(others);
+    const keys = cardKeys(sorted);
+
+    const next = new Map();
+
+    for (let i = 0; i < sorted.length; i++) {
+      const key = keys[i];
+
+      let card = otherCards.get(key);
+      if (!card) {
+        card = makeOtherCard();
+      }
+      if (!card) continue;
+
+      next.set(key, card);
+      fillOtherCard(card, sorted[i]);
+    }
+
+    // Programs that have closed.
+    for (const [key, card] of otherCards) {
+      if (next.has(key)) continue;
+      card.el.remove();
+    }
+
+    // Appending a card that is already in the strip moves it, so this puts
+    // them all in order, new ones included, after the music card.
+    for (const card of next.values()) {
+      els.strip.appendChild(card.el);
+      card.el.classList.remove("alone");
+    }
+
+    // They stack two to a column (see #activityStrip in presence.css), so an
+    // odd one out at the end has a column to itself, and is centred in it
+    // rather than left at the top.
+    const cards = [...next.values()];
+    if (cards.length % 2 === 1) {
+      cards[cards.length - 1].el.classList.add("alone");
+    }
+
+    otherCards = next;
+    forgetClosed(keys);
+  }
+
+  // Music first, the music card above being the first of all. Anything else
+  // listening, Spotify through Discord say, leads the rest the same way.
+  // Then in the order the programs were opened, oldest first. sort() keeps
+  // ties in the order they came in, which for the agent is the order the
+  // apps connected to it.
+  function sortByOpened(activities) {
+    const music = [];
+    const programs = [];
+
+    for (const a of activities) {
+      if (a.type === LISTENING) {
+        music.push(a);
+      } else {
+        programs.push(a);
+      }
+    }
+
+    const keys = cardKeys(programs);
+    const opened = new Map();
+    for (let i = 0; i < programs.length; i++) {
+      opened.set(programs[i], openedAt(programs[i], keys[i]));
+    }
+
+    programs.sort((a, b) => opened.get(a) - opened.get(b));
+
+    return music.concat(programs);
+  }
+
+  // Discord says when it was handed an activity, in created_at. The agent
+  // sends no such thing, so for its activities the time this page first saw
+  // them stands in.
+  function openedAt(activity, key) {
+    if (typeof activity.created_at === "number") {
+      return activity.created_at;
+    }
+
+    if (!firstSeen.has(key)) {
+      firstSeen.set(key, Date.now());
+    }
+
+    return firstSeen.get(key);
+  }
+
+  // A program that closes and opens again counts as newly opened.
+  function forgetClosed(keys) {
+    for (const key of firstSeen.keys()) {
+      if (!keys.includes(key)) firstSeen.delete(key);
+    }
+  }
+
+  // What tells one program from another across updates: its application id,
+  // or its name when it has none. Two of the same, which Discord can send,
+  // are told apart by how many came before.
+  function cardKeys(activities) {
+    const counts = new Map();
+    const keys = [];
+
+    for (const a of activities) {
+      const base = a.application_id || a.name || "";
+      const count = counts.get(base) || 0;
+      counts.set(base, count + 1);
+
+      keys.push(base + "#" + count);
+    }
+
+    return keys;
+  }
+
+  function makeOtherCard() {
+    const template = els.otherTemplate;
+    if (!template || !els.strip) return null;
+
+    const el = template.content.firstElementChild.cloneNode(true);
+    el.classList.add("activity");
+
+    // Same as the music card: show() puts it on screen once it is filled.
+    el.style.display = "none";
+
+    const parts = {
+      icon: el.querySelector(".activityHeading > i"),
+      name: el.querySelector(".activityName"),
+      logo: el.querySelector(".activityLogoLarge"),
+      details: el.querySelector(".activityDetails"),
+      state: el.querySelector(".activityState"),
+      info: el.querySelector(".otherActivityInfo"),
+      track: el.querySelector(".activityProgressTrack"),
+      bar: el.querySelector(".activityProgressBar"),
+      hidesUntimed: true,
+      clock: el.querySelector(".activityClock"),
+      time: el.querySelector(".activityTime"),
+      remaining: el.querySelector(".activityRemaining"),
+      elapsed: el.querySelector(".activityElapsed"),
+    };
+
+    // A late cover can change how wide the strip is - see initStripNav().
+    parts.logo?.addEventListener("load", updateStripNav);
+
+    translateClock(parts);
+
+    return { el, parts, activity: null };
+  }
+
+  // The template is outside i18n.js's reach (it is not in the page), so the
+  // words by the clock are put in here, and again when the language changes.
+  function translateClock(parts) {
+    setWord(parts.remaining, translate("remaining"));
+    setWord(parts.elapsed, translate("elapsed"));
+  }
+
+  // Not setText(): that shows what it fills, and these two take turns.
+  function setWord(el, text) {
+    if (!el) return;
+    el.textContent = text;
+  }
+
+  function fillOtherCard(card, a) {
+    const parts = card.parts;
+    card.activity = a;
+
+    show(card.el, true);
+
+    const hasImage = !!a.assets?.large_image;
+    show(parts.logo, hasImage);
+    if (hasImage) {
+      updateImage(parts.logo, a, a.assets.large_text);
+    }
+
+    updateActivityIcon(parts.icon, a);
+    setText(parts.name, a.name);
+    setText(parts.details, shown(a.details));
+    setText(parts.state, shown(a.state || ""));
+
+    // Plenty of programs say nothing but their name, and then the card is
+    // only the heading.
+    const saysMore = !!(a.details || a.state);
+    parts.info?.classList.toggle("hide", !saysMore);
+
+    updateActivityTime(a.timestamps, parts);
+    updateProgressBar(a.timestamps, parts);
+  }
+
+  // The program's own logo when Font Awesome has one, or one for its kind of
+  // program - see activityIcons.js. The window from the template otherwise.
+  function updateActivityIcon(el, activity) {
+    if (!el) return;
+    if (!window.ActivityIcons) return;
+
+    const classes = window.ActivityIcons.iconFor(activity);
+    el.className = classes.join(" ");
   }
 
   // The cards sit in a centred flex row, so revealing one also shoves its
   // neighbour sideways. FLIP: note where each card is, apply the change, then
   // animate from the old box, new cards come into focus the same way the whole
-  // card does on load (lanyard-focus-in in lanyard.css), existing ones slide
+  // card does on load (presence-focus-in in presence.css), existing ones slide
   // across.
   function animateActivityChange(mutate) {
     if (reduceMotion()) {
@@ -607,15 +829,15 @@
       return;
     }
 
-    const cards = [els.amCard, els.otherCard].filter(Boolean);
     const before = new Map();
-    for (const card of cards) {
+    for (const card of allCards()) {
       if (isVisible(card)) before.set(card, card.getBoundingClientRect());
     }
 
     mutate();
 
-    for (const card of cards) {
+    // Asked again: the change can have added cards or taken some away.
+    for (const card of allCards()) {
       if (!isVisible(card)) continue;
 
       const previous = before.get(card);
@@ -666,29 +888,16 @@
     animation.addEventListener("cancel", settle);
   }
 
-  function updateActivityImages(activities) {
-    const first = activities.find((a) => a.assets?.large_image);
-    show(els.activityLogoLarge, !!first);
-    if (first) {
-      updateImage(els.activityLogoLarge, first, first.assets.large_text);
-    }
-  }
+  // The music card, then every program's, in the order they are in.
+  function allCards() {
+    const cards = [];
+    if (els.amCard) cards.push(els.amCard);
 
-  function updateActivityDetails(activities) {
-    if (!activities.length) {
-      show(els.activityName, false);
-      show(els.activityDetails, false);
-      show(els.activityState, false);
-      return;
+    for (const card of otherCards.values()) {
+      cards.push(card.el);
     }
 
-    const a = activities[0];
-    setText(els.activityName, a.name);
-    setText(els.activityDetails, shown(a.details));
-    setText(els.activityState, shown(a.state || ""));
-
-    updateActivityTime(a.timestamps);
-    updateProgressBar(a.timestamps, "");
+    return cards;
   }
 
   function updateAppleMusicInfo(a) {
@@ -702,8 +911,8 @@
     setText(els.amActivityDetails, shown(a.details));
     markArtist(a);
 
-    updateActivityTime(a.timestamps, "am");
-    updateProgressBar(a.timestamps);
+    updateActivityTime(a.timestamps, amParts);
+    updateProgressBar(a.timestamps, amParts);
 
     refreshLinkIfNewTrack(a);
   }
@@ -774,7 +983,7 @@
     onHover(name, () => {
       const artist = els.amCard?.dataset.artist;
 
-      // The 13 has a look of its own - see .luckyThirteen in lanyard.css.
+      // The 13 has a look of its own - see .luckyThirteen in presence.css.
       artistBubble.element.classList.toggle("luckyThirteen", artist === "taylor");
 
       if (artist === "lorde") {
@@ -790,7 +999,7 @@
 
 
   // The class swaps the progress bar for the "ago" line and stops the record
-  // spinning - see lanyard.css.
+  // spinning - see presence.css.
   function setLastPlayedMode(yes) {
     if (els.amCard) {
       els.amCard.classList.toggle("lastPlayed", yes);
@@ -876,10 +1085,11 @@
     refreshAppleMusicLink(a.details, a.state, a.assets?.large_text, a.assets?.large_image);
   }
 
-  function updateProgressBar(timestamps, prefix = "am") {
-    const am = prefix === "am";
-    const bar = am ? els.amProgressBar : els.progressBar;
-    const track = am ? els.amProgressTrack : els.progressTrack;
+  // `parts` is amParts or one program card's. A program's bar is only there
+  // when it has an end to count to; the music card's just stays empty.
+  function updateProgressBar(timestamps, parts) {
+    const bar = parts.bar;
+    const track = parts.track;
     if (!bar) return;
 
     const start = +new Date(timestamps?.start || 0);
@@ -887,9 +1097,8 @@
     // A zero-length window would divide by zero.
     const timed = start > 0 && end > start;
 
-    if (!am) {
+    if (parts.hidesUntimed) {
       track?.classList.toggle("hide", !timed);
-      els.progressSeparator?.classList.toggle("hide", timed);
     }
 
     let pct = 0;
@@ -907,7 +1116,7 @@
     }
   }
 
-  function updateActivityTime(timestamps, prefix = "") {
+  function updateActivityTime(timestamps, parts) {
     const now = Date.now();
 
     let seconds = null;
@@ -918,14 +1127,19 @@
       seconds = (now - new Date(timestamps.start).getTime()) / 1000;
     }
 
+    // No times at all: a program's clock goes rather than showing "-:-".
+    parts.clock?.classList.toggle("hide", seconds === null);
+
     let text = "-:-";
     if (seconds !== null) text = clock(seconds);
 
-    setText(byId(prefix + "ActivityTime"), text);
+    // setWord(), not setText(): the time sits in a line with its word, and
+    // setText() would make it a flex box on a line of its own.
+    setWord(parts.time, text);
 
     const countingDown = !!timestamps?.end;
-    byId(prefix + "Remaining")?.classList.toggle("hide", !countingDown);
-    byId(prefix + "Elapsed")?.classList.toggle("hide", countingDown);
+    parts.remaining?.classList.toggle("hide", !countingDown);
+    parts.elapsed?.classList.toggle("hide", countingDown);
   }
 
   function clock(seconds) {
@@ -946,7 +1160,7 @@
 
   // Best-looking version last: each rung is fetched behind the one on screen.
   function artworkLadder(activity) {
-    const art = window.Lanyard.artwork(activity);
+    const art = window.Presence.artwork(activity);
     if (!art) return [];
 
     if (art.appAsset) {
@@ -1463,7 +1677,7 @@
   function msUntilClockTurns() {
     const activities = presence?.activities || [];
 
-    let timed = window.Lanyard.appleMusic(presence);
+    let timed = window.Presence.appleMusic(presence);
     if (!timed?.timestamps) {
       timed = activities.find((a) => a?.timestamps);
     }
@@ -1496,18 +1710,19 @@
     if (document.documentElement.classList.contains("lyricsOpen")) return;
     if (document.hidden) return;
 
-    const activities = presence?.activities || [];
-    const music = window.Lanyard.appleMusic(presence);
+    const music = window.Presence.appleMusic(presence);
 
     if (music) {
-      updateProgressBar(music.timestamps);
-      updateActivityTime(music.timestamps, "am");
+      updateProgressBar(music.timestamps, amParts);
+      updateActivityTime(music.timestamps, amParts);
     }
 
-    const other = activities.find((a) => a !== music && a?.timestamps);
-    if (other) {
-      updateActivityTime(other.timestamps);
-      updateProgressBar(other.timestamps, "");
+    for (const card of otherCards.values()) {
+      const timestamps = card.activity?.timestamps;
+      if (!timestamps) continue;
+
+      updateActivityTime(timestamps, card.parts);
+      updateProgressBar(timestamps, card.parts);
     }
   }
 
@@ -1531,7 +1746,7 @@
       return a?.timestamps?.start || a?.timestamps?.end;
     });
 
-    const wanted = window.Lanyard.autoUpdate && anythingTimed;
+    const wanted = window.Presence.autoUpdate && anythingTimed;
 
     // Started over on every presence update, not only the first: a new song
     // is shown at once, and its clock turns over at different moments from
@@ -1568,7 +1783,7 @@
   }
 
   function handleError(e) {
-    console.error("[lanyard.js]", e);
+    console.error("[presence.js]", e);
     // Only the copy is replaced, writing to #errorMessage itself would blow
     // away the icon paragraph along with it.
     if (els.errorText) els.errorText.textContent = `An error occurred: ${e?.message || e}`;
@@ -1577,7 +1792,6 @@
   }
 
   function initAccessibility() {
-    els.activityLogoLarge?.setAttribute("alt", "Discord activity icon");
     els.amActivityLogoLarge?.setAttribute("alt", "Album art");
   }
 

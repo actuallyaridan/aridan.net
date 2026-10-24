@@ -502,7 +502,7 @@ html.reduce-transparency .iconPicker {
     cursor: progress;
 }
 
-/* The site's small loading ring (.lds-ring.smallLoader in lanyard.css) in
+/* The site's small loading ring (.lds-ring.smallLoader in presence.css) in
    the floppy's place, in the button's white. */
 #saveArticle .lds-ring.smallLoader,
 .editorStatus .lds-ring.smallLoader {

@@ -248,7 +248,7 @@ function startTitleShuffle() {
 }
 
 /* The spinning album covers - the Apple Music card's, and the one in the
-   lyrics bar - both turn with the `spin` animation in lanyard.css.
+   lyrics bar - both turn with the `spin` animation in presence.css.
 
    On iPad, Safari sometimes stops turning one while still reporting the
    animation as running: its copy on the graphics layer stalls, typically

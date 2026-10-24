@@ -603,7 +603,7 @@
     applyMode();
   });
 
-  window.Lanyard = {
+  window.Presence = {
     get autoUpdate() { return autoUpdate; },
     get presence() { return latest; },
 
@@ -611,7 +611,7 @@
       subscribers.add(fn);
 
       // Catch a late subscriber up, so it is not left with a blank card - but
-      // only once the script subscribing has finished running. lanyard.js
+      // only once the script subscribing has finished running. presence.js
       // subscribes near its top and declares what its handler needs further
       // down, so calling it right here, when a presence has already arrived,
       // ran the handler before those existed.

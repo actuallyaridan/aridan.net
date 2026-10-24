@@ -39,14 +39,15 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/src/css/styles.css">
     <link rel="stylesheet" href="/src/css/settings.css">
-    <link rel="stylesheet" href="/src/css/lanyard.css">
+    <link rel="stylesheet" href="/src/css/presence.css">
     <link rel="stylesheet" href="/src/css/lyrics.css">
     <script src="/src/js/general.js" defer></script>
     <script src="/src/js/i18n.js" defer></script>
 
-    <script src="/src/js/lanyardClient.js" defer></script>
+    <script src="/src/js/presenceClient.js" defer></script>
     <script src="/src/js/profanity.js" defer></script>
-    <script src="/src/js/lanyard.js" defer></script>
+    <script src="/src/js/activityIcons.js" defer></script>
+    <script src="/src/js/presence.js" defer></script>
     <script src="/src/js/albumAccent.js" defer></script>
     <script src="/src/js/lyrics.js" defer></script>
     <script src="/src/js/recentlyPlayed.js" defer></script>
@@ -167,13 +168,13 @@
             </div>
 
             <div class="section">
-                <section class="discordWrapper invisible-scrollbar" id="currentdiscord"
-                    aria-labelledby="currentdiscordHeading">
-                    <h2 id="currentdiscordHeading" class="visuallyHidden">What I'm doing right now</h2>
+                <section class="presenceWrapper invisible-scrollbar" id="presenceSection"
+                    aria-labelledby="presenceHeading">
+                    <h2 id="presenceHeading" class="visuallyHidden">What I'm doing right now</h2>
                     <!-- Stands in the room held for the card until the card itself arrives
-                         - see "Placeholders while things load" in lanyard.css. -->
-                    <div class="lanyardSkeleton skeleton" aria-hidden="true">
-                        <div class="lanyardSkeletonCard">
+                         - see "Placeholders while things load" in presence.css. -->
+                    <div class="presenceSkeleton skeleton" aria-hidden="true">
+                        <div class="presenceSkeletonCard">
                             <span class="skeletonBar skeletonHeading"></span>
                             <span class="skeletonBar skeletonArt"></span>
                             <span class="skeletonBar skeletonTitle"></span>
@@ -182,7 +183,7 @@
                             <span class="skeletonBar skeletonBadge"></span>
                         </div>
                         <!-- The same for when the last visit ended on the last-played card. -->
-                        <div class="lanyardSkeletonCard lanyardSkeletonLast">
+                        <div class="presenceSkeletonCard presenceSkeletonLast">
                             <span class="skeletonBar skeletonHeading"></span>
                             <span class="skeletonBar skeletonAgo"></span>
                             <span class="skeletonBar skeletonArt"></span>
@@ -196,27 +197,27 @@
                             <span class="skeletonBar skeletonButton skeletonRecentButton"></span>
                         </div>
                     </div>
-                    <div id="lanyardDiscord">
+                    <div id="presenceCard">
                         <div id="loading">
                         </div>
                         <div id="errorMessage" role="alert">
                             <p class="errorMessage" id="errorMessageText">Something went wrong.<br>Try again later.</p>
                         </div>
-                        <div id="loadedLanyard">
-                            <!-- Single child so #loadedLanyard can collapse as one 0fr/1fr grid row. -->
-                            <div id="loadedLanyardInner">
-                                <div id="discordScroller">
-                                    <button type="button" id="discordScrollPrev" class="button activityNav hide"
+                        <div id="loadedPresence">
+                            <!-- Single child so #loadedPresence can collapse as one 0fr/1fr grid row. -->
+                            <div id="loadedPresenceInner">
+                                <div id="activityScroller">
+                                    <button type="button" id="activityScrollPrev" class="button activityNav hide"
                                         title="Previous activity" aria-label="Previous activity"
-                                        aria-controls="discord">
+                                        aria-controls="activityStrip">
                                         <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                                     </button>
-                                    <button type="button" id="discordScrollNext" class="button activityNav hide"
-                                        title="Next activity" aria-label="Next activity" aria-controls="discord">
+                                    <button type="button" id="activityScrollNext" class="button activityNav hide"
+                                        title="Next activity" aria-label="Next activity" aria-controls="activityStrip">
                                         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                                     </button>
-                                    <div id="discord" role="group" aria-label="Activities">
-                                        <div id="amLanyardDiscord">
+                                    <div id="activityStrip" role="group" aria-label="Activities">
+                                        <div id="amActivity">
                                             <span class="titleActivity">
                                                 <span class="activityHeading">
                                                     <i class="fa-brands fa-itunes-note" aria-hidden="true"></i>
@@ -232,11 +233,11 @@
                                                     <div></div>
                                                 </div>
                                             </span>
-                                            <div id="amDiscordActivityImages">
+                                            <div id="amActivityImages">
                                                 <img id="amActivityLogoLarge" draggable="false" width="96" height="96"
                                                     alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="albumArt">
                                             </div>
-                                            <div id="amDiscordActivityInfo">
+                                            <div id="amActivityInfo">
                                                 <p id="amActivityDetails" class="titleColor">Loading</p>
                                                 <p id="amActivityState" class="subtitleColor">Loading</p>
                                                 <div class="progress-bar-container" id="amProgressTrack"
@@ -258,40 +259,43 @@
                                                     class="h-8 mt-2 pointer-events-auto" />
                                             </a>
                                         </div>
-                                        <div id="discordActivity">
-                                            <span class="titleActivity">
-                                                <span class="activityHeading">
-                                                    <i class="fa-regular fa-window-maximize" aria-hidden="true"></i>
-                                                    <h3 id="activityName">Loading</h3>
+                                        <!-- One of these per program, cloned in presence.js and put
+                                             after the music card, oldest first. Laid out like the
+                                             last-played card, and stacked two to a column. -->
+                                        <template id="otherActivityTemplate">
+                                            <div class="otherActivity">
+                                                <span class="titleActivity">
+                                                    <span class="activityHeading">
+                                                        <i class="fa-regular fa-window-maximize" aria-hidden="true"></i>
+                                                        <h3 class="activityName"></h3>
+                                                    </span>
+                                                    <!-- How long it has been open, or how long is left. -->
+                                                    <p class="activityClock subtitleColor">
+                                                        <span class="activityTime">-:-</span>
+                                                        <span class="activityRemaining hide">remaining</span>
+                                                        <span class="activityElapsed hide">elapsed</span>
+                                                    </p>
+                                                    <div class="lds-ring smallLoader">
+                                                        <div></div>
+                                                        <div></div>
+                                                        <div></div>
+                                                        <div></div>
+                                                    </div>
                                                 </span>
-                                                <div class="lds-ring smallLoader">
-                                                    <div></div>
-                                                    <div></div>
-                                                    <div></div>
-                                                    <div></div>
+                                                <img class="activityLogoLarge" draggable="false" width="64" height="64"
+                                                    alt="Activity icon" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+                                                <div class="otherActivityInfo">
+                                                    <p class="activityDetails titleColor"></p>
+                                                    <p class="activityState subtitleColor"></p>
                                                 </div>
-                                            </span>
-                                            <div id="discordActivityImages">
-                                                <img id="activityLogoLarge" draggable="false" width="96" height="96"
-                                                    alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
-                                            </div>
-                                            <div id="discordActivityInfo">
-                                                <p id="activityDetails" class="titleColor">Loading</p>
-                                                <p id="activityState" class="subtitleColor">Loading</p>
-                                                <div class="progress-bar-container hide" id="ProgressTrack"
+                                                <!-- Only for something with an end to count down to. -->
+                                                <div class="progress-bar-container activityProgressTrack hide"
                                                     role="progressbar" aria-label="Activity progress" aria-valuemin="0"
                                                     aria-valuemax="100" aria-valuenow="0">
-                                                    <div class="progress-bar" id="ProgressBar"></div>
-                                                </div>
-                                                <div class="progress-bar-container activitySeparator"
-                                                    id="ProgressSeparator" aria-hidden="true"></div>
-                                                <div id="Timeremaning">
-                                                    <p id="ActivityTime" class="subTitle">-:-</p>
-                                                    <p id="Remaining" class="hide subTitle">remaining</p>
-                                                    <p id="Elapsed" class="hide subTitle">elapsed</p>
+                                                    <div class="progress-bar activityProgressBar"></div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -305,7 +309,7 @@
                             <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>Recently played
                         </button>
                     </div>
-                    <button type="button" id="lanyardRefresh" class="button hide">
+                    <button type="button" id="presenceRefresh" class="button hide">
                         <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>Refresh
                     </button>
                 </section>

@@ -14,7 +14,7 @@ import { lookup, shape } from "../../src/js/lrclib.js";
 
 const UA = "aridan.net/1.0 (+https://github.com/actuallyaridan/aridan.net)";
 
-// Mirrors USER_ID and APPLE_APP_ID in src/js/lanyardClient.js.
+// Mirrors USER_ID and APPLE_APP_ID in src/js/presenceClient.js.
 const LANYARD = "https://api.lanyard.rest/v1/users/701403809129168978";
 const APPLE_APP_ID = "773825528921849856";
 

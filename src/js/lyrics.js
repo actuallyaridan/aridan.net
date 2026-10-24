@@ -30,8 +30,8 @@
   // greyed out and saying so, since the tour reads oddly with a gap in it.
   const tourBtn = document.getElementById("tourLyricsBtn");
 
-  // Until Lanyard first answers, nothing is known either way.
-  let lanyardHeard = false;
+  // Until the presence feed first answers, nothing is known either way.
+  let presenceHeard = false;
 
   // The width transition on #lyricsNowPlaying in lyrics.css.
   const NOW_RESIZE_MS = 350;
@@ -256,7 +256,7 @@
   }
 
   // Anchored: an artist can have "by" inside their name - "Bobby Womack" - and
-  // only a leading one is Cider's prefix. Mirrored by artistOf() in lanyard.js.
+  // only a leading one is Cider's prefix. Mirrored by artistOf() in presence.js.
   function artistOf(state) {
     return String(state || "").trim().replace(/^by\s+/i, "");
   }
@@ -289,7 +289,7 @@
   // here - but the Cider host serves full-size originals, so the Discord proxy
   // is asked for a small copy instead of going there directly.
   function artworkOf(activity) {
-    const art = window.Lanyard.artwork(activity);
+    const art = window.Presence.artwork(activity);
     if (!art) return "";
 
     if (art.mzstatic) return art.mzstatic(ART_SIZE);
@@ -1711,7 +1711,7 @@
     window.clearTimeout(pageSleepTimer);
     document.documentElement.classList.remove("lyricsOpen");
 
-    // For lanyard.js, whose card stood still while it was covered.
+    // For presence.js, whose card stood still while it was covered.
     window.dispatchEvent(new CustomEvent("lyrics:close"));
 
     unlockPage();
@@ -1755,9 +1755,9 @@
 
     const label = tourBtn.querySelector("span");
 
-    // Not heard from Lanyard yet: still disabled, but without claiming
+    // Not heard from the presence feed yet: still disabled, but without claiming
     // nothing is playing - it may well be, a moment from now.
-    if (!lanyardHeard) {
+    if (!presenceHeard) {
       tourBtn.disabled = true;
       label.textContent = t("Show lyrics");
       setTooltip(tourBtn, "");
@@ -1782,11 +1782,11 @@
     syncLyricsButtons();
   });
 
-  window.Lanyard.subscribe((presence) => {
-    const next = readTrack(window.Lanyard.appleMusic(presence));
+  window.Presence.subscribe((presence) => {
+    const next = readTrack(window.Presence.appleMusic(presence));
     const changed = trackKey(next) !== trackKey(track);
     track = next;
-    lanyardHeard = true;
+    presenceHeard = true;
     syncLyricsButtons();
 
     if (!track) {

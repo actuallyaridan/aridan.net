@@ -37,7 +37,7 @@
     let generation = 0;
     let painted = false;
 
-    window.Lanyard.subscribe((presence) => onTrack(shownTrack(presence)));
+    window.Presence.subscribe((presence) => onTrack(shownTrack(presence)));
     window.addEventListener("settings:change", onSettingsChange);
     watchTheme();
 
@@ -63,10 +63,10 @@
     // Whatever cover the music card is showing: the song playing now, or the
     // last one while nothing is, so the colour stays put when a song stops.
     function shownTrack(presence) {
-        const playing = window.Lanyard.appleMusic(presence);
+        const playing = window.Presence.appleMusic(presence);
         if (playing) return playing;
 
-        const last = window.Lanyard.lastPlayed(presence);
+        const last = window.Presence.lastPlayed(presence);
         if (last) return last.activity;
 
         return null;
@@ -95,7 +95,7 @@
     // Both routes are same-origin-readable; the Cider host the art really lives
     // on sends no CORS headers, so drawing it to a canvas would taint it.
     function candidates(activity) {
-        const art = window.Lanyard.artwork(activity);
+        const art = window.Presence.artwork(activity);
         if (!art) return [];
 
         const urls = [];

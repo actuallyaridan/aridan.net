@@ -78,7 +78,7 @@ function prefEnabled(key) {
 //
 // Since every line is printed from here, the console names settings.js as the
 // source of all of them. Each one is tagged with the file that really logged
-// it instead, e.g. [lanyard.js], read off the call stack.
+// it instead, e.g. [presence.js], read off the call stack.
 const debug = {
     log(...parts) {
         if (!prefEnabled('debugMode')) return;
@@ -205,22 +205,22 @@ function restoreAlbumAccent(theme) {
 // Holds open the room the "now playing" card took up on the last visit, before
 // the first frame. Presence only arrives after the page is up, and a card
 // opening then shoves everything below it down by its whole height. With the
-// room already there, lanyard.js just fades the card into it. Has to be here
+// room already there, presence.js just fades the card into it. Has to be here
 // because this is the only script that runs before the page is painted.
-function reserveLanyardSpace() {
-    const saved = Number(localStorage.getItem('lanyardReserve'));
+function reservePresenceSpace() {
+    const saved = Number(localStorage.getItem('presenceReserve'));
     if (!saved) return;
 
     const root = document.documentElement;
-    root.style.setProperty('--lanyard-reserve', saved + 'px');
-    root.classList.add('lanyard-reserve');
+    root.style.setProperty('--presence-reserve', saved + 'px');
+    root.classList.add('presence-reserve');
 
     // The placeholder takes the shape of whichever card the last visit ended
     // on. Only a song that was playing gets the taller Apple Music one; with
     // no kind saved (a visit from before it was), the smaller last-played
     // card is the safer guess.
-    if (localStorage.getItem('lanyardReserveKind') !== 'playing') {
-        root.classList.add('lanyard-reserve-last');
+    if (localStorage.getItem('presenceReserveKind') !== 'playing') {
+        root.classList.add('presence-reserve-last');
     }
 }
 
@@ -252,7 +252,7 @@ if (localStorage.getItem('accent') === 'monochrome') {
 
 applyRootSettings();
 applyAccessibilityPrefs();
-reserveLanyardSpace();
+reservePresenceSpace();
 
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (setting('theme') === 'auto') applyRootSettings();

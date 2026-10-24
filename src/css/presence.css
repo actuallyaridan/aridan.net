@@ -5,11 +5,11 @@
     src: url(/src/fonts/SevenSegment.otf) format("opentype");
 }
 
-/* Column, not row: #loading, #errorMessage and #loadedLanyard are meant to be
+/* Column, not row: #loading, #errorMessage and #loadedPresence are meant to be
    mutually exclusive states, but the collapsed card is only 0 tall, never 0
    wide, so as a row item its width:100% basis still claimed half the row and
    shoved the error card off-centre. */
-#lanyardDiscord {
+#presenceCard {
     display: flex;
     flex-direction: column;
     font-family: Jost, sans-serif;
@@ -20,12 +20,12 @@
 }
 
 /* Collapsed to a 0fr grid row rather than display:none, so the card keeps its
-   layout while closed and can be measured. #loadedLanyardInner is the single
+   layout while closed and can be measured. #loadedPresenceInner is the single
    row; with more than one child the fr tracks would size equally and double
    the card's height. There are no transitions here: opening and closing are
-   animated by slideCard() in lanyard.js, which moves the page below with
+   animated by slideCard() in presence.js, which moves the page below with
    transforms instead of re-laying it out on every frame. */
-#loadedLanyard {
+#loadedPresence {
     display: grid;
     grid-template-rows: 0fr;
     overflow: hidden;
@@ -34,7 +34,7 @@
     visibility: hidden;
 }
 
-#loadedLanyard.showActivity {
+#loadedPresence.showActivity {
     grid-template-rows: 1fr;
     margin-top: 12px;
     opacity: 1;
@@ -46,7 +46,7 @@
    centring and shrinking, everything inside was squashed to fit the row and
    stretched back out as it grew - laid out again every frame, with the text
    creeping 170px down the card and snapping to whole pixels as it went. */
-#loadedLanyardInner {
+#loadedPresenceInner {
     min-height: 0;
     min-width: 0;
     display: flex;
@@ -56,18 +56,18 @@
     text-align: center;
 }
 
-#loadedLanyardInner > * {
+#loadedPresenceInner > * {
     flex-shrink: 0;
 }
 
 /* First open on page load: the contents come into focus. When the room for
-   the card was already held (see reserveLanyardSpace() in settings.js) that
+   the card was already held (see reservePresenceSpace() in settings.js) that
    is all that happens; otherwise slideCard() opens it as well. */
-#loadedLanyard.revealing #loadedLanyardInner {
-    animation: lanyard-focus-in .32s cubic-bezier(.2, .7, .3, 1) both;
+#loadedPresence.revealing #loadedPresenceInner {
+    animation: presence-focus-in .32s cubic-bezier(.2, .7, .3, 1) both;
 }
 
-@keyframes lanyard-focus-in {
+@keyframes presence-focus-in {
     from {
         opacity: 0;
         filter: blur(10px);
@@ -81,25 +81,11 @@
     }
 }
 
-#loadedLanyard>p,
-#discordStatus,
+#loadedPresence>p,
 #activities {
     display: inline;
     text-align: center;
     color: rgb(188, 188, 188);
-}
-
-#dcNameContainer {
-    align-items: center;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    height: 50px;
-}
-
-#dcActivityHeaderName {
-    line-height: 2.5;
-    margin-left: 12px;
 }
 
 /* Pointer events stay on so the hover title still shows. Dragging is off, but
@@ -109,33 +95,59 @@ img.albumArt {
     user-select: none;
 }
 
-.discordWrapper,
-#lanyardDiscord,
-#loadedLanyard,
-#discordScroller {
+.presenceWrapper,
+#presenceCard,
+#loadedPresence,
+#activityScroller {
     width: 100%;
     max-width: 100%;
     min-width: 0;
 }
 
-#discordScroller {
+#activityScroller {
     position: relative;
     width: 100%;
     isolation: isolate;
 }
 
-div#discord {
-    display: flex;
-    flex-direction: row;
+/* Two rows, filled a column at a time: the music card takes both, and the
+   programs after it stack two to a column, so two short cards stand as tall
+   as the music card beside them rather than each being stretched to it. */
+div#activityStrip {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: auto auto;
     justify-content: safe center;
-    align-items: stretch;
-    flex-wrap: nowrap;
+    align-items: center;
     max-width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
 }
 
-div#discord::-webkit-scrollbar {
+#amActivity {
+    grid-row: span 2;
+}
+
+/* The two rows share the music card's height, so a pair of short cards would
+   each sit in the middle of its half with a gap between them. Instead the top
+   one sits at the bottom of its row and the bottom one at the top of its, and
+   the pair stays together, centred beside the music card. */
+.otherActivity:nth-child(odd of .otherActivity) {
+    align-self: end;
+}
+
+.otherActivity:nth-child(even of .otherActivity) {
+    align-self: start;
+}
+
+/* The odd one out, in a column of its own - see updateOtherCards() in
+   presence.js. Centred beside the music card at its own height. */
+.otherActivity.alone {
+    grid-row: span 2;
+    align-self: center;
+}
+
+div#activityStrip::-webkit-scrollbar {
     display: none;
 }
 
@@ -163,18 +175,16 @@ div#discord::-webkit-scrollbar {
     margin-right: 0;
 }
 
-#discordScrollPrev {
+#activityScrollPrev {
     left: 0;
 }
 
-#discordScrollNext {
+#activityScrollNext {
     right: 0;
 }
 
-#discordName,
-#discordActivity,
-#amLanyardDiscord,
-#discordNameUser,
+.otherActivity,
+#amActivity,
 #lyricsCard {
     justify-content: center;
     align-items: center;
@@ -188,21 +198,8 @@ div#discord::-webkit-scrollbar {
     transition: width 0.2s;
 }
 
-#discordNameUser {
-    color: #333;
-    color: rgb(0, 0, 0);
-    color: rgb(0, 0, 0);
-    color: var(--text-color);
-    margin-bottom: 0px;
-    padding-bottom: 0px;
-}
-
-#discordName {
-    margin-top: 6px;
-    padding-top: 6px;
-}
-#discordActivity,
-#amLanyardDiscord,
+.otherActivity,
+#amActivity,
 #lyricsCard {
     min-width: 15vw;
     word-wrap: break-word;
@@ -211,7 +208,7 @@ div#discord::-webkit-scrollbar {
     justify-content: space-between;
 }
 
-#activityLogoLarge {
+.activityLogoLarge {
     border-radius: 5px;
     margin: 12px;
     width: auto;
@@ -238,7 +235,7 @@ div#discord::-webkit-scrollbar {
 /* Until the first cover is in, the image is a transparent 1px GIF
    (index.html) showing the skeleton shine from styles.css behind it - a
    blank src, unlike none at all, never shows the alt text or a broken-image
-   icon. lanyard.js never puts it back once a cover has loaded, so this is
+   icon. presence.js never puts it back once a cover has loaded, so this is
    only ever the first load.
 
    The shine takes the place of the spin, and a still placeholder keeps the
@@ -249,7 +246,7 @@ div#discord::-webkit-scrollbar {
   transform: none;
 }
 
-#activityLogoLarge[src^="data:"] {
+.activityLogoLarge[src^="data:"] {
   border-radius: 5px;
   width: 96px;
 }
@@ -353,9 +350,9 @@ html.reduce-motion .lds-ring.smallLoader::before {
     animation-delay: -0.15s;
 }
 
-#activityName,
-#activityState,
-#activityDetails,
+.activityName,
+.activityState,
+.activityDetails,
 #amActivityName,
 #amActivityDetails,
 #amActivityState {
@@ -367,12 +364,12 @@ html.reduce-motion .lds-ring.smallLoader::before {
     overflow-wrap: break-word;
 }
 
-#activityName,
+.activityName,
 #amActivityName {
     color: var(--paragraph-color);
 }
 
-#activityDetails,
+.activityDetails,
 #amActivityDetails {
     color: #777;
     color: var(--subtitle-color);
@@ -385,7 +382,7 @@ html.reduce-motion .lds-ring.smallLoader::before {
 }
 
 #activityTime,
-#ActivityTime,
+.activityTime,
 #amActivityTime {
     display: inline;
     color: #000;
@@ -416,17 +413,6 @@ html.reduce-motion .lds-ring.smallLoader::before {
     }
 }
 
-#discordInfo {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 12px;
-    padding: 12px;
-    border-radius: 12px;
-    background-color: var(--card-background-color);
-}
-
 span.titleActivity {
     text-align: left;
     width: 100%;
@@ -452,8 +438,8 @@ span.titleActivity {
     font-weight: normal !important;
 }
 
-#discordActivity,
-#amLanyardDiscord {
+.otherActivity,
+#amActivity {
     display: none;
     flex-direction: column;
     justify-content: center;
@@ -467,7 +453,7 @@ span.titleActivity {
     width: min-content;
 }
 
-.style-liquid-glass #discordActivity, .style-liquid-glass #amLanyardDiscord {
+.style-liquid-glass .otherActivity, .style-liquid-glass #amActivity {
     background-color: var(--liquid-glass-button-background);
 border: 1px solid var(--liquid-glass-button-border);
 }
@@ -483,8 +469,7 @@ border: 1px solid var(--liquid-glass-button-border);
     background-color: var(--card-background-color);
 }
 
-#discordActivityImages,
-#amDiscordActivityImages {
+#amActivityImages {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -510,8 +495,8 @@ border: 1px solid var(--liquid-glass-button-border);
     width: 0%;
     transition: width 0.5s;
 }
-#discordActivityInfo,
-#amDiscordActivityInfo {
+.otherActivityInfo,
+#amActivityInfo {
     width: 100%;
     transition: width 0.2s;
         width: 100%;
@@ -519,8 +504,95 @@ border: 1px solid var(--liquid-glass-button-border);
     flex: 1;
 }
 
+/* A program, laid out like the last-played card below: the heading on its
+   own line with the clock at its other end, then the icon beside what it is
+   doing. Programs often say very little - a name and nothing else - and a
+   card that size has nothing to fill a tall one with. */
+.otherActivity {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 12px;
+    width: 300px;
+    max-width: calc(100vw - 56px);
+    min-width: 0;
+}
+
+.otherActivity .titleActivity {
+    flex-basis: 100%;
+    margin-bottom: 0;
+    gap: 12px;
+}
+
+.otherActivity .activityHeading {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.otherActivity .activityName {
+    margin-top: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.otherActivity .activityClock {
+    flex: none;
+    margin: 0 0 0 auto;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+.otherActivity .activityClock.hide {
+    display: none;
+}
+
+/* Spacing for the row under the heading. Only there when there is a row:
+   a card with a name and nothing else is just the heading. */
+.otherActivity .activityLogoLarge,
+.otherActivity .otherActivityInfo {
+    margin-top: 10px;
+}
+
+.otherActivity .activityLogoLarge {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.otherActivity .otherActivityInfo {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+}
+
+.otherActivity .otherActivityInfo:empty,
+.otherActivity .otherActivityInfo.hide {
+    display: none;
+}
+
+.otherActivity .activityDetails,
+.otherActivity .activityState {
+    margin-top: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.otherActivity .activityProgressTrack {
+    flex-basis: 100%;
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+
 /* With nothing playing, the music card shows the last song instead (see
-   updateLastPlayedInfo in lanyard.js): the record stops where it is, the
+   updateLastPlayedInfo in presence.js): the record stops where it is, the
    progress bar goes, and when it stopped goes on the right of the heading. */
 #amLastPlayedAgo {
     display: none;
@@ -530,11 +602,11 @@ border: 1px solid var(--liquid-glass-button-border);
     white-space: nowrap;
 }
 
-#amLanyardDiscord.lastPlayed #amLastPlayedAgo {
+#amActivity.lastPlayed #amLastPlayedAgo {
     display: block;
 }
 
-#amLanyardDiscord.lastPlayed #amProgressTrack {
+#amActivity.lastPlayed #amProgressTrack {
     display: none;
 }
 
@@ -542,7 +614,7 @@ border: 1px solid var(--liquid-glass-button-border);
    out like a row in Recently played instead: wide and short, the cover beside
    the song rather than above it. The heading keeps its own line on top, with
    when it stopped at its other end. */
-#amLanyardDiscord.lastPlayed {
+#amActivity.lastPlayed {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
@@ -551,28 +623,28 @@ border: 1px solid var(--liquid-glass-button-border);
     max-width: calc(100% - 24px);
 }
 
-#amLanyardDiscord.lastPlayed .titleActivity {
+#amActivity.lastPlayed .titleActivity {
     flex-basis: 100%;
     margin-bottom: 10px;
 }
 
 /* The note is for a song that is on. "Last played" stands on its own. */
-#amLanyardDiscord.lastPlayed .activityHeading > i {
+#amActivity.lastPlayed .activityHeading > i {
     display: none;
 }
 
-#amLanyardDiscord.lastPlayed .titleActivity h3 {
+#amActivity.lastPlayed .titleActivity h3 {
     margin-left: 0;
 }
 
-#amLanyardDiscord.lastPlayed #amDiscordActivityImages {
+#amActivity.lastPlayed #amActivityImages {
     flex: none;
     width: auto;
 }
 
 /* A still square, the same as the list: a stopped record left at whatever
    angle it was spinning at looks like a mistake. */
-#amLanyardDiscord.lastPlayed #amActivityLogoLarge {
+#amActivity.lastPlayed #amActivityLogoLarge {
     width: 64px;
     height: 64px;
     margin: 0;
@@ -581,7 +653,7 @@ border: 1px solid var(--liquid-glass-button-border);
     animation: none;
 }
 
-#amLanyardDiscord.lastPlayed #amDiscordActivityInfo {
+#amActivity.lastPlayed #amActivityInfo {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
@@ -593,29 +665,28 @@ border: 1px solid var(--liquid-glass-button-border);
     width: auto;
 }
 
-#amLanyardDiscord.lastPlayed #amActivityDetails,
-#amLanyardDiscord.lastPlayed #amActivityState {
+#amActivity.lastPlayed #amActivityDetails,
+#amActivity.lastPlayed #amActivityState {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-#amLanyardDiscord.lastPlayed #amActivityDetails {
+#amActivity.lastPlayed #amActivityDetails {
     grid-area: title;
 }
 
-#amLanyardDiscord.lastPlayed #amActivityState {
+#amActivity.lastPlayed #amActivityState {
     grid-area: artist;
 }
 
 /* The badge alone is taller than the rest of the row. Recently played, right
    under the card, links every song there instead. */
-#amLanyardDiscord.lastPlayed #apple-link {
+#amActivity.lastPlayed #apple-link {
     display: none;
 }
 
 div#timeremaning,
-div#Timeremaning,
 div#amTimeremaning {
     display: flex;
     flex-direction: row;
@@ -627,17 +698,12 @@ div#amTimeremaning {
 }
 
 div#timeremaning>p,
-div#Timeremaning>p,
 div#amTimeremaning>p {
     padding: 0.2rem;
     color: var(--paragraph-color);
 }
 
-.discord {
-    background-color: #7289da;
-}
-
-.discordWrapper {
+.presenceWrapper {
     background-color: unset;
     display: flex;
     flex-direction: column;
@@ -654,21 +720,21 @@ div#amTimeremaning>p {
    section's own margins still left a gap under the banner. Take the section
    out entirely, so the banner's margin and the next section's can collapse
    into the one gap. */
-html:not(.lanyard-reserve) div.section:has(> .discordWrapper > #lanyardDiscord[style*="none"]):not(:has(#lyricsBtn:not(.hide), #recentBtn:not(.hide), #lanyardRefresh:not(.hide))) {
+html:not(.presence-reserve) div.section:has(> .presenceWrapper > #presenceCard[style*="none"]):not(:has(#lyricsBtn:not(.hide), #recentBtn:not(.hide), #presenceRefresh:not(.hide))) {
     display: none;
 }
 
 /* The whole section rather than just the card, so the Lyrics and Refresh
    buttons under it are inside the held room too. The html prefix outranks the
    !important above. */
-html.lanyard-reserve .discordWrapper {
-    min-height: var(--lanyard-reserve) !important;
+html.presence-reserve .presenceWrapper {
+    min-height: var(--presence-reserve) !important;
 }
 
 /* Arrives with the card on load, so it comes into focus alongside it rather
    than popping in sharp underneath a card that is still blurred. */
-.discordWrapper:has(#loadedLanyard.revealing) .cardButtons {
-    animation: lanyard-focus-in .32s cubic-bezier(.2, .7, .3, 1) both;
+.presenceWrapper:has(#loadedPresence.revealing) .cardButtons {
+    animation: presence-focus-in .32s cubic-bezier(.2, .7, .3, 1) both;
 }
 
 .progress-bar {
@@ -728,18 +794,18 @@ html.reduce-motion .progress-bar {
     display: none;
 }
 
-#lanyardRefresh {
+#presenceRefresh {
     margin: 12px auto 0;
     justify-content: center;
     align-items: center;
     display: flex;
 }
 
-#lanyardRefresh.hide {
+#presenceRefresh.hide {
     display: none;
 }
 
-#lanyardRefresh[disabled] {
+#presenceRefresh[disabled] {
     opacity: 0.6;
     pointer-events: none;
 }
@@ -753,20 +819,20 @@ html.reduce-motion .progress-bar {
 
    The music card's placeholder (the shared look is in styles.css). When the
    last visit ended with something playing, settings.js holds the card's room
-   open before anything has loaded (lanyard-reserve, above). This stands in
+   open before anything has loaded (presence-reserve, above). This stands in
    that room until the card arrives - shaped like the Apple Music card, with
    the Lyrics button under it, measured off the real ones.
 
    It sits over the room rather than in the layout, where the card will be,
-   so when the room is let go (slideCard() in lanyard.js) it fades away
+   so when the room is let go (slideCard() in presence.js) it fades away
    while the card comes into focus in the same place, with no gap between. */
-.discordWrapper {
+.presenceWrapper {
     position: relative;
 }
 
-.lanyardSkeleton {
+.presenceSkeleton {
     position: absolute;
-    /* The wrapper's padding, #loadedLanyard's margin and the card's own. */
+    /* The wrapper's padding, #loadedPresence's margin and the card's own. */
     top: 36px;
     left: 50%;
     translate: -50% 0;
@@ -779,13 +845,13 @@ html.reduce-motion .progress-bar {
     transition: opacity .3s ease, visibility 0s .3s;
 }
 
-html.lanyard-reserve .lanyardSkeleton {
+html.presence-reserve .presenceSkeleton {
     opacity: 1;
     visibility: visible;
     transition: none;
 }
 
-.lanyardSkeletonCard {
+.presenceSkeletonCard {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -796,19 +862,19 @@ html.lanyard-reserve .lanyardSkeleton {
     background-color: var(--card-background-color);
 }
 
-.style-liquid-glass .lanyardSkeletonCard {
+.style-liquid-glass .presenceSkeletonCard {
     background-color: var(--liquid-glass-button-background);
     border: 1px solid var(--liquid-glass-button-border);
 }
 
-.lanyardSkeleton .skeletonHeading {
+.presenceSkeleton .skeletonHeading {
     width: 110px;
     height: 16px;
     margin-top: 3px;
 }
 
 /* 96px, like the cover: measured mid-spin, the cover's box is wider. */
-.lanyardSkeleton .skeletonArt {
+.presenceSkeleton .skeletonArt {
     align-self: center;
     width: 96px;
     height: 96px;
@@ -816,25 +882,25 @@ html.lanyard-reserve .lanyardSkeleton {
     border-radius: 50%;
 }
 
-.lanyardSkeleton .skeletonTitle {
+.presenceSkeleton .skeletonTitle {
     width: 70%;
     height: 15px;
     margin-top: 22px;
 }
 
-.lanyardSkeleton .skeletonArtist {
+.presenceSkeleton .skeletonArtist {
     width: 45%;
     height: 13px;
     margin-top: 15px;
 }
 
-.lanyardSkeleton .skeletonProgress {
+.presenceSkeleton .skeletonProgress {
     width: 100%;
     height: 5px;
     margin-top: 13px;
 }
 
-.lanyardSkeleton .skeletonBadge {
+.presenceSkeleton .skeletonBadge {
     align-self: center;
     width: 141px;
     height: 41px;
@@ -842,36 +908,36 @@ html.lanyard-reserve .lanyardSkeleton {
     border-radius: 8px;
 }
 
-.lanyardSkeleton .skeletonButtons {
+.presenceSkeleton .skeletonButtons {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-top: 24px;
 }
 
-.lanyardSkeleton .skeletonButton {
+.presenceSkeleton .skeletonButton {
     width: 105px;
     height: 45px;
     border-radius: 999px;
 }
 
-.lanyardSkeleton .skeletonRecentButton {
+.presenceSkeleton .skeletonRecentButton {
     width: 173px;
 }
 
-/* The last-played card instead (#amLanyardDiscord.lastPlayed, above): wide
+/* The last-played card instead (#amActivity.lastPlayed, above): wide
    and short, the heading over a square cover with the song beside it, and
    Recently played under it rather than Lyrics. settings.js picks it when the
    last visit ended on that card. */
-.lanyardSkeletonLast {
+.presenceSkeletonLast {
     display: none;
 }
 
-html.lanyard-reserve-last .lanyardSkeletonCard {
+html.presence-reserve-last .presenceSkeletonCard {
     display: none;
 }
 
-html.lanyard-reserve-last .lanyardSkeletonLast {
+html.presence-reserve-last .presenceSkeletonLast {
     display: grid;
     grid-template-columns: 64px minmax(0, 1fr) auto;
     grid-template-areas:
@@ -886,13 +952,13 @@ html.lanyard-reserve-last .lanyardSkeletonLast {
 }
 
 /* Each bar as tall as the line of text it stands in for, less a little. */
-.lanyardSkeletonLast .skeletonHeading {
+.presenceSkeletonLast .skeletonHeading {
     grid-area: heading;
     width: 90px;
     margin: 3px 0 13px;
 }
 
-.lanyardSkeletonLast .skeletonAgo {
+.presenceSkeletonLast .skeletonAgo {
     grid-area: ago;
     width: 64px;
     height: 13px;
@@ -900,7 +966,7 @@ html.lanyard-reserve-last .lanyardSkeletonLast {
     border-radius: 999px;
 }
 
-.lanyardSkeletonLast .skeletonArt {
+.presenceSkeletonLast .skeletonArt {
     grid-area: art;
     width: 64px;
     height: 64px;
@@ -908,20 +974,20 @@ html.lanyard-reserve-last .lanyardSkeletonLast {
     border-radius: 8px;
 }
 
-.lanyardSkeletonLast .skeletonLines {
+.presenceSkeletonLast .skeletonLines {
     grid-area: lines;
     display: flex;
     flex-direction: column;
 }
 
-html.lanyard-reserve-last .lanyardSkeleton .skeletonButtons {
+html.presence-reserve-last .presenceSkeleton .skeletonButtons {
     margin-top: 30px;
 }
 
-html.lanyard-reserve-last .lanyardSkeleton .skeletonLyricsButton {
+html.presence-reserve-last .presenceSkeleton .skeletonLyricsButton {
     display: none;
 }
-.lanyardSkeletonLast .skeletonArtist {
+.presenceSkeletonLast .skeletonArtist {
     width: 40%;
     margin-top: 16px;
 }
@@ -1120,7 +1186,7 @@ html.reduce-motion .recentList {
 }
 
 /* Taylor Swift's 13, in the bubble from hovering her name - see
-   initArtistEggs() in lanyard.js. Bold and a bit crooked, like it was drawn on
+   initArtistEggs() in presence.js. Bold and a bit crooked, like it was drawn on
    in marker, the way she wrote it on her hand. */
 .speechBubble.luckyThirteen {
     padding: 0.3rem 0.7rem;

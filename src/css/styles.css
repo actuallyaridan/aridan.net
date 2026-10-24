@@ -340,7 +340,7 @@ input[type="radio"]:focus-visible + label.button {
     outline-offset: 2px;
 }
 
-#discord:focus-visible {
+#activityStrip:focus-visible {
     outline-offset: -2px;
 }
 
@@ -2327,8 +2327,8 @@ span.token{
     font-weight: 600;
 }
 
-/* Shared utilities. These are not Lanyard-specific - .titleColor alone is used
-   on nearly every page - but they lived in lanyard.css, so any page that did not
+/* Shared utilities. These are not presence-specific - .titleColor alone is used
+   on nearly every page - but they lived in presence.css, so any page that did not
    load it (the offline page) silently lost them. .description resolves to
    --invert-title-color, which is white in the light theme, so losing .titleColor
    meant white text on a white background. */
@@ -2612,7 +2612,7 @@ html.reduce-motion #desktop-header ul.notAList {
    the way light moving over one surface would. */
 .skeleton .skeletonBar,
 .pi-num.pi-loading::before,
-#activityLogoLarge[src^="data:"],
+.activityLogoLarge[src^="data:"],
 #amActivityLogoLarge[src^="data:"],
 .full-article:not(.isLoaded) #articleTitle:empty::before,
 .full-article:not(.isLoaded) #articlePreview:empty::before,
@@ -2651,7 +2651,7 @@ html.reduce-motion #desktop-header ul.notAList {
 
 html.reduce-motion .skeleton .skeletonBar,
 html.reduce-motion .pi-num.pi-loading::before,
-html.reduce-motion #activityLogoLarge[src^="data:"],
+html.reduce-motion .activityLogoLarge[src^="data:"],
 html.reduce-motion #amActivityLogoLarge[src^="data:"],
 html.reduce-motion .full-article:not(.isLoaded) #articleTitle:empty::before,
 html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::before,
@@ -2663,7 +2663,7 @@ html.reduce-motion .full-article:not(.isLoaded) #articlePreview:empty::after {
 /* The article list's: three cards shaped like the real ones (see
    .section.articlePreview), in the box articles.js shows while the
    list loads and hides once it is in. */
-/* #loading also holds the music card's spinner on pages with lanyard.css,
+/* #loading also holds the music card's spinner on pages with presence.css,
    whose rule for it centres everything - these are laid out like the text
    they stand in for instead. */
 #loading>.articleSkeletons {

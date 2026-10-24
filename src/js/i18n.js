@@ -37,11 +37,9 @@
         "main .pi-label",
         "main .hackGrid .pi-num",
         "main .pi-stat-label",
-        "main #lanyardRefresh",
+        "main #presenceRefresh",
         "main #lyricsBtn",
         "main #recentBtn",
-        "main #Remaining",
-        "main #Elapsed",
         "main .warn:not(#editorFolderBar) p",
         // Not Save on the editor pages: articles.js draws it, with how the
         // save is going in it, and translates it itself.
