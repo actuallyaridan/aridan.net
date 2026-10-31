@@ -346,7 +346,7 @@
   "Installed: {0}": "Installerad: {0}",
   "Updates install automatically": "Uppdateringar installeras automatiskt",
   "No latest version found": "Ingen senaste version hittades",
-  "Already up to date": "Redan uppdaterad",
+  "No newer version available": "Ingen nyare version finns",
   "Available: {0} (not on cdnjs yet)": "Tillgänglig: {0} (inte på cdnjs än)",
   "Available: {0}": "Tillgänglig: {0}",
   "No CDN components found.": "Inga CDN-komponenter hittades.",

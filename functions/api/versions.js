@@ -44,6 +44,13 @@ const CDNJS_URL = /https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/([^/"'\s]+)\/([
 // @twemoji/api, and the version may be left off, which means "latest".
 const JSDELIVR_URL = /https:\/\/cdn\.jsdelivr\.net\/npm\/((?:@[^/@"'\s]+\/)?[^/@"'\s]+)(?:@([^/"'\s]+))?\//g;
 
+// What a library is called on the Component versions page, where its CDN
+// name is not what anyone calls it. Twemoji's npm package is "@twemoji/api",
+// but the rest of the list goes by plain names.
+const LABELS = {
+  "@twemoji/api": "twemoji",
+};
+
 const jsonHeaders = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
@@ -65,9 +72,27 @@ export async function onRequestGet({ request, env }) {
   }
   await Promise.all(checks);
 
-  components.sort((a, b) => a.name.localeCompare(b.name));
+  components.sort(byOrder);
 
   return json({ checkedAt: new Date().toISOString(), components: components });
+}
+
+// The order the Component versions page lists them in, by display name. A
+// library not in here yet goes after these, by name.
+const ORDER = ["font-awesome", "twemoji", "prism", "marked"];
+
+function byOrder(a, b) {
+  const aPlace = placeOf(a);
+  const bPlace = placeOf(b);
+
+  if (aPlace !== bPlace) return aPlace - bPlace;
+  return a.label.localeCompare(b.label);
+}
+
+function placeOf(component) {
+  const place = ORDER.indexOf(component.label);
+  if (place === -1) return ORDER.length;
+  return place;
 }
 
 /* ---------- What the site loads ---------- */
@@ -121,7 +146,10 @@ function record(found, cdn, name, version, path) {
 
   let component = found.get(key);
   if (!component) {
-    component = { name: name, cdn: cdn, package: "", latest: "", onCdn: null, versions: [], error: "" };
+    let label = LABELS[name];
+    if (!label) label = name;
+
+    component = { name: name, label: label, cdn: cdn, package: "", latest: "", onCdn: null, versions: [], error: "" };
     found.set(key, component);
   }
 

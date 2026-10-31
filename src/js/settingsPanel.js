@@ -274,7 +274,7 @@
         }
 
         if (status === "current") {
-            return [installed, t("Already up to date")];
+            return [installed, t("No newer version available")];
         }
 
         if (status === "pending") {
@@ -298,7 +298,7 @@
         item.dataset.status = status;
 
         const head = element("div", "versionHead");
-        head.appendChild(element("span", "versionName", component.name));
+        head.appendChild(element("span", "versionName", component.label));
         head.appendChild(element("span", "versionBadge", t(STATUS_LABELS[status])));
         item.appendChild(head);
 

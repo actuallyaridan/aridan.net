@@ -104,10 +104,13 @@ img.albumArt {
     min-width: 0;
 }
 
+/* A container, so a card can be sized against the room the strip really has
+   (see #amActivity.lastPlayed) - inside the strip's grid a percentage can't. */
 #activityScroller {
     position: relative;
     width: 100%;
     isolation: isolate;
+    container-type: inline-size;
 }
 
 /* Two rows, filled a column at a time: the music card takes both, and the
@@ -613,14 +616,19 @@ border: 1px solid var(--liquid-glass-button-border);
 /* The last song is not the main event the way a playing one is, so it is laid
    out like a row in Recently played instead: wide and short, the cover beside
    the song rather than above it. The heading keeps its own line on top, with
-   when it stopped at its other end. */
+   when it stopped at its other end.
+
+   On a phone it shrinks to the scroller's width, less its 12px margins each
+   side. That is 100cqi rather than 100%: the strip's grid
+   column is sized from the card, so a percentage max-width was ignored while
+   sizing it and the card stayed 440px, wider than the screen. */
 #amActivity.lastPlayed {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     column-gap: 12px;
-    width: 440px;
-    max-width: calc(100% - 24px);
+    width: min(440px, 100cqi - 24px);
+    max-width: none;
 }
 
 #amActivity.lastPlayed .titleActivity {

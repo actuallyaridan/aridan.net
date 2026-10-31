@@ -342,7 +342,9 @@ input[type="radio"] {
    padding so the effect reaches the edge of the screen.
 
    Three columns - arrow, title, and an empty one as wide as the arrow - so
-   the title stays centred whether the arrow is there or not. */
+   the title stays centred whether the arrow is there or not. The middle one
+   can shrink below the title, so a long one is cut off with an ellipsis
+   instead of wrapping onto a second line. */
 .settingsSheetHeader {
     --sheet-right: max(16px, env(safe-area-inset-right));
     /* The layer's own background - .revealLayer in styles.css. */
@@ -352,7 +354,7 @@ input[type="radio"] {
     top: 0;
     z-index: 2;
     display: grid;
-    grid-template-columns: 40px 1fr 40px;
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
     align-items: center;
     width: calc(100% + var(--sheet-right));
     box-sizing: border-box;
@@ -387,6 +389,9 @@ input[type="radio"] {
 .settingsSheetHeader>h2 {
     grid-column: 2;
     margin: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 /* Reduce transparency: the same fade, with less of the settings showing

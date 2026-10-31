@@ -348,7 +348,7 @@
   "Installed: {0}": "Instalirano: {0}",
   "Updates install automatically": "Ažuriranja se instaliraju automatski",
   "No latest version found": "Najnovija verzija nije pronađena",
-  "Already up to date": "Već je ažurno",
+  "No newer version available": "Nema novije verzije",
   "Available: {0} (not on cdnjs yet)": "Dostupno: {0} (još nije na cdnjs-u)",
   "Available: {0}": "Dostupno: {0}",
   "No CDN components found.": "Nisu pronađene CDN komponente.",
