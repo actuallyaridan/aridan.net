@@ -105,21 +105,21 @@
   // say when they were opened - see openedAt().
   const firstSeen = new Map();
 
-  // The music card's own clock and progress bar. The clock is commented out
-  // in index.html, so those three come back null and are skipped. Its bar
-  // stays put with no end to count to, just empty.
+  // The music card's own progress bar. It has no clock beside it, unlike the
+  // other cards, so those three are null and skipped. The bar stays put with
+  // no end to count to, just empty.
   const amParts = {
     track: els.amProgressTrack,
     bar: els.amProgressBar,
     hidesUntimed: false,
     clock: null,
-    time: byId("amActivityTime"),
-    remaining: byId("amRemaining"),
-    elapsed: byId("amElapsed"),
+    time: null,
+    remaining: null,
+    elapsed: null,
   };
 
   // What hovering a couple of artists' names gets - see initArtistEggs().
-  const LORDE_GIF = "/assets/uploads/images/iamlorde.gif";
+  const LORDE_GIF = "/assets/uploads/images/iamlorde.webp";
   const LORDE_LINE = "I am Lorde, ya ya ya";
 
   // Taylor Swift's lucky number.

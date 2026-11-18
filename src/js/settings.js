@@ -250,9 +250,49 @@ if (localStorage.getItem('accent') === 'monochrome') {
     localStorage.setItem('accent', DEFAULTS.accent);
 }
 
+// The other half of "Sliding between pages" in general.js: the click on the
+// last page said which way this one comes in, and the class has to be on
+// before the first frame, or the page would show in place and then jump aside
+// to start sliding.
+function playPageSlide() {
+    const raw = sessionStorage.getItem('pageSlide');
+    if (!raw) return;
+
+    // Used once, whatever happens: a slide meant for this load must not play
+    // again on a reload or a later visit.
+    sessionStorage.removeItem('pageSlide');
+
+    let slide;
+    try {
+        slide = JSON.parse(raw);
+    } catch {
+        return;
+    }
+
+    if (!slide) return;
+
+    // A click that never became this page - stopped, or a link that went
+    // somewhere else in the end - leaves a note behind for the wrong page.
+    if (slide.to !== location.pathname) return;
+
+    // Long enough for a slow load, short enough that a stale note is ignored.
+    const age = Date.now() - slide.at;
+    if (age > 5000) return;
+
+    if (!matchMedia('(min-width: 967px)').matches) return;
+    if (prefEnabled('reduceMotion')) return;
+
+    if (slide.direction === 'right') {
+        document.documentElement.classList.add('page-slide-right');
+    } else if (slide.direction === 'left') {
+        document.documentElement.classList.add('page-slide-left');
+    }
+}
+
 applyRootSettings();
 applyAccessibilityPrefs();
 reservePresenceSpace();
+playPageSlide();
 
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (setting('theme') === 'auto') applyRootSettings();
@@ -936,14 +976,14 @@ function speechBubble(anchor, options) {
  * Left in English on purpose: it's a quote, and it doesn't work translated.
  */
 const RANDY_QUOTE = "I'm sorry, I thought this was America!";
-const RANDY_GIF = '/assets/uploads/images/randy.gif';
+const RANDY_GIF = '/assets/uploads/images/randy.webp';
 
 // The one gif that goes away on its own: the hover ones loop until the
 // pointer leaves, but Randy is set off by a click, with nothing to end him.
 //
-// One play of randy.gif is 4.19s. Taken down a little before that: the clip
+// One play of randy.webp is 4.2s. Taken down a little before that: the clip
 // starts playing as soon as it has loaded, a moment before it is on screen,
-// and a timer is never exactly on time, so ending right at 4.19s showed it
+// and a timer is never exactly on time, so ending right at 4.2s showed it
 // starting over before it went away.
 const RANDY_SHOWN_MS = 3900;
 
@@ -967,8 +1007,8 @@ onSettingsPanel(function wireRandy() {
 
         bubble.hide();
 
-        // The gif is over a megabyte, so it is only fetched once someone
-        // turns the filter off - the one way to then turn it back on.
+        // The clip is over half a megabyte, so it is only fetched once
+        // someone turns the filter off - the one way to then turn it back on.
         loadGif(RANDY_GIF).catch(function () {});
     });
 
@@ -982,7 +1022,7 @@ onSettingsPanel(function wireRandy() {
 
 /* ---------- Taylor's Version ----------
  * Tapping the version number at the bottom of Settings three times in a row
- * re-records it: "version 6.1.9 (Taylor's Version)". Three more taps and it
+ * re-records it: "version 6.1.10 (Taylor's Version)". Three more taps and it
  * goes back. Not saved anywhere - it lasts until the page is left.
  */
 const TAYLORS_VERSION = " (Taylor's Version)";
@@ -1024,7 +1064,7 @@ onSettingsPanel(function wireTaylorsVersion() {
  * floats on the page rather than going inside the link, where its text would
  * become part of the link's name.
  */
-const SCREW_YOU_GUYS_GIF = '/assets/uploads/images/scewyouguys.gif';
+const SCREW_YOU_GUYS_GIF = '/assets/uploads/images/scewyouguys.webp';
 const SCREW_YOU_GUYS_LINE = "Screw you guys, I'm going home.";
 
 function wireScrewYouGuys() {

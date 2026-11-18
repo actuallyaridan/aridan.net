@@ -1019,6 +1019,113 @@ html[data-reveal="settings"] {
         clip-path .45s ease;
 }
 
+/* ---------- Sliding between pages ----------
+
+   A page reached from one of the header's tabs slides in from the side its
+   tab is on - see "Sliding between pages" in general.js for which side, and
+   playPageSlide() in settings.js for the class. Only the content moves: the
+   header is the same on every page, so it stays put, like the tabs of an app.
+   Desktop only, where the tabs are actually there to see. */
+@media (min-width: 967px) {
+    html.page-slide-right #mainContent,
+    html.page-slide-right #page>footer {
+        animation: pageSlideFromRight .45s cubic-bezier(.2, .8, .2, 1) backwards;
+    }
+
+    html.page-slide-left #mainContent,
+    html.page-slide-left #page>footer {
+        animation: pageSlideFromLeft .45s cubic-bezier(.2, .8, .2, 1) backwards;
+    }
+}
+
+@keyframes pageSlideFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(48px);
+    }
+}
+
+@keyframes pageSlideFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-48px);
+    }
+}
+
+html.reduce-motion #mainContent,
+html.reduce-motion #page>footer {
+    animation: none !important;
+}
+
+/* ---------- Skeleton while the next page loads ----------
+
+   A link in the mobile menu swaps the page's content for grey shapes the
+   moment it is tapped, while the page slides back and the next one loads -
+   see showPageSkeleton() in general.js. The shapes follow what every page
+   opens with: the icon tile, title and description of .info, then sections
+   of text and a photo. The bars themselves are the ones from "Placeholders
+   while things load". */
+html.pageSkeletonShown #mainContent>:not(.pageSkeleton),
+html.pageSkeletonShown #page>footer {
+    display: none;
+}
+
+.pageSkeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Where .info puts the icon tile, so the shapes start where the real page will. */
+    margin-top: 42px;
+    padding-top: 10px;
+}
+
+.pageSkeleton .skeletonIcon {
+    width: 128px;
+    height: 128px;
+    border-radius: 25%;
+    align-self: center;
+    margin-bottom: 10px;
+}
+
+.pageSkeleton .skeletonName {
+    width: 45%;
+    height: 2em;
+    align-self: center;
+    margin-bottom: 6px;
+}
+
+.pageSkeleton .skeletonLine {
+    width: 100%;
+    height: 1em;
+}
+
+.pageSkeleton .skeletonLineShort {
+    width: 60%;
+}
+
+/* The hero's two lines are centred like its description. */
+.pageSkeleton .skeletonName~.skeletonLine {
+    align-self: center;
+}
+
+.pageSkeleton .skeletonSectionTitle {
+    width: 55%;
+    height: 1.5em;
+    margin-top: 28px;
+    align-self: flex-start;
+}
+
+.pageSkeleton .skeletonSectionTitle~.skeletonLine {
+    align-self: flex-start;
+}
+
+.pageSkeleton .skeletonPhoto {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
 /* While open, and on the way back until the slide has finished: fixed to the
    screen with a scroll position of its own, so it moves as one screen-sized
    card. Rounded corners or a transform on the whole scrolled page would land

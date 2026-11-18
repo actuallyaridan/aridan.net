@@ -669,6 +669,116 @@ document.addEventListener("keydown", function (e) {
     if (e.key === "Tab") trapRevealFocus(e);
 });
 
+// The page that a link in the menu is taking you to, drawn as grey shapes in
+// place of this one's content while it loads: the icon tile, title and
+// description every page opens with, then a couple of sections. It is the
+// same for every page, so it only has to be roughly right. Styled under
+// "Skeleton while the next page loads" in styles.css.
+function showPageSkeleton() {
+    const main = document.getElementById("mainContent");
+    if (!main) return;
+    if (main.querySelector(".pageSkeleton")) return;
+
+    const skeleton = document.createElement("div");
+    skeleton.className = "pageSkeleton skeleton";
+    skeleton.setAttribute("aria-hidden", "true");
+
+    const shapes = [
+        "skeletonIcon",
+        "skeletonName",
+        "skeletonLine",
+        "skeletonLine skeletonLineShort",
+        "skeletonSectionTitle",
+        "skeletonLine",
+        "skeletonLine",
+        "skeletonLine skeletonLineShort",
+        "skeletonPhoto",
+        "skeletonSectionTitle",
+        "skeletonLine",
+        "skeletonLine skeletonLineShort"
+    ];
+
+    for (const shape of shapes) {
+        const bar = document.createElement("span");
+        bar.className = "skeletonBar " + shape;
+        skeleton.appendChild(bar);
+    }
+
+    main.prepend(skeleton);
+    main.setAttribute("aria-busy", "true");
+    document.documentElement.classList.add("pageSkeletonShown");
+
+    // The page is a card of its own while it slides back, scrolled to where
+    // the window was. Back to the top, where the shapes are, and the window
+    // with it once the card is put back (settleReveal).
+    const page = document.getElementById("page");
+    if (page) page.scrollTop = 0;
+    revealScrollY = 0;
+}
+
+function hidePageSkeleton() {
+    const main = document.getElementById("mainContent");
+    if (!main) return;
+
+    const skeleton = main.querySelector(".pageSkeleton");
+    if (skeleton) skeleton.remove();
+
+    main.removeAttribute("aria-busy");
+    document.documentElement.classList.remove("pageSkeletonShown");
+}
+
+// Coming back to this page with Back, the browser can hand over the page
+// exactly as it was left - shapes and all - rather than load it again.
+window.addEventListener("pageshow", function (e) {
+    if (e.persisted) hidePageSkeleton();
+});
+
+// A link in the menu would otherwise swap the page out from under the open
+// menu, so it just vanishes. Instead the page's content is swapped for the
+// skeleton straight away, so the tap is answered at once, and the page slides
+// back into place with it. The link is followed once it has landed. The next
+// page starts loading the moment the link is tapped, so the wait is mostly
+// hidden.
+document.addEventListener("click", function (e) {
+    if (!revealed) return;
+    if (e.defaultPrevented) return;
+
+    // A new tab or window leaves this page, and its menu, as they are.
+    if (e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    const link = e.target.closest("a[href]");
+    if (!link) return;
+    if (!revealed.contains(link)) return;
+    if (link.target && link.target !== "_self") return;
+    if (link.hasAttribute("download")) return;
+
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin) return;
+
+    e.preventDefault();
+    closeReveal();
+
+    // The page that is already showing: closing the menu is all there is to do.
+    if (url.pathname === location.pathname) {
+        if (url.search === location.search) return;
+    }
+
+    const prefetch = document.createElement("link");
+    prefetch.rel = "prefetch";
+    prefetch.href = url.href;
+    document.head.appendChild(prefetch);
+
+    showPageSkeleton();
+
+    let wait = REVEAL_SLIDE_MS;
+    if (document.documentElement.classList.contains("reduce-motion")) wait = 0;
+
+    window.setTimeout(function () {
+        location.href = url.href;
+    }, wait);
+});
+
 // For SettingsModal in settingsPanel.js, which keeps its old name and API.
 window.PageReveal = {
     open: openReveal,
@@ -784,6 +894,111 @@ window.repositionNavPills = function () {
         settle();
     }
 };
+
+/* ---------- Sliding between pages ----------
+
+   On desktop, a page reached from the header slides in from the side its tab
+   is on: Projects comes in from the right when you leave the home page, and
+   the home page from the left on the way back. Every page is its own
+   document, so this side only notes which way to go, on the click; the next
+   page reads it in settings.js before it paints (see playPageSlide()), and
+   "Sliding between pages" in styles.css does the moving. Cross-document view
+   transitions would do this on their own, but Firefox has none.
+*/
+
+// Where the header's links fold away (see "One header, phone to desktop" in
+// styles.css). Below it there are no tabs to slide between.
+const PAGE_SLIDE_DESKTOP = "(min-width: 967px)";
+
+// Which header tab a path belongs to, by position: 0 for the home page, 1 for
+// Experience and so on. An article counts as Articles. -1 for a page with no
+// tab, like Privacy.
+function headerTabIndex(path) {
+    const links = document.querySelectorAll("#desktop-header nav a");
+
+    let best = -1;
+    let bestLength = 0;
+
+    for (let i = 0; i < links.length; i++) {
+        const tabPath = new URL(links[i].href).pathname;
+
+        // Everything starts with "/", so the home page only claims itself.
+        if (tabPath === "/") {
+            if (path === "/") return i;
+            continue;
+        }
+
+        if (!path.startsWith(tabPath)) continue;
+        if (tabPath.length <= bestLength) continue;
+
+        best = i;
+        bestLength = tabPath.length;
+    }
+
+    return best;
+}
+
+// "right" when the next page should come in from the right, "left" from the
+// left, or "" for no slide at all.
+function pageSlideDirection(fromPath, toPath) {
+    if (fromPath === toPath) return "";
+
+    const from = headerTabIndex(fromPath);
+    const to = headerTabIndex(toPath);
+    if (from === -1) return "";
+    if (to === -1) return "";
+
+    if (to > from) return "right";
+    if (to < from) return "left";
+
+    // The same tab: in from the right going deeper, like an article opened
+    // from Articles, and from the left coming back out.
+    if (toPath.startsWith(fromPath)) return "right";
+    if (fromPath.startsWith(toPath)) return "left";
+    return "";
+}
+
+document.addEventListener("click", function (e) {
+    if (e.defaultPrevented) return;
+
+    // Anything that opens elsewhere - a new tab, a new window, a download -
+    // leaves this page where it is.
+    if (e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    const link = e.target.closest("a[href]");
+    if (!link) return;
+    if (link.target && link.target !== "_self") return;
+    if (link.hasAttribute("download")) return;
+
+    if (!matchMedia(PAGE_SLIDE_DESKTOP).matches) return;
+    if (document.documentElement.classList.contains("reduce-motion")) return;
+
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin) return;
+
+    const direction = pageSlideDirection(location.pathname, url.pathname);
+    if (!direction) return;
+
+    sessionStorage.setItem("pageSlide", JSON.stringify({
+        to: url.pathname,
+        direction: direction,
+        at: Date.now()
+    }));
+});
+
+// The slide's class is only needed while it plays. Taking it off after keeps
+// the transform it leaves behind from ever outliving the animation.
+// The footer slides alongside, ending in the same frame, so the content's own
+// end is the one waited for.
+document.addEventListener("animationend", function (e) {
+    if (!e.animationName.startsWith("pageSlideFrom")) return;
+    if (e.target.id !== "mainContent") return;
+
+    const root = document.documentElement;
+    root.classList.remove("page-slide-right");
+    root.classList.remove("page-slide-left");
+});
 
 function isLocalHost() {
     const host = location.hostname;

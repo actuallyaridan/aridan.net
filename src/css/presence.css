@@ -378,15 +378,7 @@ html.reduce-motion .lds-ring.smallLoader::before {
     color: var(--subtitle-color);
 }
 
-#timeremaning>p,
-#amTimeremaning>p {
-    text-align: inherit;
-    color: var(--paragraph-color);
-}
-
-#activityTime,
-.activityTime,
-#amActivityTime {
+.activityTime {
     display: inline;
     color: #000;
     color: rgb(88, 88, 88);
@@ -692,23 +684,6 @@ border: 1px solid var(--liquid-glass-button-border);
    under the card, links every song there instead. */
 #amActivity.lastPlayed #apple-link {
     display: none;
-}
-
-div#timeremaning,
-div#amTimeremaning {
-    display: flex;
-    flex-direction: row;
-    text-align: center;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    flex-grow: 1;
-}
-
-div#timeremaning>p,
-div#amTimeremaning>p {
-    padding: 0.2rem;
-    color: var(--paragraph-color);
 }
 
 .presenceWrapper {
